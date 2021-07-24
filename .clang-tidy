@@ -1,0 +1,37 @@
+# YAMLの性質上？複数行の入力に行コメントできない。。
+# fuchsia-statically-constructed-objects 静的変数の定義周り
+# fuchsia-default-arguments-calls 静的変数の定義周り
+# cppcoreguidelines-pro-type-vararg Cっぽい可変長引数（printf）
+# hicpp-vararg Cっぽい可変長引数（printf）
+# cppcoreguidelines-avoid-c-arrays Cっぽい配列定義
+# hicpp-avoid-c-arrays Cっぽい配列定義
+# modernize-avoid-c-arrays Cっぽい配列定義
+# performance-unnecessary-value-param shared_ptrをmoveではなく代入できるように
+# modernize-use-trailing-return-type 関数定義時、auto () -> voidみたいな書き方に
+# cppcoreguidelines-pro-bounds-pointer-arithmetic ポインタアクセスを許可（想定外メモリアクセスの可能性）
+# misc-non-private-member-variables-in-classes パブリックメンバ変数の定義
+# misc-unused-parameters 使用していない関数の引数
+# readability-convert-member-functions-to-static thisにアクセスしないメンバ関数をstaticにしなくてもよい
+# cppcoreguidelines-pro-type-const-cast const_castを許可
+# cppcoreguidelines-pro-bounds-array-to-pointer-decay 配列からポインタへの暗黙的なキャスト
+# hicpp-no-array-decay 配列からポインタへの暗黙的なキャスト
+# fuchsia-default-arguments-declarations default引数の許可
+Checks: >
+  *,
+  -fuchsia-statically-constructed-objects,
+  -fuchsia-default-arguments-calls,
+  -cppcoreguidelines-pro-type-vararg,
+  -hicpp-vararg,
+  -cppcoreguidelines-avoid-c-arrays,
+  -hicpp-avoid-c-arrays,
+  -modernize-avoid-c-arrays,
+  -performance-unnecessary-value-param,
+  -modernize-use-trailing-return-type,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -misc-non-private-member-variables-in-classes,
+  -misc-unused-parameters,
+  -readability-convert-member-functions-to-static,
+  -cppcoreguidelines-pro-type-const-cast,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -hicpp-no-array-decay,
+  -fuchsia-default-arguments-declarations,
