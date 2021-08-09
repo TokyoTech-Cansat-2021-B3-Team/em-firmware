@@ -1,8 +1,8 @@
-#include "Mu2.h"
+#include "MU2.h"
 
-Mu2::Mu2(BufferedSerial *serial) : _serial(serial) {}
+MU2::MU2(BufferedSerial *serial) : _serial(serial) {}
 
-void Mu2::controlCommand(const char *command, const char *value) {
+void MU2::controlCommand(const char *command, const char *value) {
   // コマンド
   _serial->write(command, strlen(command));
 
@@ -18,7 +18,7 @@ void Mu2::controlCommand(const char *command, const char *value) {
   _serial->write(MU2_CMD_TERM, strlen(MU2_CMD_TERM));
 }
 
-void Mu2::init() {
+void MU2::init() {
   // ユーザーID設定
   controlCommand(MU2_CMD_UI, MU2_UI);
 
@@ -35,7 +35,7 @@ void Mu2::init() {
   controlCommand(MU2_CMD_CH, MU2_CH);
 }
 
-size_t Mu2::transmit(const char *data, size_t size) {
+size_t MU2::transmit(const char *data, size_t size) {
   // サイズチェック
   if (size <= 0) {
     return 0;

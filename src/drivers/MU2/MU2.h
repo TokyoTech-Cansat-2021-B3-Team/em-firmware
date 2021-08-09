@@ -22,7 +22,7 @@
 
 #define MU2_CONTROL_WRITE false // 設定をEEPROMに書き込むかどうか
 
-class Mu2 {
+class MU2 {
 private:
   BufferedSerial *_serial;
 
@@ -31,7 +31,7 @@ private:
   void controlCommand(const char *command, const char *value);
 
 public:
-  explicit Mu2(BufferedSerial *serial);
+  explicit MU2(BufferedSerial *serial);
 
   // 初期化
   // 設定値は事前にEEPROMに設定されているが念のため起動時に設定する
