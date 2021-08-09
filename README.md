@@ -1,25 +1,35 @@
-# mbed-template
+# em-firmware
 
-## 使い方
+EM用プログラム
 
-1. Githubのこのリポジトリのトップページから「Use this template」をクリック
+# コーディングルール
 
-2. リポジトリ名を指定して、新しいリポジトリを作成
+## 命名規則
 
-3. 新しく作成したリポジトリをClone
+- クラス名：Upper camel case (HogeHoge)
 
-## 各ファイルの説明
+- Publicメンバ：Lower camel case (hogeHoge)
 
-- ".gitignore"：gitで無視されるファイルの定義
+- Privateメンバ：_ + Lower camel case (_hogeHoge)
 
-    （mbed-os, BUILD, .mbed等はコミットしないこと）
+- グローバル変数、ローカル変数、関数：Lower camel case (hogeHoge)
 
-- ".clang-format", ".clang-tidy"：コードの入力規則を定義 
+- マクロ：Upper snake case (HOGE_HOGE)
 
-- "mbed_app.json"：mbedの設定
+- ファイル名：Upper camel case (HogeHoge)
 
-- "mbed-os.lib"：使用するmbed-osのバージョンを指定（v6.13）
+※一部型番などUpper camelですべて大文字は許容 (HOGEHoge)
 
-- "src"：ソースファイルを入れるフォルダ
-   
-    - "main.cpp"：main関数
+## ピンアサイン
+
+"PinAssignment.h"をインクルードして参照
+
+## オブジェクト
+
+- 基本的にmain.cppにグローバル変数として持つ
+
+- 依存性注入を基本とする
+
+- 初期化されていない可能性があるので、コンストラクタで依存関係を参照することは禁止
+
+- 依存関係を用いる初期化はinit関数を定義
