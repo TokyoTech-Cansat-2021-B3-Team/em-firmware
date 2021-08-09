@@ -1,6 +1,4 @@
 #include "Mu2.h"
-#include <cstdio>
-#include <cstring>
 
 Mu2::Mu2(BufferedSerial *serial) : _serial(serial) {}
 
