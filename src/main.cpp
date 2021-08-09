@@ -1,8 +1,10 @@
 #include "mbed.h"
 
+#include "PinAssignment.h"
+
 #include "Mu2.h"
 
-BufferedSerial bufferedSerial(PA_2, NC, MU2_SERIAL_BAUDRATE);
+BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 
 Mu2 mu2(&bufferedSerial);
 
