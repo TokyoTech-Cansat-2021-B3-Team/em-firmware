@@ -34,4 +34,14 @@ EM用プログラム
 
 - 依存性を用いる初期化はinit関数を定義
 
-- Threadは再利用しないので、クラス内で宣言してよい
+## Threadの使用
+
+- クラス内でThreadを使用する場合は、別途容易するパターンに従うこと
+
+- Threadは再開できないので、開始時にnew, 停止時にdeleteする必要がある
+
+- リーク防止のためThreadオブジェクトはunique_ptrで管理する
+
+- start、stop関数の実装
+
+- PriorityやStack Sizeに注意する
