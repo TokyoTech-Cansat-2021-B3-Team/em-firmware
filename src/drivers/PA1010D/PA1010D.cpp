@@ -93,7 +93,7 @@ void PA1010D::nmeaDecode() {
     ptr++;
   }
 
-  uint8_t trueChecksum = strtol(endPtr + 1, nullptr, PA1010D_CHECKSUM_BASE);
+  uint8_t trueChecksum = strtol(endPtr + 1, nullptr, PA1010D_BASE_16);
 
   if (calChecksum != trueChecksum) {
     // 不正なパケット
@@ -102,7 +102,7 @@ void PA1010D::nmeaDecode() {
   }
 
   // パケットを分類してデコード
-  if (strstr(_packetBuffer, PA1010D_GNRMC_ID) == _packetBuffer) {
+  if (strstr(_packetBuffer, "$" PA1010D_GNRMC_ID) == _packetBuffer) {
     rmcDecode();
   }
 }
@@ -110,32 +110,79 @@ void PA1010D::nmeaDecode() {
 void PA1010D::rmcDecode() {
   _rmc = {0};
 
-  sscanf(_packetBuffer,
-         PA1010D_GNRMC_ID ","      //
-         PA1010D_GNRMC_UTC ","     //
-         PA1010D_GNRMC_STATUS ","  //
-         PA1010D_GNRMC_LAT ","     //
-         PA1010D_GNRMC_NS ","      //
-         PA1010D_GNRMC_LNG ","     //
-         PA1010D_GNRMC_EW ","      //
-         PA1010D_GNRMC_SOG ","     //
-         PA1010D_GNRMC_COG ","     //
-         PA1010D_GNRMC_DATE ","    //
-         PA1010D_GNRMC_MV ","      //
-         PA1010D_GNRMC_VD ","      //
-         PA1010D_GNRMC_MODE "%*s", //
-         &_rmc.utc,                //
-         &_rmc.status,             //
-         &_rmc.latitude,           //
-         &_rmc.nsIndicator,        //
-         &_rmc.longitude,          //
-         &_rmc.ewIndicator,        //
-         &_rmc.speedOverGround,    //
-         &_rmc.courseOverGround,   //
-         &_rmc.date,               //
-         &_rmc.magneticVariation,  //
-         &_rmc.variationDirection, //
-         &_rmc.mode);
+  // UTC
+  char *ptr = nullptr;
+  if ((ptr = strchr(_packetBuffer, ',')) == nullptr) {
+    return;
+  }
+  _rmc.utc = strtod(ptr + 1, nullptr);
+
+  // STATUS
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.status = PA1010D_CHAR_FIELD(ptr + 1);
+
+  // LAT
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.latitude = strtod(ptr + 1, nullptr);
+
+  // NS
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.nsIndicator = PA1010D_CHAR_FIELD(ptr + 1);
+
+  // LNG
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.longitude = strtod(ptr + 1, nullptr);
+
+  // EW
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.ewIndicator = PA1010D_CHAR_FIELD(ptr + 1);
+
+  // SOG
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.speedOverGround = strtof(ptr + 1, nullptr);
+
+  // COG
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.courseOverGround = strtof(ptr + 1, nullptr);
+
+  // DATE
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.date = strtoul(ptr + 1, nullptr, PA1010D_BASE_10);
+
+  // MV
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    printf("return \n");
+    return;
+  }
+  _rmc.magneticVariation = strtof(ptr + 1, nullptr);
+
+  // VD
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.variationDirection = PA1010D_CHAR_FIELD(ptr + 1);
+
+  // MODE
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _rmc.mode = PA1010D_CHAR_FIELD(ptr + 1);
 
   // 表示
   //   printf("utc: %lf\n", _rmc.utc);

@@ -17,22 +17,12 @@
 #define PA1010D_POLLING_PERIOD 500ms
 #define PA1010D_READ_SIZE 255
 
-#define PA1010D_CHECKSUM_BASE 16
+#define PA1010D_BASE_10 10
+#define PA1010D_BASE_16 16
 
-#define PA1010D_GNRMC_ID "$GNRMC"
-#define PA1010D_GNRMC_UTC "%lf"
-#define PA1010D_GNRMC_STATUS "%c"
-#define PA1010D_GNRMC_LAT "%lf"
-#define PA1010D_GNRMC_NS "%c"
-#define PA1010D_GNRMC_LNG "%lf"
-#define PA1010D_GNRMC_EW "%c"
-#define PA1010D_GNRMC_SOG "%f"
-#define PA1010D_GNRMC_COG "%f"
-#define PA1010D_GNRMC_DATE "%u"
-#define PA1010D_GNRMC_MV "%f"
-#define PA1010D_GNRMC_VD "%c"
-#define PA1010D_GNRMC_MODE "%c"
-#define PA1010D_GNRMC_CHECKSUM "%2s"
+#define PA1010D_CHAR_FIELD(ptr) (*(ptr) == ',' ? '\0' : *(ptr))
+
+#define PA1010D_GNRMC_ID "GNRMC"
 
 class PA1010D {
 private:
