@@ -5,11 +5,21 @@
 #include "DCMotor.h"
 #include "DrillMotor.h"
 #include "QEI.h"
-#include <cstdio>
+#include "WheelMotor.h"
+
+PwmOut motor1In1(M1_IN1);
+PwmOut motor1In2(M1_IN2);
+
+PwmOut motor2In1(M2_IN1);
+PwmOut motor2In2(M2_IN2);
 
 PwmOut motor3In1(M3_IN1);
 PwmOut motor3In2(M3_IN2);
+
 PwmOut motor4In1(M4_IN1);
+
+WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
+WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 
 DCMotor verticalMotor(&motor3In1, &motor3In2);
 DrillMotor drillMotor(&motor4In1);
@@ -36,41 +46,44 @@ int main() {
   encoderThread.start(encoderThreadLoop);
 
   while (true) {
-    // ドリル用モータ
+    // 上昇
+    leftWheelMotor.forward(1.0);
+    rightWheelMotor.forward(1.0);
     drillMotor.forward(1.0);
-
-    ThisThread::sleep_for(2s);
-
-    drillMotor.forward(0.5);
-
-    ThisThread::sleep_for(2s);
-
-    drillMotor.stop();
-
-    ThisThread::sleep_for(2s);
-
-    // 上下駆動用モータ上昇
     verticalMotor.forward(1.0);
 
     ThisThread::sleep_for(2s);
 
+    leftWheelMotor.forward(0.5);
+    rightWheelMotor.forward(0.5);
+    drillMotor.forward(0.5);
     verticalMotor.forward(0.5);
 
     ThisThread::sleep_for(2s);
 
+    leftWheelMotor.stop();
+    rightWheelMotor.stop();
+    drillMotor.stop();
     verticalMotor.stop();
 
     ThisThread::sleep_for(2s);
 
-    // 上下駆動用モータ下降
+    // 下降
+    leftWheelMotor.reverse(1.0);
+    rightWheelMotor.reverse(1.0);
     verticalMotor.reverse(1.0);
 
     ThisThread::sleep_for(2s);
 
+    leftWheelMotor.reverse(0.5);
+    rightWheelMotor.reverse(0.5);
     verticalMotor.reverse(0.5);
 
     ThisThread::sleep_for(2s);
 
+    leftWheelMotor.stop();
+    rightWheelMotor.stop();
+    drillMotor.stop();
     verticalMotor.stop();
 
     ThisThread::sleep_for(2s);
