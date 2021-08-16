@@ -149,7 +149,8 @@ public:
   typedef enum Encoding {
 
     X2_ENCODING,
-    X4_ENCODING
+    X4_ENCODING,
+    CHANNEL_A_ENCODING,
 
   } Encoding;
 
@@ -225,6 +226,10 @@ private:
   void index(void);
 
   Encoding encoding_;
+
+  PinName pinChannelA_;
+  PinName pinChannelB_;
+  PinName pinIndex_;
 
   InterruptIn channelA_;
   InterruptIn channelB_;

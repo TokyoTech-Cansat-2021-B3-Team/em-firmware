@@ -129,7 +129,8 @@
 #include "QEI.h"
 
 QEI::QEI(PinName channelA, PinName channelB, PinName index, int pulsesPerRev, Encoding encoding)
-    : channelA_(channelA), channelB_(channelB), index_(index) {
+    : channelA_(channelA), channelB_(channelB), index_(index), pinChannelA_(channelA), pinChannelB_(channelB),
+      pinIndex_(index) {
 
   pulses_ = 0;
   revolutions_ = 0;
@@ -138,7 +139,11 @@ QEI::QEI(PinName channelA, PinName channelB, PinName index, int pulsesPerRev, En
 
   // Workout what the current state is.
   int chanA = channelA_.read();
-  int chanB = channelB_.read();
+
+  int chanB = 0;
+  if (pinChannelB_ != NC) {
+    chanB = channelB_.read();
+  }
 
   // 2-bit state.
   currState_ = (chanA << 1) | (chanB);
@@ -151,7 +156,7 @@ QEI::QEI(PinName channelA, PinName channelB, PinName index, int pulsesPerRev, En
   channelA_.fall(callback(this, &QEI::encode));
 
   // If we're using X4 encoding, then attach interrupts to channel B too.
-  if (encoding == X4_ENCODING) {
+  if (encoding == X4_ENCODING || pinChannelB_ != NC) {
     channelB_.rise(callback(this, &QEI::encode));
     channelB_.fall(callback(this, &QEI::encode));
   }
@@ -178,8 +183,11 @@ int QEI::getPulses(void) {
 }
 
 int QEI::getRevolutions(void) {
-
-  return revolutions_;
+  if (pinIndex_ == NC) {
+    return pulses_ / pulsesPerRev_;
+  } else {
+    return revolutions_;
+  }
 }
 
 // +-------------+
@@ -230,7 +238,11 @@ void QEI::encode(void) {
 
   int change = 0;
   int chanA = channelA_.read();
-  int chanB = channelB_.read();
+
+  int chanB = 0;
+  if (pinChannelB_ != NC) {
+    chanB = channelB_.read();
+  }
 
   // 2-bit state.
   currState_ = (chanA << 1) | (chanB);
@@ -263,6 +275,8 @@ void QEI::encode(void) {
 
       pulses_ -= change;
     }
+  } else if (encoding_ == CHANNEL_A_ENCODING) {
+    pulses_++;
   }
 
   prevState_ = currState_;
