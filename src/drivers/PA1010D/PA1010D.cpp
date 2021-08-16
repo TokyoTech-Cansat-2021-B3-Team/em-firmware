@@ -199,7 +199,7 @@ void PA1010D::rmcDecode() {
   //   printf("mode: %c\n", _rmc.mode);
 }
 
-void PA1010D::getRMC(NmeaRmcPacket *rmc) {
+void PA1010D::getRMC(RMCPacket *rmc) {
   if (rmc != nullptr) {
     *rmc = _rmc;
   }

@@ -14,7 +14,7 @@ int main() {
 
   pa1010d.start();
 
-  NmeaRmcPacket rmc;
+  PA1010D::RMCPacket rmc;
 
   while (true) {
     pa1010d.getRMC(&rmc);
