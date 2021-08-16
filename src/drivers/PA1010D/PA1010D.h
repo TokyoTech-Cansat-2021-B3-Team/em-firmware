@@ -20,7 +20,8 @@
 
 #define PA1010D_CHAR_FIELD(ptr) (*(ptr) == ',' ? '\0' : *(ptr))
 
-#define PA1010D_GNRMC_ID "GNRMC"
+#define PA1010D_GNRMC_PREFIX "$GNRMC"
+#define PA1010D_GNGGA_PREFIX "$GNGGA"
 
 #define PA1010D_COMMAND_SIZE 64
 #define PA1010D_COMMAND_SUFFIX_FORMAT "%02X\r\n"
@@ -33,6 +34,10 @@
 // 1000(millisecond) = 1(sec) 1/1 = 1Hz
 // 200(millisecond) = 0.2(sec) 1/0.2 = 5 Hz
 // 100(millisecond) = 0.1(sec) 1/0.1 = 10 Hz
+
+// 出力形式が多いとレートをあげられない
+// 出力形式を一時的に減らして設定することでレートをあげられるが、取りこぼすので望ましくない
+// 10Hzでは1形式
 #define PA1010D_UPDATERATE 100
 
 // Packet Type: 225 PMTK_CMD_PERIODIC_MODE
@@ -57,9 +62,9 @@
 // "3" - Output once every three position fixes
 // "4" - Output once every four position fixes
 // "5" - Output once every five position fixes
-#define PA1010D_RMC_OUTPUT 1
+#define PA1010D_RMC_OUTPUT 0
 #define PA1010D_VTG_OUTPUT 0
-#define PA1010D_GGA_OUTPUT 0
+#define PA1010D_GGA_OUTPUT 1
 #define PA1010D_GSA_OUTPUT 0
 #define PA1010D_GSV_OUTPUT 0
 
@@ -81,6 +86,21 @@ public:
     char mode;               // N: データなし, A: 単独測位, D: DGPS, E: Dead Reckoning
   };
 
+  using GGAPacket = struct {
+    double utc;                   // UTC時刻 hhmmss.sss
+    double latitude;              // 緯度 ddmm.mmmm
+    char nsIndicator;             // N: 北緯, S: 南緯
+    double longitude;             // 経度: dddmm.mmmm
+    char ewIndicator;             // E: 東経, W: 西経
+    uint8_t positionFixIndicator; // 0: Fix not avalilable, 1: GPS fix, 2: Differencial GPS fix
+    uint8_t satellitesUsed;       // 使用衛星数: Range 0 to 14
+    float hdop;                   // 水平精度低下率
+    float mslAltitude;            // アンテナの海抜高さ (m)
+    float geoidalSeparation;      // ジオイド高 (m)
+    float ageOfDiffCorr;          // DGPS データのエイジ (秒)
+    uint16_t stationID;           // DGPS 局 ID (0000-1023)
+  };
+
 private:
   I2C *_i2c;
   unique_ptr<Thread> _thread;
@@ -89,6 +109,7 @@ private:
   size_t _packetBufferPosition;
 
   RMCPacket _rmc;
+  GGAPacket _gga;
 
 public:
 private:
@@ -110,6 +131,9 @@ private:
   // RMCのデコード
   void rmcDecode();
 
+  // GGAのデコード
+  void ggaDecode();
+
 public:
   explicit PA1010D(I2C *i2c);
 
@@ -118,4 +142,6 @@ public:
   void stop();
 
   void getRMC(RMCPacket *rmc);
+
+  void getGGA(GGAPacket *gga);
 };

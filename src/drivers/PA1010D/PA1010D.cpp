@@ -1,6 +1,6 @@
 #include "PA1010D.h"
 
-PA1010D::PA1010D(I2C *i2c) : _i2c(i2c), _thread(), _packetBuffer(), _packetBufferPosition(0), _rmc() {}
+PA1010D::PA1010D(I2C *i2c) : _i2c(i2c), _thread(), _packetBuffer(), _packetBufferPosition(0), _rmc(), _gga() {}
 
 void PA1010D::start() {
   _thread = make_unique<Thread>(PA1010D_THREAD_PRIORITY,   //
@@ -152,8 +152,10 @@ void PA1010D::nmeaDecode() {
   }
 
   // パケットを分類してデコード
-  if (strstr(_packetBuffer, "$" PA1010D_GNRMC_ID) == _packetBuffer) {
+  if (strstr(_packetBuffer, PA1010D_GNRMC_PREFIX) == _packetBuffer) {
     rmcDecode();
+  } else if (strstr(_packetBuffer, PA1010D_GNGGA_PREFIX) == _packetBuffer) {
+    ggaDecode();
   }
 }
 
@@ -249,8 +251,109 @@ void PA1010D::rmcDecode() {
   //   printf("mode: %c\n", _rmc.mode);
 }
 
+void PA1010D::ggaDecode() {
+  _gga = {0};
+
+  // UTC
+  char *ptr = nullptr;
+  if ((ptr = strchr(_packetBuffer, ',')) == nullptr) {
+    return;
+  }
+  _gga.utc = strtod(ptr + 1, nullptr);
+
+  // LAT
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _gga.latitude = strtod(ptr + 1, nullptr);
+
+  // NS
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _gga.nsIndicator = PA1010D_CHAR_FIELD(ptr + 1);
+
+  // LNG
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _gga.longitude = strtod(ptr + 1, nullptr);
+
+  // EW
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _gga.ewIndicator = PA1010D_CHAR_FIELD(ptr + 1);
+
+  // FIX
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _gga.positionFixIndicator = strtoul(ptr + 1, nullptr, PA1010D_BASE_10);
+
+  // SU
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _gga.satellitesUsed = strtoul(ptr + 1, nullptr, PA1010D_BASE_10);
+
+  // HDOP
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    printf("return \n");
+    return;
+  }
+  _gga.hdop = strtof(ptr + 1, nullptr);
+
+  // MSLALT
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    printf("return \n");
+    return;
+  }
+  _gga.mslAltitude = strtof(ptr + 1, nullptr);
+
+  // GEOSEP
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    printf("return \n");
+    return;
+  }
+  _gga.geoidalSeparation = strtof(ptr + 1, nullptr);
+
+  // AGE
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    printf("return \n");
+    return;
+  }
+  _gga.ageOfDiffCorr = strtof(ptr + 1, nullptr);
+
+  // STATION
+  if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
+    return;
+  }
+  _gga.stationID = strtoul(ptr + 1, nullptr, PA1010D_BASE_10);
+
+  // 表示
+  //   printf("utc: %lf\n", _gga.utc);
+  //   printf("latitude: %lf\n", _gga.latitude);
+  //   printf("nsIndicator: %c\n", _gga.nsIndicator);
+  //   printf("longitude: %lf\n", _gga.longitude);
+  //   printf("ewIndicator: %c\n", _gga.ewIndicator);
+  //   printf("positionFixIndicator: %u\n", _gga.positionFixIndicator);
+  //   printf("satellitesUsed: %u\n", _gga.satellitesUsed);
+  //   printf("hdop: %f\n", _gga.hdop);
+  //   printf("mslAltitude: %f\n", _gga.mslAltitude);
+  //   printf("geoidalSeparation: %f\n", _gga.geoidalSeparation);
+  //   printf("ageOfDiffCorr: %f\n", _gga.ageOfDiffCorr);
+  //   printf("stationID: %u\n", _gga.stationID);
+}
+
 void PA1010D::getRMC(RMCPacket *rmc) {
   if (rmc != nullptr) {
     *rmc = _rmc;
+  }
+}
+
+void PA1010D::getGGA(GGAPacket *gga) {
+  if (gga != nullptr) {
+    *gga = _gga;
   }
 }
