@@ -16,12 +16,79 @@ void PA1010D::stop() {
 }
 
 void PA1010D::threadLoop() {
+  setup();
+
   while (true) {
     polling();
 
     ThisThread::sleep_for(PA1010D_POLLING_PERIOD);
   }
 }
+
+uint8_t PA1010D::checksum(const char *packet) {
+  uint8_t ret = 0;
+
+  // チェックサム
+  const char *beginPtr = strchr(packet, '$');
+  const char *endPtr = strchr(packet, '*');
+  const char *ptr = beginPtr + 1;
+
+  if (beginPtr == nullptr || //
+      endPtr == nullptr ||   //
+      strlen(packet) <= 1) {
+    // printf("error format\n");
+    return 0;
+  }
+
+  while (ptr < endPtr) {
+    ret ^= *ptr;
+    ptr++;
+  }
+
+  return ret;
+}
+
+void PA1010D::setup() {
+  // 空読みしてバッファクリア
+  char readBuffer[PA1010D_READ_SIZE];
+
+  _i2c->read(PA1010D_I2C_READ_ADDR, //
+             readBuffer,            //
+             PA1010D_READ_SIZE);
+
+  // 動作モード
+  pmtkCommand(PA1010D_PMTK_CMD_PERIODIC_MODE, PA1010D_MODE);
+
+  // 出力形式
+  pmtkCommand(PA1010D_PMTK_API_SET_NMEA_OUTPUT_FORMAT,                    //
+              PA1010D_RMC_OUTPUT, PA1010D_VTG_OUTPUT, PA1010D_GGA_OUTPUT, //
+              PA1010D_GSA_OUTPUT, PA1010D_GSV_OUTPUT);
+
+  // 出力レート
+  // 出力形式を少なくしないとレートをあげられない
+  pmtkCommand(PA1010D_PMTK_SET_NMEA_UPDATERATE_FORMAT, PA1010D_UPDATERATE);
+}
+
+void PA1010D::pmtkCommand(const char *format, ...) {
+
+  va_list ap;
+  va_start(ap, format);
+
+  char commandBuffer[PA1010D_COMMAND_SIZE];
+
+  // コマンド
+  vsnprintf(commandBuffer, PA1010D_COMMAND_SIZE, format, ap);
+
+  // チェックサム + 改行
+  uint8_t cs = checksum(commandBuffer);
+  snprintf(commandBuffer + strlen(commandBuffer), PA1010D_COMMAND_SIZE - strlen(commandBuffer),
+           PA1010D_COMMAND_SUFFIX_FORMAT, cs);
+
+  // 送信
+  _i2c->write(PA1010D_I2C_WRITE_ADDR, commandBuffer, strlen(commandBuffer));
+
+  va_end(ap);
+};
 
 void PA1010D::polling() {
   char readBuffer[PA1010D_READ_SIZE];
@@ -75,25 +142,8 @@ void PA1010D::nmeaDecode() {
   //   printf("%s\n", _packetBuffer);
 
   // チェックサム
-  char *beginPtr = strchr(_packetBuffer, '$');
-  char *endPtr = strchr(_packetBuffer, '*');
-
-  if (beginPtr == nullptr || //
-      endPtr == nullptr ||   //
-      strlen(_packetBuffer) <= 1) {
-    // printf("error format\n");
-    return;
-  }
-
-  char *ptr = beginPtr + 1;
-  uint8_t calChecksum = 0;
-
-  while (ptr < endPtr) {
-    calChecksum ^= *ptr;
-    ptr++;
-  }
-
-  uint8_t trueChecksum = strtol(endPtr + 1, nullptr, PA1010D_BASE_16);
+  uint8_t calChecksum = checksum(_packetBuffer);
+  uint8_t trueChecksum = strtol(_packetBuffer + strlen(_packetBuffer) - 2, nullptr, PA1010D_BASE_16);
 
   if (calChecksum != trueChecksum) {
     // 不正なパケット

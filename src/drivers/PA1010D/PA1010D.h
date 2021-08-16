@@ -12,7 +12,7 @@
 
 #define PA1010D_BUFFER_SIZE 256
 
-#define PA1010D_POLLING_PERIOD 500ms
+#define PA1010D_POLLING_PERIOD 100ms
 #define PA1010D_READ_SIZE 255
 
 #define PA1010D_BASE_10 10
@@ -21,6 +21,47 @@
 #define PA1010D_CHAR_FIELD(ptr) (*(ptr) == ',' ? '\0' : *(ptr))
 
 #define PA1010D_GNRMC_ID "GNRMC"
+
+#define PA1010D_COMMAND_SIZE 64
+#define PA1010D_COMMAND_SUFFIX_FORMAT "%02X\r\n"
+
+// Packet Type: 220 PMTK_SET_NMEA_UPDATERATE
+#define PA1010D_PMTK_SET_NMEA_UPDATERATE_FORMAT "$PMTK220,%u*"
+
+// Before user input this command for update rate setting, it needs to see if the baud rate is enough or not.
+// User can use PMTK251 command for baud rate setting
+// 1000(millisecond) = 1(sec) 1/1 = 1Hz
+// 200(millisecond) = 0.2(sec) 1/0.2 = 5 Hz
+// 100(millisecond) = 0.1(sec) 1/0.1 = 10 Hz
+#define PA1010D_UPDATERATE 100
+
+// Packet Type: 225 PMTK_CMD_PERIODIC_MODE
+#define PA1010D_PMTK_CMD_PERIODIC_MODE "$PMTK225,%u*"
+
+// 動作モード
+// ‘0’ = go back to normal mode
+// ‘1’ = Periodic backup mode
+// ‘2’ = Periodic standby mode
+// ‘4’ = Perpetual mode(this mode need be work with relative hardware pin)
+// ‘8’ = AlwaysLocateTM standby mode
+// ‘9’ = AlwaysLocateTM backup mode
+#define PA1010D_MODE 0
+
+// Packet Type: 314 PMTK_API_SET_NMEA_OUTPUT
+#define PA1010D_PMTK_API_SET_NMEA_OUTPUT_FORMAT "$PMTK314,0,%u,%u,%u,%u,%u,0,0,0,0,0,0,0,0,0,0,0,0,0*"
+
+// 出力設定
+// "0" - Disabled or not supported sentence
+// "1" - Output once every one position fix
+// "2" - Output once every two position fixes
+// "3" - Output once every three position fixes
+// "4" - Output once every four position fixes
+// "5" - Output once every five position fixes
+#define PA1010D_RMC_OUTPUT 1
+#define PA1010D_VTG_OUTPUT 0
+#define PA1010D_GGA_OUTPUT 0
+#define PA1010D_GSA_OUTPUT 0
+#define PA1010D_GSV_OUTPUT 0
 
 class PA1010D {
 private:
@@ -52,6 +93,13 @@ private:
 public:
 private:
   void threadLoop();
+
+  uint8_t checksum(const char *packet);
+
+  // コンフィグの書き込み
+  void setup();
+
+  void pmtkCommand(const char *format, ...) MBED_PRINTF_METHOD(1, 2);
 
   // モジュールからの読み出し
   void polling();
