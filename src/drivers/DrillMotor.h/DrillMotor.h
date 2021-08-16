@@ -2,24 +2,20 @@
 
 #include "mbed.h"
 
+#include "DCMotor.h"
+
 // ドリル用モータ
-// DRV8833使用
 // IN2はGNDに固定
 
-#define DRILL_MOTOR_PWM_PERIOD 20ms // mbed デフォルト
-
-class DrillMotor {
-private:
-  PwmOut *_in1;
-
-public:
+class DrillMotor : public DCMotor {
 private:
 public:
-  explicit DrillMotor(PwmOut *in1);
+private:
+  void reverse(float duty) override {}
 
-  // ドリルが進む方向に回転
-  void forward(float duty);
-
-  // 停止
-  void stop();
+public:
+  // in2をnullptrとする
+  // (DCMotorでnullチェックされる)
+  // 周期デフォルト
+  explicit DrillMotor(PwmOut *in1) : DCMotor(in1, nullptr) {}
 };
