@@ -18,6 +18,9 @@ PwmOut motor3In2(M3_IN2);
 
 PwmOut motor4In1(M4_IN1);
 
+DigitalOut motor5Enable(M5_ENABLE);
+DigitalOut motor5Step(M5_STEP);
+
 WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
 WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 
@@ -27,7 +30,15 @@ QEI verticalEncoder(ENC3_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
 Thread encoderThread(osPriorityAboveNormal, 1024, nullptr, "encoder");
 
+Thread stepperThread(osPriorityRealtime, 1024, nullptr, "stepper");
+
+Ticker stepperTicker;
+
 int previousRev;
+
+int stepperCount;
+int stepperDst;
+bool stepperFlag;
 
 void encoderThreadLoop() {
   while (true) {
@@ -40,6 +51,38 @@ void encoderThreadLoop() {
   }
 }
 
+void stepperTickerCallback() {
+  motor5Step = !motor5Step;
+
+  stepperCount++;
+
+  if (stepperCount >= stepperDst) {
+    stepperFlag = true;
+    stepperTicker.detach();
+  }
+}
+
+void stepperThreadLoop() {
+  while (true) {
+
+    motor5Enable = 0; // ActiveLow
+
+    stepperCount = 0;
+    stepperDst = 4096;
+    stepperFlag = false;
+
+    stepperTicker.attach(stepperTickerCallback, 1ms);
+
+    while (!stepperFlag) {
+      ThisThread::sleep_for(1ms);
+    }
+
+    motor5Enable = 1;
+
+    ThisThread::sleep_for(1s);
+  }
+}
+
 static TIM_HandleTypeDef TimHandle;
 
 // main() runs in its own thread in the OS
@@ -47,10 +90,12 @@ int main() {
 
   encoderThread.start(encoderThreadLoop);
 
+  stepperThread.start(stepperThreadLoop);
+
   while (true) {
     // 上昇
     for (int i = 0; i < 1000; i++) {
-      printf("%d\n", i);
+      //   printf("%d\n", i);
 
       leftWheelMotor.forward(i * 0.001);
       rightWheelMotor.forward(i * 0.001);
@@ -62,7 +107,7 @@ int main() {
     }
 
     for (int i = 1000; i >= 0; i--) {
-      printf("%d\n", i);
+      //   printf("%d\n", i);
 
       leftWheelMotor.forward(i * 0.001);
       rightWheelMotor.forward(i * 0.001);
@@ -75,7 +120,7 @@ int main() {
 
     // 下降
     for (int i = 0; i < 1000; i++) {
-      printf("%d\n", i);
+      //   printf("%d\n", i);
 
       leftWheelMotor.reverse(i * 0.001);
       rightWheelMotor.reverse(i * 0.001);
@@ -86,7 +131,7 @@ int main() {
     }
 
     for (int i = 1000; i >= 0; i--) {
-      printf("%d\n", i);
+      //   printf("%d\n", i);
 
       leftWheelMotor.reverse(i * 0.001);
       rightWheelMotor.reverse(i * 0.001);
