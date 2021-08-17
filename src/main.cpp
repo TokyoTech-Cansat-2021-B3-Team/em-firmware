@@ -55,8 +55,8 @@ int main() {
       leftWheelMotor.forward(i * 0.001);
       rightWheelMotor.forward(i * 0.001);
 
-      //   verticalMotor.forward(i * 0.001);
-      //   drillMotor.forward(i * 0.001);
+      verticalMotor.forward(i * 0.001);
+      drillMotor.forward(i * 0.001);
 
       ThisThread::sleep_for(1ms);
     }
@@ -67,8 +67,8 @@ int main() {
       leftWheelMotor.forward(i * 0.001);
       rightWheelMotor.forward(i * 0.001);
 
-      //   verticalMotor.forward(i * 0.001);
-      // drillMotor.forward(i * 0.001);
+      verticalMotor.forward(i * 0.001);
+      drillMotor.forward(i * 0.001);
 
       ThisThread::sleep_for(1ms);
     }
@@ -80,7 +80,7 @@ int main() {
       leftWheelMotor.reverse(i * 0.001);
       rightWheelMotor.reverse(i * 0.001);
 
-      //   verticalMotor.reverse(i * 0.001);
+      verticalMotor.reverse(i * 0.001);
 
       ThisThread::sleep_for(1ms);
     }
@@ -91,7 +91,7 @@ int main() {
       leftWheelMotor.reverse(i * 0.001);
       rightWheelMotor.reverse(i * 0.001);
 
-      //   verticalMotor.reverse(i * 0.001);
+      verticalMotor.reverse(i * 0.001);
 
       ThisThread::sleep_for(1ms);
     }
