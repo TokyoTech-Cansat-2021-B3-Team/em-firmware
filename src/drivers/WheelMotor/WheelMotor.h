@@ -4,7 +4,7 @@
 
 #include "DCMotor.h"
 
-#define WHEEL_MOTOR_PWM_PERIOD 20ms // TODO: PWM周波数調整？
+#define WHEEL_MOTOR_PWM_PERIOD 100us // TODO: PWM周波数調整？
 
 // 車輪用モータ
 // チャンネル共有のため、毎度初期化が必要
@@ -13,6 +13,11 @@ class WheelMotor : public DCMotor {
 private:
 public:
 private:
+  enum DIRECTION{
+    FOWARD,
+    REVERSE
+  };
+  DIRECTION _direction;
 public:
   explicit WheelMotor(PwmOut *in1, PwmOut *in2);
 

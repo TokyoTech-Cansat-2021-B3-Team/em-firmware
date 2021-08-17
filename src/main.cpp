@@ -31,10 +31,10 @@ Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 WheelPID leftPID;
 WheelPID rightPID;
 
-//WheelControl leftControl(&leftWheelMotor,&leftPID,&leftEncoder, 1000.0);
-//WheelControl rightControl(&rightWheelMotor,&rightPID,&rightEncoder, 249.8);
-WheelControl leftControl(&motor1In1,&motor1In2,&leftPID,&leftEncoder, 1000.0);
-WheelControl rightControl(&motor2In1,&motor2In2,&rightPID,&rightEncoder, 249.8);
+WheelControl leftControl(&leftWheelMotor,&leftPID,&leftEncoder, 1000.0);
+WheelControl rightControl(&rightWheelMotor,&rightPID,&rightEncoder, 249.8);
+//WheelControl leftControl(&motor1In1,&motor1In2,&leftPID,&leftEncoder, 1000.0);
+//WheelControl rightControl(&motor2In1,&motor2In2,&rightPID,&rightEncoder, 249.8);
 
 
 void printThreadLoop(){
