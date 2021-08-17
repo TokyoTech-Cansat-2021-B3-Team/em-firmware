@@ -25,7 +25,7 @@ int main() {
         serial.write(printBuffer,strlen(printBuffer));
     }
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f;\r\n",imu.accX(), imu.accY(), imu.accZ());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f %f %f %f %f;\r\n",imu.accX(), imu.accY(), imu.accZ(), imu.gyrX(), imu.gyrY(), imu.gyrZ(), imu.magX(), imu.magY(), imu.magZ());
         serial.write(printBuffer,strlen(printBuffer));            
         ThisThread::sleep_for(100ms);
     }

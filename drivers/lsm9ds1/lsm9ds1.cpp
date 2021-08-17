@@ -172,3 +172,27 @@ float LSM9DS1::accY(){
 float LSM9DS1::accZ(){
     return _acc[2];
 }
+
+float LSM9DS1::gyrX(){
+    return _gyr[0];
+}
+
+float LSM9DS1::gyrY(){
+    return _gyr[1];
+}
+
+float LSM9DS1::gyrZ(){
+    return _gyr[2];
+}
+
+float LSM9DS1::magX(){
+    return _mag[0];
+}
+
+float LSM9DS1::magY(){
+    return _mag[1];
+}
+
+float LSM9DS1::magZ(){
+    return _mag[2];
+}

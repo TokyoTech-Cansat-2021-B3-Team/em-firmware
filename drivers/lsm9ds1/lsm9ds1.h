@@ -33,6 +33,12 @@ public:
     float accX();
     float accY();
     float accZ();
+    float gyrX();
+    float gyrY();
+    float gyrZ();
+    float magX();
+    float magY();
+    float magZ();
 private:
     void threadLoop();
     int startLSM9DS1();
