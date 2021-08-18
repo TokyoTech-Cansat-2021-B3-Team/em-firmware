@@ -5,6 +5,7 @@
 #include "DCMotor.h"
 #include "DrillMotor.h"
 #include "QEI.h"
+#include "Stepper.h"
 #include "WheelMotor.h"
 
 PwmOut motor1In1(M1_IN1);
@@ -28,17 +29,13 @@ DCMotor verticalMotor(&motor3In1, &motor3In2);
 DrillMotor drillMotor(&motor4In1);
 QEI verticalEncoder(ENC3_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
+Stepper loadingMotor(&motor5Step, &motor5Enable);
+
 Thread encoderThread(osPriorityAboveNormal, 1024, nullptr, "encoder");
 
 Thread stepperThread(osPriorityRealtime, 1024, nullptr, "stepper");
 
-Ticker stepperTicker;
-
 int previousRev;
-
-int stepperCount;
-int stepperDst;
-bool stepperFlag;
 
 void encoderThreadLoop() {
   while (true) {
@@ -51,42 +48,17 @@ void encoderThreadLoop() {
   }
 }
 
-void stepperTickerCallback() {
-  motor5Step = !motor5Step;
-
-  stepperCount++;
-
-  if (stepperCount >= stepperDst) {
-    stepperFlag = true;
-    stepperTicker.detach();
-  }
-}
-
 void stepperThreadLoop() {
   while (true) {
+    loadingMotor.rotate(360.0 / 7.0, 0.3);
 
-    motor5Enable = 0; // ActiveLow
-
-    stepperCount = 0;
-    stepperDst = 4096;
-    stepperFlag = false;
-
-    stepperTicker.attach(stepperTickerCallback, 1ms);
-
-    while (!stepperFlag) {
-      ThisThread::sleep_for(1ms);
-    }
-
-    motor5Enable = 1;
-
-    ThisThread::sleep_for(1s);
+    ThisThread::sleep_for(500ms);
   }
 }
-
-static TIM_HandleTypeDef TimHandle;
 
 // main() runs in its own thread in the OS
 int main() {
+  loadingMotor.idleCurrent(false);
 
   encoderThread.start(encoderThreadLoop);
 
