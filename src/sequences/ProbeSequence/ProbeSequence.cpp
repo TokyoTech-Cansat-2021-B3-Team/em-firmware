@@ -1,4 +1,5 @@
 #include "ProbeSequence.h"
+#include <cstdio>
 
 ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor)
     : _thread(), _drillMotor(drillMotor), //
@@ -9,6 +10,28 @@ ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Ste
 void ProbeSequence::threadLoop() {
   // startが呼ばれるとここから始まる
   // ここにシーケンスを書く
+  int i;
+
+  //1本目
+  if(i==1){
+    set(20);
+
+    drilling();
+  }
+
+  //2～4本
+  else{
+    drilling();
+  }
+}
+
+//初期位置に移動
+void ProbeSequence::set(float L){
+
+}
+
+//刺しこみ一連の動作
+void ProbeSequence::drilling(){
 }
 
 void ProbeSequence::start() {
