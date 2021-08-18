@@ -12,11 +12,24 @@
 
 class ProbeSequence {
 private:
+public:
+  // 電極の番号
+  using ProbeNumber = enum {
+    Probe1 = 1,
+    Probe2 = 2,
+    Probe3 = 3,
+    Probe4 = 4,
+  };
+
+private:
   unique_ptr<Thread> _thread;
 
   DrillMotor *_drillMotor;
   DCMotor *_verticalMotor;
   Stepper *_loadingMotor;
+
+  // 電極の番号をThreadに通知
+  ProbeNumber _probeNumber;
 
 public:
 private:
@@ -25,7 +38,7 @@ private:
 public:
   explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor);
 
-  void start();
+  void start(ProbeNumber probeNumber);
 
   void stop();
 };

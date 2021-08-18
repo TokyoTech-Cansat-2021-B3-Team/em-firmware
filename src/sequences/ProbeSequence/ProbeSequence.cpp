@@ -3,7 +3,8 @@
 ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor)
     : _thread(), _drillMotor(drillMotor), //
       _verticalMotor(verticalMotor),      //
-      _loadingMotor(loadingMotor)         //
+      _loadingMotor(loadingMotor),        //
+      _probeNumber(Probe1)                //
 {}
 
 void ProbeSequence::threadLoop() {
@@ -11,7 +12,9 @@ void ProbeSequence::threadLoop() {
   // ここにシーケンスを書く
 }
 
-void ProbeSequence::start() {
+void ProbeSequence::start(ProbeNumber probeNumber) {
+  _probeNumber = probeNumber;
+
   _thread = make_unique<Thread>(THREAD_PATTERN_THREAD_PRIORITY,   //
                                 THREAD_PATTERN_THREAD_STACK_SIZE, //
                                 nullptr,                          //
