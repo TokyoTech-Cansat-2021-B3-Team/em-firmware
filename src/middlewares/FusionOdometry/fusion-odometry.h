@@ -1,3 +1,5 @@
+#pragma once
+
 #include <chrono>
 #include <math.h>
 #define Nsta 6 //the size of states
