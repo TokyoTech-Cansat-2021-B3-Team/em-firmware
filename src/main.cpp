@@ -1,4 +1,17 @@
 #include "mbed.h"
+#include "PinAssignment.h"
+
+#include "lsm9ds1.h"
+#include <cstring>
+
+#define PRINT_BUFFER_SIZE 128
+
+BufferedSerial serial(USBTX, USBRX);//
+I2C i2c(D4,D5);//
+
+char printBuffer[PRINT_BUFFER_SIZE];
+
+LSM9DS1 imu(&i2c);
 
 #include "PinAssignment.h"
 
@@ -10,9 +23,6 @@
 
 #define SPEED_TASK_PERIOD 10ms
 #define PRINT_BUFFER_SIZE 128
-
-char printBuffer[PRINT_BUFFER_SIZE];
-BufferedSerial serial(USBTX, USBRX, 115200);
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -47,22 +57,19 @@ void printThreadLoop(){
 
 // main() runs in its own thread in the OS
 int main() {
-  leftControl.setTargetSpeed(20);
-  rightControl.setTargetSpeed(20);
-  leftControl.start();
-  rightControl.start();
   printThread.start(printThreadLoop);
-  int i = 0;
-  int j = 0;
-  double output[3] = {22.0, 18.0, 0.0};
-  while (true) {
-    i++;
-    if(i*100 > 7000){
-        i = 0;
-        j++;
-        leftControl.setTargetSpeed(output[j%3]);
-        rightControl.setTargetSpeed(output[j%3]);
-    }
-    ThisThread::sleep_for(100ms);
+  imu.start();
+  ThisThread::sleep_for(100ms);
+  if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
+      serial.write(printBuffer,strlen(printBuffer));
+  }else{
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
+      serial.write(printBuffer,strlen(printBuffer));
+  }
+  while(true){
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f %f %f %f %f;\r\n",imu.accX(), imu.accY(), imu.accZ(), imu.gyrX(), imu.gyrY(), imu.gyrZ(), imu.magX(), imu.magY(), imu.magZ());
+      serial.write(printBuffer,strlen(printBuffer));            
+      ThisThread::sleep_for(100ms);
   }
 }
