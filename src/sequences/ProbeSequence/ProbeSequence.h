@@ -22,6 +22,10 @@ public:
 private:
   void threadLoop();
 
+  void set(float L);
+
+  void drilling();
+
 public:
   explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor);
 
