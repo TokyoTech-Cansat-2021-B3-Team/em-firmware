@@ -9,5 +9,6 @@ private:
 public:
   explicit Stepper();
 
-  void rotate(float angle);
+  // angle: 角度(度), speed: 速度(rps)
+  void rotate(double angle, double speed);
 };
