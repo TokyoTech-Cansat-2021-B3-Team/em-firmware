@@ -4,6 +4,7 @@
 
 #include "DCMotor.h"
 #include "DrillMotor.h"
+#include "QEI.h"
 #include "Stepper.h"
 
 #define THREAD_PATTERN_THREAD_PRIORITY osPriorityNormal
@@ -27,6 +28,7 @@ private:
   DrillMotor *_drillMotor;
   DCMotor *_verticalMotor;
   Stepper *_loadingMotor;
+  QEI *_verticalEncoder;
 
   // 電極の番号をThreadに通知
   ProbeNumber _probeNumber;
@@ -40,7 +42,7 @@ private:
   void drilling();
 
 public:
-  explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor);
+  explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder);
 
   void start(ProbeNumber probeNumber);
 

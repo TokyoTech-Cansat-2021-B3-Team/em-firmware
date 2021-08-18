@@ -1,11 +1,13 @@
 #include "ProbeSequence.h"
 #include <cstdio>
 
-ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor)
+ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor,
+                             QEI *verticalEncoder)
     : _thread(), _drillMotor(drillMotor), //
       _verticalMotor(verticalMotor),      //
       _loadingMotor(loadingMotor),        //
-      _probeNumber(Probe1)                //
+      _probeNumber(Probe1),               //
+      _verticalEncoder(verticalEncoder)   //
 {}
 
 void ProbeSequence::threadLoop() {
