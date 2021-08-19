@@ -56,6 +56,23 @@ void ProbeSequence::drilling(double angle, double speed, double stroke, double d
   //～初期位置に戻す～
   set(dl + L, stroke, duty_back);
 }
+
+void ProbeSequence::s(double pwmA, double pwmB, double stroke, double L) {
+  //モーター回転
+  _drillMotor->forward(pwmA);
+  _verticalMotor->forward(pwmB);
+
+  //エンコーダーでセンシング
+  _verticalEncoder->reset();
+  int i = 0;
+  int loop = L / stroke * 6 * 249;
+  while (i < loop) {
+    i = _verticalEncoder->getPulses();
+  }
+
+  //モーター停止
+  _verticalMotor->stop();
+  _drillMotor->stop();
 }
 
 void ProbeSequence::start(ProbeNumber probeNumber) {
