@@ -4,8 +4,12 @@
 #include "mbed.h"
 #include "fusion-odometry.h"
 
-Localization::Localization(WheelControl* wheelControl, FusionOdometry* ekf):
-_wheelControl(wheelControl),
+Localization::Localization(MotorSpeed* leftMotorSpeed, MotorSpeed* rightMotorSpeed, LSM9DS1* imu, FusionOdometry* ekf, double wheelDistance, double wheelRadius):
+_leftMotorSpeed(leftMotorSpeed),
+_rightMotorSpeed(rightMotorSpeed),
+_wheelDistance(wheelDistance),
+_wheelRadius(wheelRadius),
+_imu(imu),
 _ekf(ekf),
 _thread(){
 }
@@ -22,7 +26,39 @@ void Localization::stop() {
 
 void Localization::threadLoop(){
     while(true){
-
+        double z[] = {getAngularVelocityFromWheelOdometry(),_imu->gyrZ(),getVelocityFromWheelOdometry()};
+        _ekf->step_with_updateQR(z);
+        _theta = _ekf->getX(0);
+        _xpk = _ekf->getX(3);
+        _ypk = _ekf->getX(4);
         ThisThread::sleep_for(LOCALIZATION_PERIOD);
     }
+}
+
+double Localization::getAngularVelocityFromWheelOdometry(){
+    return (getVelocityLeft() - getVelocityRight()) / _wheelDistance;
+}
+
+double Localization::getVelocityFromWheelOdometry(){
+    return (getVelocityRight() + getVelocityRight())/2.0;
+}
+
+double Localization::getVelocityLeft(){
+    return _leftMotorSpeed->currentSpeedRPS() * _wheelRadius;
+}
+
+double Localization::getVelocityRight(){
+    return _rightMotorSpeed->currentSpeedRPS() * _wheelRadius;
+}
+
+double Localization::x(){
+    return _xpk;
+}
+
+double Localization::y(){
+    return _ypk;
+}
+
+double Localization::theta(){
+    return _theta;
 }

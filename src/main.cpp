@@ -6,22 +6,23 @@
 
 #define PRINT_BUFFER_SIZE 128
 
-BufferedSerial serial(USBTX, USBRX);//
-I2C i2c(D4,D5);//
+BufferedSerial serial(UART_TX, UART_RX);//
+I2C i2c(I2C_SDA, I2C_SCL);//
 
 char printBuffer[PRINT_BUFFER_SIZE];
 
-LSM9DS1 imu(&i2c);
 
 #include "PinAssignment.h"
 
 #include "QEI.h"
 
+#include "fusion-odometry.h"
 #include "WheelMotor.h"
 #include "WheelPID.h"
 #include "WheelControl.h"
+#include "MotorSpeed.h"
+#include "Localization.h"
 
-#define SPEED_TASK_PERIOD 10ms
 #define PRINT_BUFFER_SIZE 128
 
 PwmOut motor1In1(M1_IN1);
@@ -36,30 +37,45 @@ WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
-Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
+LSM9DS1 imu(&i2c);
+
+MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
+MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
 
 WheelPID leftPID;
 WheelPID rightPID;
 
-WheelControl leftControl(&leftWheelMotor,&leftPID,&leftEncoder, 1000.0);
-WheelControl rightControl(&rightWheelMotor,&rightPID,&rightEncoder, 249.8);
-//WheelControl leftControl(&motor1In1,&motor1In2,&leftPID,&leftEncoder, 1000.0);
-//WheelControl rightControl(&motor2In1,&motor2In2,&rightPID,&rightEncoder, 249.8);
+WheelControl leftControl(&leftWheelMotor,&leftPID,&leftMotorSpeed);
+WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 
+FusionOdometry ekf(KALMANFILTER_PERIOD);
+
+Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
+
+Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
+Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$L:%f R:%f ;\r\n",leftControl.sensorSpeed(), rightControl.sensorSpeed());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f;\r\n",leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
         serial.write(printBuffer,strlen(printBuffer));
-        ThisThread::sleep_for(100ms);
+        ThisThread::sleep_for(500ms);
     }
 }
 
 // main() runs in its own thread in the OS
 int main() {
   printThread.start(printThreadLoop);
+  leftMotorSpeed.start();
+  rightMotorSpeed.start();
+  leftControl.start();
+  rightControl.start();
+  leftControl.setDirection(FOWARD);
+  rightControl.setDirection(FOWARD);
+  leftControl.setTargetSpeed(20);
+  rightControl.setTargetSpeed(20);
   imu.start();
-  ThisThread::sleep_for(100ms);
+  localization.start();
   if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
       serial.write(printBuffer,strlen(printBuffer));
@@ -68,8 +84,6 @@ int main() {
       serial.write(printBuffer,strlen(printBuffer));
   }
   while(true){
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f %f %f %f %f;\r\n",imu.accX(), imu.accY(), imu.accZ(), imu.gyrX(), imu.gyrY(), imu.gyrZ(), imu.magX(), imu.magY(), imu.magZ());
-      serial.write(printBuffer,strlen(printBuffer));            
       ThisThread::sleep_for(100ms);
   }
 }

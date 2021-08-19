@@ -7,27 +7,6 @@
 
 #include "TinyEKF.h"
 
-const double initial_theta = 0.0;
-const double initial_w_wheel = 0.0;
-const double initial_v_wheel = 0.0;
-
-const double sigma_1_w = 0.01f; // 調整する変数
-const double sigma_1_v = 0.01f; // 調整する変数
-const double sigma_beta = 0.01f;// 調整する変数
-const double sigma_2_w = sigma_1_w * sigma_1_w /2;
-const double sigma_3_w = sigma_1_w * sigma_1_w * sigma_1_w /3;
-const double sigma_2_v = sigma_1_v * sigma_1_v /2;
-const double sigma_3_v = sigma_1_v * sigma_1_v * sigma_1_v /3;
-
-double sigma_w_w;
-double sigma_w_v;
-const double delta_w_w = 0.01f;     // 調整する変数
-const double delta_w_v = 0.01f;     // 調整する変数
-const double sigma_g_w = 0.01f;     // 調整する変数
-const double sigma_d_theta = 0.01f; // 調整する変数
-const double sigma_d_x = 0.01f;     // 調整する変数
-const double sigma_d_y = 0.01f;     // 調整する変数
-
 class FusionOdometry : public TinyEKF{
     public:
         double dt;
@@ -135,5 +114,25 @@ class FusionOdometry : public TinyEKF{
             H[4][3] = 1;
             H[5][4] = 1;
             */
-        }
+        }        
+        const double initial_theta = 0.0;
+        const double initial_w_wheel = 0.0;
+        const double initial_v_wheel = 0.0;
+
+        const double sigma_1_w = 0.01f; // 調整する変数
+        const double sigma_1_v = 0.01f; // 調整する変数
+        const double sigma_beta = 0.01f;// 調整する変数
+        const double sigma_2_w = sigma_1_w * sigma_1_w /2;
+        const double sigma_3_w = sigma_1_w * sigma_1_w * sigma_1_w /3;
+        const double sigma_2_v = sigma_1_v * sigma_1_v /2;
+        const double sigma_3_v = sigma_1_v * sigma_1_v * sigma_1_v /3;
+
+        double sigma_w_w;
+        double sigma_w_v;
+        const double delta_w_w = 0.01f;     // 調整する変数
+        const double delta_w_v = 0.01f;     // 調整する変数
+        const double sigma_g_w = 0.01f;     // 調整する変数
+        const double sigma_d_theta = 0.01f; // 調整する変数
+        const double sigma_d_x = 0.01f;     // 調整する変数
+        const double sigma_d_y = 0.01f;     // 調整する変数
 };
