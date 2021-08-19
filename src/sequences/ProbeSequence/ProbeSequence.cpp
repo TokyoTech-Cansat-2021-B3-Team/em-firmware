@@ -14,15 +14,15 @@ void ProbeSequence::threadLoop() {
   // startが呼ばれるとここから始まる
   // ここにシーケンスを書く
 
-  if(_probeNumber == Probe1){
-    set(20);
+  if (_probeNumber == Probe1) {
+    set(20, 0.8, 0.3);
 
-    drilling();
+    drilling(72.0, 0.125, 0.8, 5, 50, 0.1, 0.1, 1.0, 0.3, 0.3);
   }
 
-  //2～4本
-  else{
-    drilling();
+  // 2～4本
+  else {
+    drilling(72.0, 0.125, 0.8, 5, 50, 0.1, 0.1, 1.0, 0.3, 0.3);
   }
 }
 
