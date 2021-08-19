@@ -41,8 +41,21 @@ void ProbeSequence::set(double L, double stroke, double duty) {
 }
 
 //刺しこみ一連の動作
-void ProbeSequence::drilling(){
-  
+void ProbeSequence::drilling(double angle, double speed, double stroke, double dl, double L, double dutyA_connect,
+                             double dutyB_connect, double dutyA_drilling, double dutyB_drilling, double duty_back) {
+
+  //～ホルダー回転～
+  _loadingMotor->rotate(angle, speed);
+
+  //～電極接続～
+  s(dutyA_connect, dutyB_connect, stroke, dl);
+
+  //～刺しこみ～
+  s(dutyA_drilling, dutyB_drilling, stroke, L);
+
+  //～初期位置に戻す～
+  set(dl + L, stroke, duty_back);
+}
 }
 
 void ProbeSequence::start(ProbeNumber probeNumber) {
