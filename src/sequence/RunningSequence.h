@@ -33,9 +33,9 @@ public:
     void start();
     void stop();
     void setStatus(RunningSequenceState state);
-    void notifyArrivingTarget();
 private:
     void threadLoop();
+    void shiftStatusToArrived();
     bool isMoving(RunningSequenceState state);
     bool isWaiting(RunningSequenceState state);
     bool isArrived(RunningSequenceState state);

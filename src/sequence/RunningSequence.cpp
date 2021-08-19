@@ -50,7 +50,8 @@ void RunningSequence::threadLoop(){
     //waitingは対応するmovingになっているため正常時はすべてループに入る
     while(!isError(_state)){
         //正常終了の確認
-        if(isArrived(_state)){
+        if(_navigation->checkArrivingTarget()){
+            shiftStatusToArrived();
             break;
         }
         //強制終了の確認
@@ -69,8 +70,8 @@ void RunningSequence::setStatus(RunningSequenceState state){
     _currentStateCount = 0;
 }
 
-void RunningSequence::notifyArrivingTarget(){
-    switch (_state) {
+void RunningSequence::shiftStatusToArrived(){
+    switch(_state){
         case MOVING_FIRST_TO_SECOND_POLE:
             setStatus(ARRIVED_SECOND_POLE);
             break;
