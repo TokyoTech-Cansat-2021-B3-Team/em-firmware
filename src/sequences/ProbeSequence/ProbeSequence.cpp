@@ -26,9 +26,18 @@ void ProbeSequence::threadLoop() {
   }
 }
 
-//初期位置に移動
-void ProbeSequence::set(float L){
-  
+void ProbeSequence::set(double L, double stroke, double duty) {
+  //上下駆動用モーターを回す
+  _verticalMotor->reverse(duty);
+  //エンコーダーでセンシング
+  _verticalEncoder->reset();
+  int i = 0;
+  int loop = L / stroke * 6 * 249;
+  while (i < loop) {
+    i = _verticalEncoder->getPulses();
+  }
+  //モーター停止
+  _verticalMotor->stop();
 }
 
 //刺しこみ一連の動作
