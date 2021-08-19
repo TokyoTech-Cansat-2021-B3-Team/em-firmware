@@ -20,12 +20,12 @@ public:
     void stop();
     double leftTargetSpeed();
     double rightTargetSpeed();
+    virtual bool checkArrivingTarget();
 protected:
     double _y_diff = 0.0;
     double _theta_diff = 0.0;
     double norm(double x, double y);
     virtual void updateDifference();
-    virtual bool checkArrivingTarget();
     Localization* _localization;
     double _targetX = 0.0;
     double _targetY = 0.0;
