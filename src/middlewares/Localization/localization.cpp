@@ -36,7 +36,7 @@ void Localization::threadLoop(){
 }
 
 double Localization::getAngularVelocityFromWheelOdometry(){
-    return (getVelocityLeft() - getVelocityRight()) / _wheelDistance;
+    return (-getVelocityLeft() + getVelocityRight()) / _wheelDistance;
 }
 
 double Localization::getVelocityFromWheelOdometry(){
