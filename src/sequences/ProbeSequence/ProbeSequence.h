@@ -37,9 +37,10 @@ public:
 private:
   void threadLoop();
 
-  void set(float L);
+  void set(double L, double stroke, double duty);
 
-  void drilling();
+  void drilling(double angle, double speed, double stroke, double dl, double L, double dutyA_connect,
+                double dutyB_connect, double dutyA_drilling, double dutyB_drilling, double duty_back);
 
 public:
   explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder);
