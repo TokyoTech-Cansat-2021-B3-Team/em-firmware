@@ -1,4 +1,5 @@
 #include "RunningSequence.h"
+#include <algorithm>
 
 RunningSequence::RunningSequence(Navigation* navigation):
 _navigation(navigation),
@@ -29,7 +30,7 @@ void RunningSequence::threadLoop(){
     の部分のみ処理を行う.
     */
     //WAITING状態でない状態でstartされた場合は待機
-    while(!isWaiting(_state)){
+    while(!isWaiting()){
         ThisThread::sleep_for(RUNNINGSEQUENCE_PERIOD);
     }
     switch (_state) {
@@ -45,24 +46,26 @@ void RunningSequence::threadLoop(){
         setStatus(MOVING_THIRD_TO_FOURTH_POLE);
         _navigation->setTargetPosition(_fourthPolePosition[0], _fourthPolePosition[1], _fourthPoleEPS);
         break;
+    default:
+        break;
     }
     //エラー以外はwhileループが回る
     //waitingは対応するmovingになっているため正常時はすべてループに入る
-    while(!isError(_state)){
+    while(!isError()){
         //正常終了の確認
         if(_navigation->checkArrivingTarget()){
             shiftStatusToArrived();
             break;
         }
         //強制終了の確認
-        if(_currentStateCount * RUNNINGSEQUENCE_PERIOD > RUNNINGSEQUENCE_TERMINATE_TIME){
+        if(_currentStateCount > 600){
             break;
             setStatus(TERMINATE);
         }
         _currentStateCount++;
         ThisThread::sleep_for(RUNNINGSEQUENCE_PERIOD);
     }
-    //エラー時もしくは完了時にループを抜ける
+    //エラー時もしくは完了時はループから抜ける
 }
 
 void RunningSequence::setStatus(RunningSequenceState state){
@@ -81,54 +84,60 @@ void RunningSequence::shiftStatusToArrived(){
         case MOVING_THIRD_TO_FOURTH_POLE:
             setStatus(ARRIVED_FOURTH_POLE);
             break;
+        default:
+            break;
     }
 }
 
-bool RunningSequence::isMoving(RunningSequenceState state){
-    if(state == MOVING_FIRST_TO_SECOND_POLE){
+bool RunningSequence::isMoving(){
+    if(_state == MOVING_FIRST_TO_SECOND_POLE){
         return true;
     }
-    if(state == MOVING_SECOND_TO_THIRD_POLE){
+    if(_state == MOVING_SECOND_TO_THIRD_POLE){
         return true;
     }
-    if(state == MOVING_THIRD_TO_FOURTH_POLE){
+    if(_state == MOVING_THIRD_TO_FOURTH_POLE){
         return true;
     }
     return false;
 }
 
-bool RunningSequence::isError(RunningSequenceState state){
-    if(state == TERMINATE){
+bool RunningSequence::isError(){
+    if(_state == TERMINATE){
         return true;
     }
-    if(state == UNDEFINED){
-        return true;
-    }
-    return false;
-}
-
-bool RunningSequence::isWaiting(RunningSequenceState state){
-    if(state == WAITING_FIRST_TO_SECOND_POLE){
-        return true;
-    }
-    if(state == WAITING_SECOND_TO_THIRD_POLE){
-        return true;
-    }
-    if(state == WAITING_THIRD_TO_FOURTH_POLE){
+    if(_state == UNDEFINED){
         return true;
     }
     return false;
 }
 
-bool RunningSequence::isArrived(RunningSequenceState state){
-    if(state == ARRIVED_SECOND_POLE){
+bool RunningSequence::isWaiting(){
+    if(_state == WAITING_FIRST_TO_SECOND_POLE){
         return true;
     }
-    if(state == ARRIVED_THIRD_POLE){
+    if(_state == WAITING_SECOND_TO_THIRD_POLE){
         return true;
     }
-    if(state == ARRIVED_FOURTH_POLE){
+    if(_state == WAITING_THIRD_TO_FOURTH_POLE){
         return true;
     }
     return false;
+}
+
+bool RunningSequence::isArrived(){
+    if(_state == ARRIVED_SECOND_POLE){
+        return true;
+    }
+    if(_state == ARRIVED_THIRD_POLE){
+        return true;
+    }
+    if(_state == ARRIVED_FOURTH_POLE){
+        return true;
+    }
+    return false;
+}
+
+RunningSequenceState RunningSequence::state(){
+    return _state;
 }

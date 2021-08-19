@@ -24,6 +24,8 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "Localization.h"
 #include "navigation.h"
 
+#include "RunningSequence.h"
+
 #define PRINT_BUFFER_SIZE 128
 
 PwmOut motor1In1(M1_IN1);
@@ -55,14 +57,17 @@ Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
+RunningSequence runningSequence(&navi);
+RunningSequenceState currentState;
+
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f %f %f;\r\n", navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",currentState, navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
         serial.write(printBuffer,strlen(printBuffer));
-        ThisThread::sleep_for(500ms);
+        ThisThread::sleep_for(20ms);
     }
 }
 
@@ -73,13 +78,8 @@ int main() {
   rightMotorSpeed.start();
   leftControl.start();
   rightControl.start();
-  leftControl.setDirection(FOWARD);
-  rightControl.setDirection(FOWARD);
-  leftControl.setTargetSpeed(20);
-  rightControl.setTargetSpeed(20);
   imu.start();
   localization.start();
-  navi.setTargetPosition(1.0,1.0,0.1);
   navi.start();
   if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
@@ -88,7 +88,32 @@ int main() {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
       serial.write(printBuffer,strlen(printBuffer));
   }
+  runningSequence.setStatus(WAITING_FIRST_TO_SECOND_POLE);
+  runningSequence.start();
+  int i = 0;
   while(true){
+      currentState = runningSequence.state();
+      if(runningSequence.state() == ARRIVED_SECOND_POLE){
+          runningSequence.stop();
+          ThisThread::sleep_for(1s);
+          runningSequence.setStatus(WAITING_SECOND_TO_THIRD_POLE);
+          runningSequence.start();
+      }
+      if(runningSequence.state() == ARRIVED_THIRD_POLE){
+          runningSequence.stop();
+          ThisThread::sleep_for(1s);
+          runningSequence.setStatus(WAITING_THIRD_TO_FOURTH_POLE);
+          runningSequence.start();
+      }
+      if(runningSequence.state() == ARRIVED_FOURTH_POLE){
+          runningSequence.stop();
+          printThread.terminate();
+          snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
+          serial.write(printBuffer,strlen(printBuffer));
+          while(true){
+            ThisThread::sleep_for(100ms);
+          }
+      }
       ThisThread::sleep_for(100ms);
   }
 }
