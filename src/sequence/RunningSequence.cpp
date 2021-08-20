@@ -1,8 +1,14 @@
 #include "RunningSequence.h"
 #include <algorithm>
 
-RunningSequence::RunningSequence(Navigation* navigation):
+RunningSequence::RunningSequence(Navigation* navigation, Localization* localization, LSM9DS1* imu, MotorSpeed* leftMotorSpeed, MotorSpeed* rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl):
 _navigation(navigation),
+_localization(localization),
+_imu(imu),
+_leftMotorSpeed(leftMotorSpeed),
+_rightMotorSpeed(rightMotorSpeed),
+_leftWheelControl(leftWheelControl),
+_rightWheelControl(rightWheelControl),
 _state(UNDEFINED),
 _thread()
 {
@@ -11,6 +17,7 @@ _thread()
 
 void RunningSequence::start(RunningSqequneceType sequenceType) {
     if(sequenceType==FIRST){
+        init();
         setStatus(WAITING_FIRST_TO_SECOND_POLE);
     }else if(sequenceType==SECOND){
         setStatus(WAITING_SECOND_TO_THIRD_POLE);
@@ -19,6 +26,16 @@ void RunningSequence::start(RunningSqequneceType sequenceType) {
     }
     _thread = make_unique<Thread>(RUNNINGSEQUENCE_THREAD_PRIORITY, RUNNINGSEQUENCE_THREAD_STACK_SIZE, nullptr, RUNNINGSEQUENCE_THREAD_NAME);
     _thread->start(callback(this, &RunningSequence::threadLoop));
+}
+
+void RunningSequence::init(){
+    _imu->start();
+    _leftMotorSpeed->start();
+    _rightMotorSpeed->start();
+    _localization->start();
+    _leftWheelControl->start();
+    _rightWheelControl->start();
+    _navigation->start();
 }
 
 void RunningSequence::stop() {

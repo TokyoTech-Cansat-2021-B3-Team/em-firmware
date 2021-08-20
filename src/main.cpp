@@ -21,7 +21,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "WheelPID.h"
 #include "WheelControl.h"
 #include "MotorSpeed.h"
-#include "Localization.h"
+#include "localization.h"
 #include "navigation.h"
 
 #include "RunningSequence.h"
@@ -57,7 +57,7 @@ Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
-RunningSequence runningSequence(&navi);
+RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
@@ -72,14 +72,7 @@ void printThreadLoop(){
 
 // main() runs in its own thread in the OS
 int main() {
-  printThread.start(printThreadLoop);
-  leftMotorSpeed.start();
-  rightMotorSpeed.start();
-  leftControl.start();
-  rightControl.start();
-  imu.start();
-  localization.start();
-  navi.start();
+  runningSequence.start(FIRST);
   if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
       serial.write(printBuffer,strlen(printBuffer));
@@ -87,7 +80,7 @@ int main() {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
       serial.write(printBuffer,strlen(printBuffer));
   }
-  runningSequence.start(FIRST);
+  printThread.start(printThreadLoop);
   int i = 0;
   while(true){
       if(runningSequence.state() == ARRIVED_SECOND_POLE){

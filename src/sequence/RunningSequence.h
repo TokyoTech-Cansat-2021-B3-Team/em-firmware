@@ -4,6 +4,11 @@
 #include <cstdint>
 
 #include "navigation.h"
+#include "localization.h"
+#include "MotorSpeed.h"
+#include "WheelControl.h"
+#include "lsm9ds1.h"
+
 
 #define RUNNINGSEQUENCE_THREAD_PRIORITY osPriorityHigh
 #define RUNNINGSEQUENCE_THREAD_STACK_SIZE 1024
@@ -35,7 +40,7 @@ enum RunningSqequneceType{
 
 class RunningSequence{
 public:
-    explicit RunningSequence(Navigation* navigation);
+    explicit RunningSequence(Navigation* navigation, Localization* Localization, LSM9DS1* imu, MotorSpeed* leftMotorSpeed, MotorSpeed* rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl);
     void start(RunningSqequneceType sequenceType);
     void stop();
     RunningSequenceState state();
@@ -45,6 +50,7 @@ public:
     bool isError();
     int tmp = 0;
 private:
+    void init();
     void setStatus(RunningSequenceState state);
     void threadLoop();
     void shiftStatusToMovingAndSetTargetPosition();
@@ -58,5 +64,11 @@ private:
     const double _fourthPoleEPS = 0.1;
     RunningSequenceState _state;
     Navigation* _navigation;
+    Localization* _localization;
+    LSM9DS1* _imu;
+    MotorSpeed* _leftMotorSpeed;
+    MotorSpeed* _rightMotorSpeed;
+    WheelControl* _leftWheelControl;
+    WheelControl* _rightWheelControl;
     unique_ptr<Thread> _thread;
 };
