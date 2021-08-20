@@ -3,6 +3,7 @@
 
 #include "lsm9ds1.h"
 #include <cstring>
+#include <exception>
 
 #define PRINT_BUFFER_SIZE 128
 
@@ -66,6 +67,8 @@ Navigation navi(&localization, &leftControl, &rightControl);
 
 RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl);
 
+DigitalIn SafetyPin(FUSE_GATE);
+
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
@@ -77,15 +80,7 @@ void printThreadLoop(){
     }
 }
 
-// main() runs in its own thread in the OS
-int main() {
-    for(int i = 1; i < 51; i++){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        ThisThread::sleep_for(100ms);
-    }
-    navi.setCruiseSpeed(30);
-    printThread.start(printThreadLoop);
+void speedThreadLoop(){
     if(flag==RunningAllSequence){
         runningSequence.start(FIRST);
         if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
@@ -127,4 +122,35 @@ int main() {
         navi.start();
         navi.setTargetPosition(1.0, 0.0, 0.1);
     }
+}
+
+// main() runs in its own thread in the OS
+int main() {
+    for(int i = 1; i < 51; i++){
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");
+        serial.write(printBuffer,strlen(printBuffer));
+        ThisThread::sleep_for(100ms);
+    }
+    navi.setCruiseSpeed(30);
+    SafetyPin.mode(PullDown);
+    printThread.start(printThreadLoop);
+    speedThread.start(speedThreadLoop);
+    while(true){
+        if(SafetyPin==0){
+        speedThread.terminate();
+        printThread.terminate();
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "STOP PROGRAM\r\n");
+        serial.write(printBuffer,strlen(printBuffer));
+        leftWheelMotor.stop();
+        rightWheelMotor.stop();
+        ThisThread::sleep_for(500ms);
+
+        exit(1);
+        while(true){
+                ThisThread::sleep_for(20ms);
+        }
+        }
+        ThisThread::sleep_for(20ms);
+    }
+
 }
