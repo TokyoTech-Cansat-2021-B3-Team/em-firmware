@@ -77,6 +77,10 @@ void Navigation::setTargetPosition(double targetX, double targetY, double eps){
     _eps = eps;
 }
 
+void Navigation::setCruiseSpeed(double cruiseSpeed){
+    _cruiseSpeed = cruiseSpeed;
+}
+
 double Navigation::leftTargetSpeed(){
     return _leftTargetSpeed;
 }
