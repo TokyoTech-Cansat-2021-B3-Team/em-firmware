@@ -30,6 +30,8 @@ void WheelControl::threadLoop(){
         updateSensorSpeed();
         if(_targetSpeed==0.0){
             _output = 0.0;
+            _wheelpid->resetIntegral();
+            _wheelpid->updatePIDOutput(_sensorSpeed, WHEELCONTROL_PERIOD);
         }else{
             _wheelpid->updatePIDOutput(_sensorSpeed, WHEELCONTROL_PERIOD);
             _output = _wheelpid->getOutput();

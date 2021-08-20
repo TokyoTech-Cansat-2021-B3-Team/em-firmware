@@ -7,6 +7,7 @@ class WheelPID{
 public:
     explicit WheelPID();
     void setTargetSpeed(double speed);
+    void resetIntegral();
     void updatePIDOutput(double sensorSpeed, chrono::microseconds period);
     double getOutput();
 private:
