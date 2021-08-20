@@ -16,6 +16,7 @@ class Navigation{
 public:
     explicit Navigation(Localization* localization, WheelControl* leftWheelControl, WheelControl* rightWheelControl);
     void setTargetPosition(double targetX, double targetY, double eps);
+    void setCruiseSpeed(double cruiseSpeed);
     void start();
     void stop();
     double leftTargetSpeed();
@@ -34,7 +35,7 @@ private:
     void threadLoop();
     const double _gainKL = 0.2;//1mのずれで2RPMの差
     const double _gainKT = 0.4;
-    const double _cruiseSpeed = 18.0;//rpm
+    double _cruiseSpeed = 18.0;//rpm
     double _deltaV = 0.0;
     double _leftTargetSpeed = 0.0;
     double _rightTargetSpeed = 0.0;
