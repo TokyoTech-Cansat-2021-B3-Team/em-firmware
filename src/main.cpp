@@ -28,6 +28,13 @@ char printBuffer[PRINT_BUFFER_SIZE];
 
 #define PRINT_BUFFER_SIZE 128
 
+enum ExperimentMode{
+    RunningAllSequence,
+    RunningPoleToPole
+};
+
+ExperimentMode flag = RunningPoleToPole;
+
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
 
@@ -42,8 +49,8 @@ QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
 LSM9DS1 imu(&i2c);
 
-MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
+MotorSpeed leftMotorSpeed(&leftEncoder, 298.0);
+MotorSpeed rightMotorSpeed(&rightEncoder, 298.0);
 
 WheelPID leftPID;
 WheelPID rightPID;
@@ -72,35 +79,52 @@ void printThreadLoop(){
 
 // main() runs in its own thread in the OS
 int main() {
-  runningSequence.start(FIRST);
-  if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
-      serial.write(printBuffer,strlen(printBuffer));
-  }else{
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
-      serial.write(printBuffer,strlen(printBuffer));
-  }
-  printThread.start(printThreadLoop);
-  int i = 0;
-  while(true){
-      if(runningSequence.state() == ARRIVED_SECOND_POLE){
-          runningSequence.stop();
-          ThisThread::sleep_for(1s);
-          runningSequence.start(SECOND);
-      }
-      if(runningSequence.state() == ARRIVED_THIRD_POLE){
-          runningSequence.stop();
-          ThisThread::sleep_for(1s);
-          runningSequence.start(THIRD);
-      }
-      if(runningSequence.state() == ARRIVED_FOURTH_POLE){
-          runningSequence.stop();
-          snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
-          serial.write(printBuffer,strlen(printBuffer));
-          while(true){
+    for(int i = 1; i < 51; i++){
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");
+        serial.write(printBuffer,strlen(printBuffer));
+        ThisThread::sleep_for(100ms);
+    }
+    navi.setCruiseSpeed(30);
+    printThread.start(printThreadLoop);
+    if(flag==RunningAllSequence){
+        runningSequence.start(FIRST);
+        if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
+            snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
+            serial.write(printBuffer,strlen(printBuffer));
+        }else{
+            snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
+            serial.write(printBuffer,strlen(printBuffer));
+        }
+        int i = 0;
+        while(true){
+            if(runningSequence.state() == ARRIVED_SECOND_POLE){
+                runningSequence.stop();
+                ThisThread::sleep_for(1s);
+                runningSequence.start(SECOND);
+            }
+            if(runningSequence.state() == ARRIVED_THIRD_POLE){
+                runningSequence.stop();
+                ThisThread::sleep_for(1s);
+                runningSequence.start(THIRD);
+            }
+            if(runningSequence.state() == ARRIVED_FOURTH_POLE){
+                runningSequence.stop();
+                snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
+                serial.write(printBuffer,strlen(printBuffer));
+                while(true){
+                    ThisThread::sleep_for(100ms);
+                }
+            }
             ThisThread::sleep_for(100ms);
-          }
-      }
-      ThisThread::sleep_for(100ms);
-  }
+        }
+    }else if(flag==RunningPoleToPole){
+        imu.start();
+        leftMotorSpeed.start();
+        rightMotorSpeed.start();
+        localization.start();
+        leftControl.start();
+        rightControl.start();
+        navi.start();
+        navi.setTargetPosition(1.0, 0.0, 0.1);
+    }
 }
