@@ -79,6 +79,10 @@ int main() {
         j++;
         leftPID.setTargetSpeed(output[j%3]);
         rightPID.setTargetSpeed(output[j%3]);
+        if((j%3)==2){
+            leftPID.resetIntegral();
+            rightPID.resetIntegral();
+        }
     }
     ThisThread::sleep_for(100ms);
   }

@@ -15,10 +15,14 @@ void WheelPID::updatePIDOutput(double sensorSpeed, chrono::microseconds period){
     _integral += deviation * chrono::duration<float>(period).count();
     _diff += deviation * chrono::duration<float>(period).count();
     _previousSpeed = _sensorSpeed;
-
+    
     _output = deviation * _pGain + _integral * _iGain + _diff * _dGain;
 }
 
 double WheelPID::getOutput(){
     return _output;
+}
+
+void WheelPID::resetIntegral(){
+    _integral = 0.0;
 }
