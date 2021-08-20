@@ -126,31 +126,44 @@ void speedThreadLoop(){
 
 // main() runs in its own thread in the OS
 int main() {
-    for(int i = 1; i < 51; i++){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        ThisThread::sleep_for(100ms);
-    }
-    navi.setCruiseSpeed(30);
-    SafetyPin.mode(PullDown);
-    printThread.start(printThreadLoop);
-    speedThread.start(speedThreadLoop);
+    int i = 0;
     while(true){
         if(SafetyPin==0){
-        speedThread.terminate();
-        printThread.terminate();
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "STOP PROGRAM\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        leftWheelMotor.stop();
-        rightWheelMotor.stop();
-        ThisThread::sleep_for(500ms);
+            navi.stop();
+            leftControl.stop();
+            rightControl.stop();
 
-        exit(1);
-        while(true){
-                ThisThread::sleep_for(20ms);
+            motor1In1 = 0.0;
+            motor1In2 = 0.0;
+            motor2In1 = 0.0;
+            motor2In2 = 0.0;
+
+            speedThread.terminate();
+            printThread.terminate();
+            snprintf(printBuffer, PRINT_BUFFER_SIZE, "STOP PROGRAM\r\n");
+            serial.write(printBuffer,strlen(printBuffer));
+            leftControl.setTargetSpeed(0);
+            rightControl.setTargetSpeed(0);
+            ThisThread::sleep_for(500ms);
+
+
+            exit(1);
+            while(true){
+                    ThisThread::sleep_for(10ms);
+            }
         }
+        if(i < 51){
+            snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");
+            serial.write(printBuffer,strlen(printBuffer));
+            ThisThread::sleep_for(100ms);
+        }else if(i == 51){
+            navi.setCruiseSpeed(30);
+            SafetyPin.mode(PullDown);
+            printThread.start(printThreadLoop);
+            speedThread.start(speedThreadLoop);
         }
-        ThisThread::sleep_for(20ms);
+        i++;
+        ThisThread::sleep_for(10ms);
     }
 
 }
