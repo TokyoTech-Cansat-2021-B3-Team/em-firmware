@@ -58,14 +58,13 @@ Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-
 Navigation navi(&localization, &leftControl, &rightControl);
 
 RunningSequence runningSequence(&navi);
-RunningSequenceState currentState;
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",currentState, navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
         serial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(20ms);
     }
@@ -88,26 +87,21 @@ int main() {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
       serial.write(printBuffer,strlen(printBuffer));
   }
-  runningSequence.setStatus(WAITING_FIRST_TO_SECOND_POLE);
-  runningSequence.start();
+  runningSequence.start(FIRST);
   int i = 0;
   while(true){
-      currentState = runningSequence.state();
       if(runningSequence.state() == ARRIVED_SECOND_POLE){
           runningSequence.stop();
           ThisThread::sleep_for(1s);
-          runningSequence.setStatus(WAITING_SECOND_TO_THIRD_POLE);
-          runningSequence.start();
+          runningSequence.start(SECOND);
       }
       if(runningSequence.state() == ARRIVED_THIRD_POLE){
           runningSequence.stop();
           ThisThread::sleep_for(1s);
-          runningSequence.setStatus(WAITING_THIRD_TO_FOURTH_POLE);
-          runningSequence.start();
+          runningSequence.start(THIRD);
       }
       if(runningSequence.state() == ARRIVED_FOURTH_POLE){
           runningSequence.stop();
-          printThread.terminate();
           snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
           serial.write(printBuffer,strlen(printBuffer));
           while(true){

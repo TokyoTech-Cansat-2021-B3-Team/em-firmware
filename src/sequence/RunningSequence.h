@@ -27,20 +27,27 @@ enum RunningSequenceState{
     TERMINATE
 };
 
+enum RunningSqequneceType{
+    FIRST,
+    SECOND,
+    THIRD
+};
+
 class RunningSequence{
 public:
     explicit RunningSequence(Navigation* navigation);
-    void start();
+    void start(RunningSqequneceType sequenceType);
     void stop();
     RunningSequenceState state();
-    void setStatus(RunningSequenceState state);
     bool isMoving();
     bool isWaiting();
     bool isArrived();
     bool isError();
     int tmp = 0;
 private:
+    void setStatus(RunningSequenceState state);
     void threadLoop();
+    void shiftStatusToMovingAndSetTargetPosition();
     void shiftStatusToArrived();
     int _currentStateCount = 0;
     const double _secondPolePosition[2] = {1.0,0.0};

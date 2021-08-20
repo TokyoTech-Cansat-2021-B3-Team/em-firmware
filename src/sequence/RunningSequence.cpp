@@ -9,7 +9,14 @@ _thread()
 
 }
 
-void RunningSequence::start() {
+void RunningSequence::start(RunningSqequneceType sequenceType) {
+    if(sequenceType==FIRST){
+        setStatus(WAITING_FIRST_TO_SECOND_POLE);
+    }else if(sequenceType==SECOND){
+        setStatus(WAITING_SECOND_TO_THIRD_POLE);
+    }else if(sequenceType==THIRD){
+        setStatus(WAITING_THIRD_TO_FOURTH_POLE);
+    }
     _thread = make_unique<Thread>(RUNNINGSEQUENCE_THREAD_PRIORITY, RUNNINGSEQUENCE_THREAD_STACK_SIZE, nullptr, RUNNINGSEQUENCE_THREAD_NAME);
     _thread->start(callback(this, &RunningSequence::threadLoop));
 }
@@ -29,25 +36,13 @@ void RunningSequence::threadLoop(){
     ・制御完了後の取次およびロギング
     の部分のみ処理を行う.
     */
-    //WAITING状態でない状態でstartされた場合は待機
-    while(!isWaiting()){
-        ThisThread::sleep_for(RUNNINGSEQUENCE_PERIOD);
-    }
-    switch (_state) {
-    case WAITING_FIRST_TO_SECOND_POLE:
-        setStatus(MOVING_FIRST_TO_SECOND_POLE);
-        _navigation->setTargetPosition(_secondPolePosition[0], _secondPolePosition[1], _secondPoleEPS);
-        break;
-    case WAITING_SECOND_TO_THIRD_POLE:
-        setStatus(MOVING_SECOND_TO_THIRD_POLE);
-        _navigation->setTargetPosition(_thirdPolePosition[0], _thirdPolePosition[1], _thirdPoleEPS);
-        break;
-    case WAITING_THIRD_TO_FOURTH_POLE:
-        setStatus(MOVING_THIRD_TO_FOURTH_POLE);
-        _navigation->setTargetPosition(_fourthPolePosition[0], _fourthPolePosition[1], _fourthPoleEPS);
-        break;
-    default:
-        break;
+    if(isWaiting()){
+        shiftStatusToMovingAndSetTargetPosition();
+    }else{
+        //WAITING状態でない状態でstartされた場合は待機
+        while(!isWaiting()){
+            ThisThread::sleep_for(RUNNINGSEQUENCE_PERIOD);
+        }
     }
     //エラー以外はwhileループが回る
     //waitingは対応するmovingになっているため正常時はすべてループに入る
@@ -86,6 +81,25 @@ void RunningSequence::shiftStatusToArrived(){
             break;
         default:
             break;
+    }
+}
+
+void RunningSequence::shiftStatusToMovingAndSetTargetPosition(){
+    switch (_state) {
+    case WAITING_FIRST_TO_SECOND_POLE:
+        setStatus(MOVING_FIRST_TO_SECOND_POLE);
+        _navigation->setTargetPosition(_secondPolePosition[0], _secondPolePosition[1], _secondPoleEPS);
+        break;
+    case WAITING_SECOND_TO_THIRD_POLE:
+        setStatus(MOVING_SECOND_TO_THIRD_POLE);
+        _navigation->setTargetPosition(_thirdPolePosition[0], _thirdPolePosition[1], _thirdPoleEPS);
+        break;
+    case WAITING_THIRD_TO_FOURTH_POLE:
+        setStatus(MOVING_THIRD_TO_FOURTH_POLE);
+        _navigation->setTargetPosition(_fourthPolePosition[0], _fourthPolePosition[1], _fourthPoleEPS);
+        break;
+    default:
+        break;
     }
 }
 
