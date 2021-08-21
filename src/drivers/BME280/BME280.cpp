@@ -88,8 +88,8 @@ void BME280::readTrim() {
 
 void BME280::writeConfig() {
   // 順番が重要
-  if (writeRegister(BME280_CTRL_MEAS_ADDR, BME280_CTRL_MEAS(BME280_OSRS_T, BME280_OSRS_P, BME280_MODE)) != 0 ||
-      writeRegister(BME280_CTRL_HUM_ADDR, BME280_CTRL_HUM(BME280_OSRS_H)) != 0 ||
+  if (writeRegister(BME280_CTRL_HUM_ADDR, BME280_CTRL_HUM(BME280_OSRS_H)) != 0 ||
+      writeRegister(BME280_CTRL_MEAS_ADDR, BME280_CTRL_MEAS(BME280_OSRS_T, BME280_OSRS_P, BME280_MODE)) != 0 ||
       writeRegister(BME280_CONFIG_ADDR, BME280_CONFIG(BME280_T_SB, BME280_FILTER)) != 0) {
     // コンフィグ書き込み失敗
   }
