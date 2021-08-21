@@ -4,15 +4,18 @@ LandingSequence::LandingSequence(Variometer *variometer) : _thread(), _variomete
 
 void LandingSequence::threadLoop() {
   // シーケンス開始
+  _state = Running;
   printf("start Landing Sequence\n");
 
   // 着地まで待機
+  _state = WaitLanding;
   waitLanding();
 
   // 着地検出
   printf("detect landing\n");
 
   // シーケンス終了
+  _state = Complete;
   printf("Landing Sequence complete\n");
 }
 
@@ -54,4 +57,8 @@ void LandingSequence::start() {
 void LandingSequence::stop() {
   _thread->terminate();
   _thread.reset();
+}
+
+LandingSequence::LandingSequenceState LandingSequence::state() {
+  return _state;
 }

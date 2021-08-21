@@ -5,6 +5,7 @@
 #include "BME280.h"
 #include "LandingSequence.h"
 #include "Variometer.h"
+#include <cstdio>
 
 I2C i2c(I2C_SDA, I2C_SCL);
 
@@ -14,13 +15,23 @@ Variometer variometer(&bme280);
 
 LandingSequence landingSequence(&variometer);
 
+void startSync() {
+  landingSequence.start();
+
+  printf("start\n");
+
+  while (landingSequence.state() != LandingSequence::Complete) {
+    ThisThread::sleep_for(100ms);
+  }
+
+  landingSequence.stop();
+
+  printf("stop\n");
+}
+
 // main() runs in its own thread in the OS
 int main() {
   i2c.frequency(400000);
 
-  landingSequence.start();
-
-  while (true) {
-    ThisThread::sleep_for(1s);
-  }
+  startSync();
 }

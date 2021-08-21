@@ -13,8 +13,18 @@
 
 class LandingSequence {
 private:
+public:
+  using LandingSequenceState = enum {
+    Running,
+    WaitLanding,
+    Complete,
+  };
+
+private:
   unique_ptr<Thread> _thread;
   Variometer *_variometer;
+
+  LandingSequenceState _state;
 
 public:
 private:
@@ -30,4 +40,6 @@ public:
   void start();
 
   void stop();
+
+  LandingSequenceState state();
 };
