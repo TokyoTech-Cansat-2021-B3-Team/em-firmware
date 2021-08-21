@@ -39,6 +39,7 @@ void LSM9DS1::threadLoop(){
 }
 
 int LSM9DS1::startLSM9DS1(){
+    _i2c->frequency(400000);
     char rst_AG = 0;
     char rst_M = 0;
     //lsm9ds1への接続を確認
