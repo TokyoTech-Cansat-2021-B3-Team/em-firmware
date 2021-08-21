@@ -1,7 +1,14 @@
 #include "Variometer.h"
 
 Variometer::Variometer(BME280 *bme280)
-    : _thread(), _bme280(bme280), _previousAltitude(0), _currentAltitude(0), _smaBuffer(), _smaPtr(0) {}
+    : _thread(),            //
+      _bme280(bme280),      //
+      _previousAltitude(0), //
+      _currentAltitude(0),  //
+      _verticalSpeed(0),    //
+      _smaBuffer(),         //
+      _smaPtr(0)            //
+{}
 
 double Variometer::altitude() {
   double P = _bme280->getPressure();
