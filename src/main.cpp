@@ -23,6 +23,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "MotorSpeed.h"
 #include "localization.h"
 #include "navigation.h"
+#include "stabilize.h"
 
 #include "RunningSequence.h"
 
@@ -53,18 +54,14 @@ WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 
 FusionOdometry ekf(KALMANFILTER_PERIOD);
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
-
-Navigation navi(&localization, &leftControl, &rightControl);
-
-RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl);
+Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f;\r\n",stabilize.currentTheta(), stabilize.currentTheta());
         serial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(20ms);
     }
@@ -72,35 +69,8 @@ void printThreadLoop(){
 
 // main() runs in its own thread in the OS
 int main() {
-  runningSequence.start(FIRST);
-  if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
-      serial.write(printBuffer,strlen(printBuffer));
-  }else{
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
-      serial.write(printBuffer,strlen(printBuffer));
-  }
-  printThread.start(printThreadLoop);
-  int i = 0;
-  while(true){
-      if(runningSequence.state() == ARRIVED_SECOND_POLE){
-          runningSequence.stop();
-          ThisThread::sleep_for(1s);
-          runningSequence.start(SECOND);
-      }
-      if(runningSequence.state() == ARRIVED_THIRD_POLE){
-          runningSequence.stop();
-          ThisThread::sleep_for(1s);
-          runningSequence.start(THIRD);
-      }
-      if(runningSequence.state() == ARRIVED_FOURTH_POLE){
-          runningSequence.stop();
-          snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
-          serial.write(printBuffer,strlen(printBuffer));
-          while(true){
-            ThisThread::sleep_for(100ms);
-          }
-      }
-      ThisThread::sleep_for(100ms);
-  }
+    stabilize.start();
+    while(true){
+        ThisThread::sleep_for(100ms);
+    }
 }
