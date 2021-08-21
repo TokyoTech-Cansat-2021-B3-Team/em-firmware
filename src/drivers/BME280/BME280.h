@@ -59,13 +59,13 @@
 #define BME280_HUM_DOUBLE(value) (static_cast<double>(value) / 1024.0)
 
 #define BME280_T_SB 0b000U   // スタンバイ時間 0.5ms
-#define BME280_FILTER 0b000U // IIRフィルタ OFF
-#define BME280_OSRS_T 0b001U // 温度オーバーサンプリング x1
-#define BME280_OSRS_P 0b001U // 気圧オーバーサンプリング x1
-#define BME280_OSRS_H 0b001U // 湿度オーバーサンプリング x1
+#define BME280_FILTER 0b100U // IIRフィルタ係数 16
+#define BME280_OSRS_T 0b101U // 温度オーバーサンプリング x16
+#define BME280_OSRS_P 0b101U // 気圧オーバーサンプリング x16
+#define BME280_OSRS_H 0b000U // 湿度オーバーサンプリング x0 計測しない
 #define BME280_MODE 0b11U    // モード Normal
 
-#define BME280_READ_PERIOD 100ms
+#define BME280_READ_PERIOD 50ms
 
 class BME280 {
 private:
