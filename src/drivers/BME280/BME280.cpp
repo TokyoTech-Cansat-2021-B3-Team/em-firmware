@@ -11,6 +11,14 @@ BME280::BME280(I2C *i2c)
 {}
 
 void BME280::start() {
+
+  // 初期化と最初の読み込みを同期で行う
+  readTrim();
+
+  writeConfig();
+
+  readData();
+
   _thread = make_unique<Thread>(BME280_THREAD_PRIORITY,   //
                                 BME280_THREAD_STACK_SIZE, //
                                 nullptr,                  //
@@ -24,10 +32,6 @@ void BME280::stop() {
 }
 
 void BME280::threadLoop() {
-  readTrim();
-
-  writeConfig();
-
   while (true) {
     readData();
 
@@ -102,12 +106,13 @@ void BME280::readData() {
     // 測定値読み込み失敗
   }
 
-  int32_t pressureADC = BME280_PRESS_ADC(readBuffer[0], readBuffer[1], readBuffer[2]);
   int32_t temparetureADC = BME280_TEMP_ADC(readBuffer[3], readBuffer[4], readBuffer[5]);
+  int32_t pressureADC = BME280_PRESS_ADC(readBuffer[0], readBuffer[1], readBuffer[2]);
   int32_t humidityADC = BME280_HUM_ADC(readBuffer[6], readBuffer[7]);
 
-  _pressure = compensatePressure(pressureADC);
+  // 温度を気圧、湿度の補正に使うので順番に注意
   _tempareture = compensateTemperature(temparetureADC);
+  _pressure = compensatePressure(pressureADC);
   _humidity = compensateHumidity(humidityADC);
 }
 
