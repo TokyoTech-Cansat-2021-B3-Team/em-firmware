@@ -1,6 +1,7 @@
 #include "PA1010D.h"
 
-PA1010D::PA1010D(I2C *i2c) : _i2c(i2c), _thread(), _packetBuffer(), _packetBufferPosition(0), _rmc(), _gga() {}
+PA1010D::PA1010D(I2C *i2c)
+    : _i2c(i2c), _thread(), _packetBuffer(), _packetBufferPosition(0), _rmc(), _gga(), _isSetTime(false) {}
 
 void PA1010D::start() {
   _thread = make_unique<Thread>(PA1010D_THREAD_PRIORITY,   //
@@ -20,6 +21,8 @@ void PA1010D::threadLoop() {
 
   while (true) {
     polling();
+
+    setTime();
 
     ThisThread::sleep_for(PA1010D_POLLING_PERIOD);
   }
@@ -344,6 +347,36 @@ void PA1010D::ggaDecode() {
   //   printf("geoidalSeparation: %f\n", _gga.geoidalSeparation);
   //   printf("ageOfDiffCorr: %f\n", _gga.ageOfDiffCorr);
   //   printf("stationID: %u\n", _gga.stationID);
+}
+
+void PA1010D::setTime() {
+  if (_isSetTime) {
+    if (PA1010D_RMC_OUTPUT && _rmc.status == 'A') {
+      tm t = {
+          static_cast<int>(_rmc.utc) % 100,                // sec
+          static_cast<int>(_rmc.utc / 100) % 100,          // min
+          static_cast<int>(_rmc.utc / 10000) % 100,        // hour
+          static_cast<int>(_rmc.date / 10000) % 100,       // day
+          static_cast<int>(_rmc.date / 100) % 100 - 1,     // month
+          static_cast<int>(_rmc.date) % 100 + 2000 - 1900, // year
+      };
+      set_time(mktime(&t));
+      _isSetTime = true;
+    } else if (PA1010D_GGA_OUTPUT && _gga.positionFixIndicator > 0) {
+      tm t = {
+          static_cast<int>(_gga.utc) % 100,         // sec
+          static_cast<int>(_gga.utc / 100) % 100,   // min
+          static_cast<int>(_gga.utc / 10000) % 100, // hour
+          1,
+          1 - 1,
+          1970 - 1900,
+      };
+      //   printf("%d,%d,%d,%d,%d,%d\n", t.tm_sec, t.tm_min, t.tm_hour, t.tm_mday, t.tm_mon, t.tm_year);
+      //   printf("%lf\n", _gga.utc);
+      set_time(mktime(&t));
+      _isSetTime = true;
+    }
+  }
 }
 
 void PA1010D::getRMC(RMCPacket *rmc) {
