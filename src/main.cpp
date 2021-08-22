@@ -23,6 +23,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "WheelControl.h"
 #include "MotorSpeed.h"
 #include "localization.h"
+#include "SimpleLocalization.h"
 #include "navigation.h"
 
 #include "RunningSequence.h"
@@ -31,10 +32,12 @@ char printBuffer[PRINT_BUFFER_SIZE];
 
 enum ExperimentMode{
     RunningAllSequence,
-    RunningPoleToPole
+    RunningPoleToPole,
+    RunningNoControle,
 };
 
 ExperimentMode flag = RunningPoleToPole;
+const double cruiseSpeed = 40.0;
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -62,6 +65,7 @@ WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 FusionOdometry ekf(KALMANFILTER_PERIOD);
 
 Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 62.0e-3);
+SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 62.0e-3);
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
@@ -74,7 +78,9 @@ Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y(), simpleLocalization.theta());
+        //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        
         serial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(20ms);
     }
@@ -83,6 +89,7 @@ void printThreadLoop(){
 void speedThreadLoop(){
     if(flag==RunningAllSequence){
         runningSequence.start(FIRST);
+        //simpleLocalization.start();
         if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
             snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
             serial.write(printBuffer,strlen(printBuffer));
@@ -117,10 +124,25 @@ void speedThreadLoop(){
         leftMotorSpeed.start();
         rightMotorSpeed.start();
         localization.start();
+        simpleLocalization.start();
         leftControl.start();
         rightControl.start();
         navi.start();
         navi.setTargetPosition(5.0, 0.0, 0.5);
+    }else if(flag==RunningNoControle){
+        imu.start();
+        leftMotorSpeed.start();
+        rightMotorSpeed.start();
+        localization.start();
+        simpleLocalization.start();
+        leftControl.start();
+        rightControl.start();
+        leftControl.setTargetSpeed(cruiseSpeed);
+        rightControl.setTargetSpeed(cruiseSpeed);
+        while(true){
+
+            ThisThread::sleep_for(100ms);
+        }
     }
 }
 
@@ -154,7 +176,7 @@ int main() {
             serial.write(printBuffer,strlen(printBuffer));
             ThisThread::sleep_for(100ms);
         }else if(i == 51){
-            navi.setCruiseSpeed(40);
+            navi.setCruiseSpeed(cruiseSpeed);
             SafetyPin.mode(PullDown);
             printThread.start(printThreadLoop);
             speedThread.start(speedThreadLoop);

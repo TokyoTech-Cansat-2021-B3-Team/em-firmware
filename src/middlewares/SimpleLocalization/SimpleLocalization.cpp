@@ -24,7 +24,7 @@ void SimpleLocalization::stop() {
 
 void SimpleLocalization::threadLoop(){
     while(true){
-        _dt = ODOMETRY_PERIOD.count();
+        _dt = static_cast<std::chrono::duration<double>>(ODOMETRY_PERIOD).count();
         _omega = getAngularVelocityFromWheelOdometry();
         _theta += _omega * _dt;
         _v = getVelocityFromWheelOdometry();
