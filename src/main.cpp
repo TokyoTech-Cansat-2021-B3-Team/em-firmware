@@ -1,6 +1,22 @@
 #include "mbed.h"
 
+#include "LittleFileSystem2.h"
+#include "SDBlockDevice.h"
+
 #include "PinAssignment.h"
+
+#include "Logger.h"
+#include "PA1010D.h"
+
+I2C i2c(I2C_SDA, I2C_SCL);
+
+PA1010D pa1010d(&i2c);
+
+SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
+
+LittleFileSystem2 littleFileSystem2(nullptr);
+
+Logger logger(&sdBlockDevice, &littleFileSystem2);
 
 #include "Console.h"
 #include "MU2.h"
@@ -20,4 +36,3 @@ int main() {
 
     ThisThread::sleep_for(1s);
   }
-}
