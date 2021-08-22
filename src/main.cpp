@@ -2,20 +2,22 @@
 
 #include "PinAssignment.h"
 
+#include "Console.h"
 #include "MU2.h"
 
 BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 
 MU2 mu2(&bufferedSerial);
 
+Console console(&mu2);
+
 // main() runs in its own thread in the OS
 int main() {
-  mu2.init();
+  console.init();
 
   while (true) {
-    const char *str = "Hello MU2";
-    mu2.transmit(str, strlen(str));
+    console.lprintf("downlink message\n");
 
-    ThisThread::sleep_for(5s);
+    ThisThread::sleep_for(1s);
   }
 }
