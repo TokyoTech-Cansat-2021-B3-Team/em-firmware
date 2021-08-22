@@ -62,7 +62,7 @@
 // "3" - Output once every three position fixes
 // "4" - Output once every four position fixes
 // "5" - Output once every five position fixes
-#define PA1010D_RMC_OUTPUT 0
+#define PA1010D_RMC_OUTPUT 5
 #define PA1010D_VTG_OUTPUT 0
 #define PA1010D_GGA_OUTPUT 1
 #define PA1010D_GSA_OUTPUT 0
