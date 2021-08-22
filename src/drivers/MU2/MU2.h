@@ -26,6 +26,8 @@ class MU2 {
 private:
   BufferedSerial *_serial;
 
+  bool _isInit;
+
 public:
 private:
   void controlCommand(const char *command, const char *value);

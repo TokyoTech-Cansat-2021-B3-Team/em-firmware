@@ -1,6 +1,6 @@
 #include "MU2.h"
 
-MU2::MU2(BufferedSerial *serial) : _serial(serial) {}
+MU2::MU2(BufferedSerial *serial) : _serial(serial), _isInit(false) {}
 
 void MU2::controlCommand(const char *command, const char *value) {
   // コマンド
@@ -19,20 +19,24 @@ void MU2::controlCommand(const char *command, const char *value) {
 }
 
 void MU2::init() {
-  // ユーザーID設定
-  controlCommand(MU2_CMD_UI, MU2_UI);
+  if (!_isInit) {
+    // ユーザーID設定
+    controlCommand(MU2_CMD_UI, MU2_UI);
 
-  // グループID設定
-  controlCommand(MU2_CMD_GI, MU2_GI);
+    // グループID設定
+    controlCommand(MU2_CMD_GI, MU2_GI);
 
-  // 機器ID設定
-  controlCommand(MU2_CMD_EI, MU2_EI);
+    // 機器ID設定
+    controlCommand(MU2_CMD_EI, MU2_EI);
 
-  // 目的局ID指定
-  controlCommand(MU2_CMD_DI, MU2_DI);
+    // 目的局ID指定
+    controlCommand(MU2_CMD_DI, MU2_DI);
 
-  // 使用チャンネル設定
-  controlCommand(MU2_CMD_CH, MU2_CH);
+    // 使用チャンネル設定
+    controlCommand(MU2_CMD_CH, MU2_CH);
+
+    _isInit = true;
+  }
 }
 
 size_t MU2::transmit(const char *data, size_t size) {
