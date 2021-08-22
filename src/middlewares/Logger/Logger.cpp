@@ -34,7 +34,7 @@ shared_ptr<File> Logger::open(const char *path) {
   fflush(stdout);
 
   shared_ptr<File> file = make_shared<File>();
-  int err = file->open(_fileSystem, path, O_RDWR | O_CREAT);
+  int err = file->open(_fileSystem, path, O_RDWR | O_CREAT | O_APPEND);
 
   if (err) {
     file.reset();
