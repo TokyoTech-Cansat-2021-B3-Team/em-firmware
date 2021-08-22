@@ -3,6 +3,7 @@
         "bare-metal",
         "rtos",
         "cmsis-cmsis5-rtos2",
+        "events",
         "sd",
         "filesystem",
         "fat_chan",

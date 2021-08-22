@@ -104,6 +104,7 @@ public:
 private:
   I2C *_i2c;
   unique_ptr<Thread> _thread;
+  EventQueue _queue;
 
   char _packetBuffer[PA1010D_BUFFER_SIZE];
   size_t _packetBufferPosition;
