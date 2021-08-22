@@ -12,6 +12,8 @@ private:
   MU2 *_mu2;
   Logger *_logger;
 
+  bool _isInit;
+
 public:
 private:
 public:

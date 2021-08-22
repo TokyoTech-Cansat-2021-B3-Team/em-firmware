@@ -1,11 +1,15 @@
 #include "Console.h"
 
-Console::Console(MU2 *mu2, Logger *logger) : _mu2(mu2), _logger(logger) {}
+Console::Console(MU2 *mu2, Logger *logger) : _mu2(mu2), _logger(logger), _isInit(false) {}
 
 void Console::init() {
-  _mu2->init();
+  if (!_isInit) {
+    _mu2->init();
 
-  _logger->init();
+    _logger->init();
+
+    _isInit = true;
+  }
 }
 
 int Console::lprintf(const char *group, const char *format, ...) {
