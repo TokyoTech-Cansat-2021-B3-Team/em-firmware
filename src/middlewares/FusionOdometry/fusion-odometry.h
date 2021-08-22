@@ -83,8 +83,10 @@ class FusionOdometry : public TinyEKF{
             F[1][1] = 1;
             F[2][2] = 1;
             F[3][3] = 1;
+            F[3][0] = -sin(this->x[0]) * this->dt * this->x[5];
             F[3][5] = cos(this->x[0]) * this->dt;
             F[4][4] = 1;
+            F[4][0] = cos(this->x[0]) * this->dt * this->x[5];
             F[4][5] = sin(this->x[0]) * this->dt;
             F[5][5] = 1;
 
