@@ -362,20 +362,21 @@ void PA1010D::setTime() {
       };
       set_time(mktime(&t));
       _isSetTime = true;
-    } else if (PA1010D_GGA_OUTPUT && _gga.positionFixIndicator > 0) {
-      tm t = {
-          static_cast<int>(_gga.utc) % 100,         // sec
-          static_cast<int>(_gga.utc / 100) % 100,   // min
-          static_cast<int>(_gga.utc / 10000) % 100, // hour
-          1,
-          1 - 1,
-          1970 - 1900,
-      };
-      //   printf("%d,%d,%d,%d,%d,%d\n", t.tm_sec, t.tm_min, t.tm_hour, t.tm_mday, t.tm_mon, t.tm_year);
-      //   printf("%lf\n", _gga.utc);
-      set_time(mktime(&t));
-      _isSetTime = true;
     }
+    // else if (PA1010D_GGA_OUTPUT && _gga.positionFixIndicator > 0) {
+    //     tm t = {
+    //         static_cast<int>(_gga.utc) % 100,         // sec
+    //         static_cast<int>(_gga.utc / 100) % 100,   // min
+    //         static_cast<int>(_gga.utc / 10000) % 100, // hour
+    //         1,
+    //         1 - 1,
+    //         1970 - 1900,
+    //     };
+    //     //   printf("%d,%d,%d,%d,%d,%d\n", t.tm_sec, t.tm_min, t.tm_hour, t.tm_mday, t.tm_mon, t.tm_year);
+    //     //   printf("%lf\n", _gga.utc);
+    //     set_time(mktime(&t));
+    //     _isSetTime = true;
+    //   }
   }
 }
 
