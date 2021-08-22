@@ -22,6 +22,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "WheelControl.h"
 #include "MotorSpeed.h"
 #include "Localization.h"
+#include "SimpleLocalization.h"
 
 #define PRINT_BUFFER_SIZE 128
 
@@ -51,13 +52,14 @@ WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 FusionOdometry ekf(KALMANFILTER_PERIOD);
 
 Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
+SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 52.0e-3);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f;\r\n",leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f %f %f %f;\r\n",leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y());
         serial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(500ms);
     }
@@ -76,6 +78,7 @@ int main() {
   rightControl.setTargetSpeed(20);
   imu.start();
   localization.start();
+  simpleLocalization.start();
   if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
       serial.write(printBuffer,strlen(printBuffer));
