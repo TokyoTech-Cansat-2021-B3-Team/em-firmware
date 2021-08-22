@@ -36,7 +36,7 @@ enum ExperimentMode{
     RunningNoControle,
 };
 
-ExperimentMode flag = RunningPoleToPole;
+ExperimentMode flag = RunningNoControle;
 const double cruiseSpeed = 40.0;
 
 PwmOut motor1In1(M1_IN1);
@@ -139,8 +139,12 @@ void speedThreadLoop(){
         rightControl.start();
         leftControl.setTargetSpeed(cruiseSpeed);
         rightControl.setTargetSpeed(cruiseSpeed);
+        navi.setTargetPosition(5.0, 0.0, 0.5);
         while(true){
-
+            if(navi.checkArrivingTarget()){
+                leftControl.setTargetSpeed(0.0);
+                rightControl.setTargetSpeed(0.0);
+            }
             ThisThread::sleep_for(100ms);
         }
     }
@@ -151,7 +155,7 @@ int main() {
     int i = 0;
     while(true){
         if(SafetyPin==0){
-            navi.stop();
+            if(flag!=RunningNoControle)navi.stop();
             leftControl.stop();
             rightControl.stop();
 
