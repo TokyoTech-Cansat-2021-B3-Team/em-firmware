@@ -61,7 +61,7 @@ WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 
 FusionOdometry ekf(KALMANFILTER_PERIOD);
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
+Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 62.0e-3);
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
@@ -120,7 +120,7 @@ void speedThreadLoop(){
         leftControl.start();
         rightControl.start();
         navi.start();
-        navi.setTargetPosition(1.0, 0.0, 0.1);
+        navi.setTargetPosition(5.0, 0.0, 0.5);
     }
 }
 
@@ -148,16 +148,13 @@ int main() {
 
 
             exit(1);
-            while(true){
-                    ThisThread::sleep_for(10ms);
-            }
         }
         if(i < 51){
             snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");
             serial.write(printBuffer,strlen(printBuffer));
             ThisThread::sleep_for(100ms);
         }else if(i == 51){
-            navi.setCruiseSpeed(30);
+            navi.setCruiseSpeed(40);
             SafetyPin.mode(PullDown);
             printThread.start(printThreadLoop);
             speedThread.start(speedThreadLoop);
