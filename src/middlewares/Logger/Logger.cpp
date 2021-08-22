@@ -3,7 +3,8 @@
 Logger::Logger(BlockDevice *blockDevice, FileSystem *fileSystem)
     : _blockDevice(blockDevice), //
       _fileSystem(fileSystem),   //
-      _messageFile()             //
+      _messageFile(),            //
+      _gpsFile()                 //
 {}
 
 void Logger::mount() {
@@ -85,12 +86,28 @@ int Logger::read(shared_ptr<File> file, void *buffer, size_t size) {
   return ret;
 }
 
-void Logger::dump(shared_ptr<File> file, const char *path) {
-  printf("Dumping \"%s\":\n", path);
+void Logger::dumpMessageLog() {
+  printf("Dumping \"%s\":\n", LOGGER_MESSAGE_FILE_PATH);
 
   char c;
-  while (read(file, &c, 1) != 0) {
+  while (read(_messageFile, &c, 1) != 0) {
     printf("%c", c);
+  }
+}
+
+void Logger::dumpGPSLog() {
+  printf("Dumping \"%s\":\n", LOGGER_GPS_FILE_PATH);
+
+  GPSLogData data;
+  while (read(_gpsFile, &data, sizeof(data)) != 0) {
+    printf("%lf, %lf, %c, %lf, %c, %u\n", //
+           data.utc,                      //
+           data.latitude,                 //
+           data.nsIndicator,              //
+           data.longitude,                //
+           data.ewIndicator,              //
+           data.positionFixIndicator      //
+    );
   }
 }
 
@@ -101,12 +118,20 @@ void Logger::init() {
   // メッセージログ用のファイル
   _messageFile = open(LOGGER_MESSAGE_FILE_PATH);
 
-  dump(_messageFile, LOGGER_MESSAGE_FILE_PATH);
+  //   dumpMessageLog();
+
+  // GPSログ用のファイル
+  _gpsFile = open(LOGGER_GPS_FILE_PATH);
+
+  //   dumpGPSLog();
 }
 
 void Logger::deinit() {
   // メッセージログ用のファイル
   close(_messageFile, LOGGER_MESSAGE_FILE_PATH);
+
+  // GPSログ用のファイル
+  close(_gpsFile, LOGGER_GPS_FILE_PATH);
 }
 
 int Logger::lprintf(const char *format, ...) {
@@ -133,4 +158,8 @@ int Logger::vlprintf(const char *format, va_list ap) {
   write(_messageFile, buffer.get(), ret);
 
   return ret;
+}
+
+void Logger::gpsLog(GPSLogData *data) {
+  write(_gpsFile, data, sizeof(GPSLogData));
 }

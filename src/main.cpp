@@ -1,10 +1,16 @@
 #include "mbed.h"
 
 #include "LittleFileSystem.h"
-#include "Logger.h"
 #include "SDBlockDevice.h"
 
 #include "PinAssignment.h"
+
+#include "Logger.h"
+#include "PA1010D.h"
+
+I2C i2c(I2C_SDA, I2C_SCL);
+
+PA1010D pa1010d(&i2c);
 
 SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
 
@@ -15,17 +21,28 @@ Logger logger(&sdBlockDevice, &littleFileSystem);
 // main() runs in its own thread in the OS
 int main() {
   logger.init();
+  pa1010d.start();
 
-  Timer t;
-  t.start();
-  logger.lprintf("Hello!\n");
-  t.stop();
-
-  // logger.deinit();
-
-  printf("timer: %llu\n", t.elapsed_time().count());
+  logger.lprintf("LogMessage\n");
 
   while (true) {
+    PA1010D::GGAPacket packet;
+
+    pa1010d.getGGA(&packet);
+
+    Logger::GPSLogData logData = {
+        packet.utc,                 //
+        packet.latitude,            //
+        packet.nsIndicator,         //
+        packet.longitude,           //
+        packet.ewIndicator,         //
+        packet.positionFixIndicator //
+    };
+
+    logger.gpsLog(&logData);
+
     ThisThread::sleep_for(1s);
   }
+
+  // logger.deinit();
 }
