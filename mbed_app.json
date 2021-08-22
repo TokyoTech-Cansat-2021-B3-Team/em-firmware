@@ -16,7 +16,7 @@
     "target_overrides": {
         "*": {
             "platform.stdio-baud-rate": 57600,
-            "platform.default-serial-baud-rate": 57600
+            "platform.default-serial-baud-rate": 57600,
             "platform.minimal-printf-enable-floating-point": true,
             "sd.SPI_MOSI": "NC",
             "sd.SPI_MISO": "NC",
