@@ -152,6 +152,8 @@ int Logger::vlprintf(const char *group, const char *format, va_list ap) {
   time_t t = time(nullptr);
   tm *lt = localtime(&t);
 
+  int size = 0;
+
   int ret = snprintf(buffer.get(), LOGGER_PRINTF_BUFFER_SIZE, "[%04d-%02d-%02dT%02d:%02d:%02d][%s]: ", //
                      lt->tm_year + 1900,                                                               //
                      lt->tm_mon + 1,                                                                   //
@@ -166,15 +168,17 @@ int Logger::vlprintf(const char *group, const char *format, va_list ap) {
     return ret;
   }
 
-  write(_messageFile, buffer.get(), ret);
+  size += ret;
 
-  ret = vsnprintf(buffer.get(), LOGGER_PRINTF_BUFFER_SIZE, format, ap);
+  ret = vsnprintf(buffer.get() + size, LOGGER_PRINTF_BUFFER_SIZE - size, format, ap);
 
   if (ret < 0) {
     return ret;
   }
 
-  write(_messageFile, buffer.get(), ret);
+  size += ret;
+
+  write(_messageFile, buffer.get(), size);
 
   return ret;
 }
