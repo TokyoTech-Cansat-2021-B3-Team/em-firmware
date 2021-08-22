@@ -1,31 +1,35 @@
 #include "PA1010D.h"
 
 PA1010D::PA1010D(I2C *i2c)
-    : _i2c(i2c), _thread(), _packetBuffer(), _packetBufferPosition(0), _rmc(), _gga(), _isSetTime(false) {}
+    : _i2c(i2c), _thread(), _queue(), _packetBuffer(), _packetBufferPosition(0), _rmc(), _gga(), _isSetTime(false) {}
 
 void PA1010D::start() {
-  _thread = make_unique<Thread>(PA1010D_THREAD_PRIORITY,   //
-                                PA1010D_THREAD_STACK_SIZE, //
-                                nullptr,                   //
-                                PA1010D_THREAD_NAME);
-  _thread->start(callback(this, &PA1010D::threadLoop));
+  if (!_thread) {
+    _thread = make_unique<Thread>(PA1010D_THREAD_PRIORITY,   //
+                                  PA1010D_THREAD_STACK_SIZE, //
+                                  nullptr,                   //
+                                  PA1010D_THREAD_NAME);
+    _thread->start(callback(this, &PA1010D::threadLoop));
+  }
 }
 
 void PA1010D::stop() {
-  _thread->terminate();
-  _thread.reset();
+  if (_thread) {
+    _thread->terminate();
+    _thread.reset();
+  }
 }
 
 void PA1010D::threadLoop() {
   setup();
 
-  while (true) {
+  _queue.call_every(PA1010D_POLLING_PERIOD, [this]() {
     polling();
 
     setTime();
+  });
 
-    ThisThread::sleep_for(PA1010D_POLLING_PERIOD);
-  }
+  _queue.dispatch_forever();
 }
 
 uint8_t PA1010D::checksum(const char *packet) {
