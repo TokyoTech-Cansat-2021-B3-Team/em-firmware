@@ -16,7 +16,7 @@ int main() {
   console.init();
 
   while (true) {
-    console.lprintf("downlink message\n");
+    console.lprintf("main", "downlink message\n");
 
     ThisThread::sleep_for(1s);
   }
