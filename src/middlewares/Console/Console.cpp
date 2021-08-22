@@ -1,9 +1,11 @@
 #include "Console.h"
 
-Console::Console(MU2 *mu2) : _mu2(mu2) {}
+Console::Console(MU2 *mu2, Logger *logger) : _mu2(mu2), _logger(logger) {}
 
 void Console::init() {
   _mu2->init();
+
+  _logger->init();
 }
 
 int Console::lprintf(const char *group, const char *format, ...) {
@@ -50,7 +52,40 @@ int Console::vlprintf(const char *group, const char *format, va_list ap) {
 
   size += ret;
 
+  // 改行までとする
+  size = 0;
+  while (1) {
+    if (buffer[size] == '\r' || buffer[size] == '\n') {
+      buffer[size] = '\0';
+      break;
+    }
+    size++;
+  }
+
   _mu2->transmit(buffer.get(), size);
+
+  return ret;
+}
+
+int Console::log(const char *group, const char *format, ...) {
+  va_list ap;
+  va_start(ap, format);
+
+  // ダウンリンク
+  int ret = vlprintf(group, format, ap);
+
+  if (ret < 0) {
+    return ret;
+  }
+
+  // ログ書き込み
+  ret = _logger->vlprintf(group, format, ap);
+
+  if (ret < 0) {
+    return ret;
+  }
+
+  va_end(ap);
 
   return ret;
 }

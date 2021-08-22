@@ -21,7 +21,7 @@ BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 MU2 mu2(&bufferedSerial);
 
 Logger logger(&sdBlockDevice, &littleFileSystem2);
-Console console(&mu2);
+Console console(&mu2, &logger);
 
 // main() runs in its own thread in the OS
 int main() {
