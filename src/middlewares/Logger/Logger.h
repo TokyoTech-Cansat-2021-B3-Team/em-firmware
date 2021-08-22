@@ -58,9 +58,9 @@ public:
   void deinit();
 
   // メッセージログの書き込み
-  int lprintf(const char *format, ...) MBED_PRINTF_METHOD(1, 2);
+  int lprintf(const char *group, const char *format, ...) MBED_PRINTF_METHOD(2, 3);
 
-  int vlprintf(const char *format, va_list ap) MBED_PRINTF_METHOD(1, 0);
+  int vlprintf(const char *group, const char *format, va_list ap) MBED_PRINTF_METHOD(2, 0);
 
   // GPSログの書き込み
   void gpsLog(GPSLogData *data);

@@ -134,22 +134,41 @@ void Logger::deinit() {
   close(_gpsFile, LOGGER_GPS_FILE_PATH);
 }
 
-int Logger::lprintf(const char *format, ...) {
+int Logger::lprintf(const char *group, const char *format, ...) {
   va_list ap;
   va_start(ap, format);
 
-  int ret = vlprintf(format, ap);
+  int ret = vlprintf(group, format, ap);
 
   va_end(ap);
 
   return ret;
 }
 
-int Logger::vlprintf(const char *format, va_list ap) {
-
+int Logger::vlprintf(const char *group, const char *format, va_list ap) {
   unique_ptr<char[]> buffer = make_unique<char[]>(LOGGER_PRINTF_BUFFER_SIZE);
 
-  int ret = vsnprintf(buffer.get(), LOGGER_PRINTF_BUFFER_SIZE, format, ap);
+  // タイムスタンプ
+  time_t t = time(nullptr);
+  tm *lt = localtime(&t);
+
+  int ret = snprintf(buffer.get(), LOGGER_PRINTF_BUFFER_SIZE, "[%04d-%02d-%02dT%02d:%02d:%02d][%s]: ", //
+                     lt->tm_year + 1900,                                                               //
+                     lt->tm_mon + 1,                                                                   //
+                     lt->tm_mday,                                                                      //
+                     lt->tm_hour,                                                                      //
+                     lt->tm_min,                                                                       //
+                     lt->tm_sec,                                                                       //
+                     group                                                                             //
+  );
+
+  if (ret < 0) {
+    return ret;
+  }
+
+  write(_messageFile, buffer.get(), ret);
+
+  ret = vsnprintf(buffer.get(), LOGGER_PRINTF_BUFFER_SIZE, format, ap);
 
   if (ret < 0) {
     return ret;

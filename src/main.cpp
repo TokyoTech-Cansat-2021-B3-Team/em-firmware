@@ -23,8 +23,6 @@ int main() {
   logger.init();
   pa1010d.start();
 
-  logger.lprintf("LogMessage\n");
-
   while (true) {
     PA1010D::GGAPacket packet;
 
@@ -40,6 +38,8 @@ int main() {
     };
 
     logger.gpsLog(&logData);
+
+    logger.lprintf("main", "LogMessage\n");
 
     ThisThread::sleep_for(1s);
   }
