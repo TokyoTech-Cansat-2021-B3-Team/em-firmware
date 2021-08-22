@@ -111,6 +111,8 @@ private:
   RMCPacket _rmc;
   GGAPacket _gga;
 
+  bool _isSetTime;
+
 public:
 private:
   void threadLoop();
@@ -133,6 +135,8 @@ private:
 
   // GGAのデコード
   void ggaDecode();
+
+  void setTime();
 
 public:
   explicit PA1010D(I2C *i2c);
