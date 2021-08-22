@@ -1,6 +1,6 @@
 #include "mbed.h"
 
-#include "LittleFileSystem.h"
+#include "LittleFileSystem2.h"
 #include "SDBlockDevice.h"
 
 #include "PinAssignment.h"
@@ -14,9 +14,9 @@ PA1010D pa1010d(&i2c);
 
 SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
 
-LittleFileSystem littleFileSystem(nullptr);
+LittleFileSystem2 littleFileSystem2(nullptr);
 
-Logger logger(&sdBlockDevice, &littleFileSystem);
+Logger logger(&sdBlockDevice, &littleFileSystem2);
 
 // main() runs in its own thread in the OS
 int main() {
