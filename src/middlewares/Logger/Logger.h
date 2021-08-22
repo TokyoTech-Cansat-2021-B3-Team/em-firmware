@@ -34,6 +34,8 @@ private:
   // GPSログ用のファイル
   shared_ptr<File> _gpsFile;
 
+  bool _isInit;
+
 public:
 private:
   void mount();

@@ -4,7 +4,8 @@ Logger::Logger(BlockDevice *blockDevice, FileSystem *fileSystem)
     : _blockDevice(blockDevice), //
       _fileSystem(fileSystem),   //
       _messageFile(),            //
-      _gpsFile()                 //
+      _gpsFile(),                //
+      _isInit(false)             //
 {}
 
 void Logger::mount() {
@@ -112,26 +113,34 @@ void Logger::dumpGPSLog() {
 }
 
 void Logger::init() {
-  // ファイルシステムのマウント
-  mount();
+  if (!_isInit) {
+    // ファイルシステムのマウント
+    mount();
 
-  // メッセージログ用のファイル
-  _messageFile = open(LOGGER_MESSAGE_FILE_PATH);
+    // メッセージログ用のファイル
+    _messageFile = open(LOGGER_MESSAGE_FILE_PATH);
 
-  //   dumpMessageLog();
+    //   dumpMessageLog();
 
-  // GPSログ用のファイル
-  _gpsFile = open(LOGGER_GPS_FILE_PATH);
+    // GPSログ用のファイル
+    _gpsFile = open(LOGGER_GPS_FILE_PATH);
 
-  //   dumpGPSLog();
+    //   dumpGPSLog();
+
+    _isInit = true;
+  }
 }
 
 void Logger::deinit() {
-  // メッセージログ用のファイル
-  close(_messageFile, LOGGER_MESSAGE_FILE_PATH);
+  if (_isInit) {
+    // メッセージログ用のファイル
+    close(_messageFile, LOGGER_MESSAGE_FILE_PATH);
 
-  // GPSログ用のファイル
-  close(_gpsFile, LOGGER_GPS_FILE_PATH);
+    // GPSログ用のファイル
+    close(_gpsFile, LOGGER_GPS_FILE_PATH);
+
+    _isInit = false;
+  }
 }
 
 int Logger::lprintf(const char *group, const char *format, ...) {
