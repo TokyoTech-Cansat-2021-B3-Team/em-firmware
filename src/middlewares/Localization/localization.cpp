@@ -41,7 +41,7 @@ double Localization::getAngularVelocityFromWheelOdometry(){
 }
 
 double Localization::getVelocityFromWheelOdometry(){
-    return (getVelocityRight() + getVelocityRight())/2.0;
+    return (getVelocityLeft() + getVelocityRight())/2.0;
 }
 
 double Localization::getVelocityLeft(){

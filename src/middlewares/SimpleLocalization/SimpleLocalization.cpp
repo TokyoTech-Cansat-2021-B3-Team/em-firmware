@@ -39,7 +39,7 @@ double SimpleLocalization::getAngularVelocityFromWheelOdometry(){
 }
 
 double SimpleLocalization::getVelocityFromWheelOdometry(){
-    return (getVelocityRight() + getVelocityRight())/2.0;
+    return (getVelocityLeft() + getVelocityRight())/2.0;
 }
 
 double SimpleLocalization::getVelocityLeft(){
