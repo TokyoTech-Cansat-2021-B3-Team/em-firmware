@@ -1,7 +1,7 @@
 #include "PA1010D.h"
 
 PA1010D::PA1010D(I2C *i2c)
-    : _i2c(i2c), _thread(), _packetBuffer(), _packetBufferPosition(0), _rmc(), _gga(), _isSetTime(false) {}
+    : _i2c(i2c), _thread(), _queue(), _packetBuffer(), _packetBufferPosition(0), _rmc(), _gga(), _isSetTime(false) {}
 
 void PA1010D::start() {
   if (!_thread) {
@@ -23,13 +23,13 @@ void PA1010D::stop() {
 void PA1010D::threadLoop() {
   setup();
 
-  while (true) {
+  _queue.call_every(PA1010D_POLLING_PERIOD, [this]() {
     polling();
 
     setTime();
+  });
 
-    ThisThread::sleep_for(PA1010D_POLLING_PERIOD);
-  }
+  _queue.dispatch_forever();
 }
 
 uint8_t PA1010D::checksum(const char *packet) {

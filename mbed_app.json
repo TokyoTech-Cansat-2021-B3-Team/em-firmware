@@ -2,7 +2,8 @@
     "requires": [
         "bare-metal",
         "rtos",
-        "cmsis-cmsis5-rtos2"
+        "cmsis-cmsis5-rtos2",
+        "events"
     ],
     "config": {
         "main_stack_size": {
