@@ -209,8 +209,17 @@ BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 
 MU2 mu2(&bufferedSerial);
 
+#include "PinAssignment.h"
+
+#include "BME280.h"
+
+I2C i2c(I2C_SDA, I2C_SCL);
+
+BME280 bme280(&i2c);
+
 // main() runs in its own thread in the OS
 int main() {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     int i = 0;
@@ -317,4 +326,17 @@ int main() {
     ThisThread::sleep_for(5s);
   }
 >>>>>>> origin/mu-2
+=======
+  i2c.frequency(400000);
+
+  bme280.start();
+
+  while (true) {
+    printf("press: %lf Pa\n", bme280.getPressure());
+    printf("temp: %lf DegC\n", bme280.getTemprature());
+    printf("hum: %lf %%RH\n", bme280.getHumidity());
+
+    ThisThread::sleep_for(100ms);
+  }
+>>>>>>> origin/bme280
 }
