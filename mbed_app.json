@@ -15,8 +15,8 @@
             "target.printf_lib": "minimal-printf",
             "platform.minimal-printf-enable-floating-point": true,
             "platform.stdio-minimal-console-only": true,
-            "platform.stdio-baud-rate": 115200,
-            "platform.default-serial-baud-rate": 115200
+            "platform.stdio-baud-rate": 57600,
+            "platform.default-serial-baud-rate": 57600
         }
     }
 }
