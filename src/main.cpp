@@ -217,8 +217,19 @@ I2C i2c(I2C_SDA, I2C_SCL);
 
 BME280 bme280(&i2c);
 
+#include "PinAssignment.h"
+
+#include "Fusing.h"
+
+PwmOut fuseGate(FUSE_GATE);
+
+Fusing fusing(&fuseGate);
+
+DigitalOut led(LED1);
+
 // main() runs in its own thread in the OS
 int main() {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -339,4 +350,15 @@ int main() {
     ThisThread::sleep_for(100ms);
   }
 >>>>>>> origin/bme280
+=======
+  led = 0;
+
+  ThisThread::sleep_for(10s);
+
+  led = 1;
+
+  fusing.heat(10s);
+
+  led = 0;
+>>>>>>> origin/fusing
 }
