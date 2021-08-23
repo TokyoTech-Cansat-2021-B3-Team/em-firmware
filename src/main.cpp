@@ -1,7 +1,6 @@
 #include "mbed.h"
 #include "PinAssignment.h"
 
-#include "lsm9ds1.h"
 #include <cstring>
 #include <exception>
 
@@ -15,17 +14,21 @@ char printBuffer[PRINT_BUFFER_SIZE];
 
 #include "PinAssignment.h"
 
-<<<<<<< HEAD
 #include "QEI.h"
+#include "lsm9ds1.h"
+#include "MU-2.h"
+#include "BME280.h"
+#include "PA1010D.h"
 
-#include "fusion-odometry.h"
+#include "Fusing.h"
+
 #include "WheelMotor.h"
 #include "WheelPID.h"
 #include "WheelControl.h"
 #include "MotorSpeed.h"
-#include "localization.h"
-#include "SimpleLocalization.h"
-#include "navigation.h"
+#include "DCMotor.h"
+#include "DrillMotor.h"
+#include "Stepper.h"
 
 #include "RunningSequence.h"
 
@@ -39,13 +42,6 @@ enum ExperimentMode{
 
 ExperimentMode flag = RunningNoControle;
 const double cruiseSpeed = 40.0;
-=======
-#include "DCMotor.h"
-#include "DrillMotor.h"
-#include "QEI.h"
-#include "Stepper.h"
-#include "WheelMotor.h"
->>>>>>> origin/probe
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -53,115 +49,12 @@ PwmOut motor1In2(M1_IN2);
 PwmOut motor2In1(M2_IN1);
 PwmOut motor2In2(M2_IN2);
 
-<<<<<<< HEAD
-WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
-WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
-
-QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
-QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
-
-LSM9DS1 imu(&i2c);
-
-MotorSpeed leftMotorSpeed(&leftEncoder, 298.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 298.0);
-
-WheelPID leftPID;
-WheelPID rightPID;
-
-WheelControl leftControl(&leftWheelMotor,&leftPID,&leftMotorSpeed);
-WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
-
-FusionOdometry ekf(KALMANFILTER_PERIOD);
-
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 62.0e-3);
-SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 62.0e-3);
-
-Navigation navi(&localization, &leftControl, &rightControl);
-
-RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl);
-
-DigitalIn SafetyPin(FUSE_GATE);
-
-Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
-Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
-
-void printThreadLoop(){
-    while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y(), simpleLocalization.theta());
-        //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
-        
-        serial.write(printBuffer,strlen(printBuffer));
-        ThisThread::sleep_for(20ms);
-    }
-}
-
-void speedThreadLoop(){
-    if(flag==RunningAllSequence){
-        runningSequence.start(FIRST);
-        //simpleLocalization.start();
-        if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
-            snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
-            serial.write(printBuffer,strlen(printBuffer));
-        }else{
-            snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
-            serial.write(printBuffer,strlen(printBuffer));
-        }
-        int i = 0;
-        while(true){
-            if(runningSequence.state() == ARRIVED_SECOND_POLE){
-                runningSequence.stop();
-                ThisThread::sleep_for(1s);
-                runningSequence.start(SECOND);
-            }
-            if(runningSequence.state() == ARRIVED_THIRD_POLE){
-                runningSequence.stop();
-                ThisThread::sleep_for(1s);
-                runningSequence.start(THIRD);
-            }
-            if(runningSequence.state() == ARRIVED_FOURTH_POLE){
-                runningSequence.stop();
-                snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
-                serial.write(printBuffer,strlen(printBuffer));
-                while(true){
-                    ThisThread::sleep_for(100ms);
-                }
-            }
-            ThisThread::sleep_for(100ms);
-        }
-    }else if(flag==RunningPoleToPole){
-        imu.start();
-        leftMotorSpeed.start();
-        rightMotorSpeed.start();
-        localization.start();
-        simpleLocalization.start();
-        leftControl.start();
-        rightControl.start();
-        navi.start();
-        navi.setTargetPosition(5.0, 0.0, 0.5);
-    }else if(flag==RunningNoControle){
-        imu.start();
-        leftMotorSpeed.start();
-        rightMotorSpeed.start();
-        localization.start();
-        simpleLocalization.start();
-        leftControl.start();
-        rightControl.start();
-        leftControl.setTargetSpeed(cruiseSpeed);
-        rightControl.setTargetSpeed(cruiseSpeed);
-        navi.setTargetPosition(5.0, 0.0, 0.5);
-        while(true){
-            if(navi.checkArrivingTarget()){
-                leftControl.setTargetSpeed(0.0);
-                rightControl.setTargetSpeed(0.0);
-            }
-            ThisThread::sleep_for(100ms);
-        }
-    }
-=======
 PwmOut motor3In1(M3_IN1);
 PwmOut motor3In2(M3_IN2);
 
 PwmOut motor4In1(M4_IN1);
+
+PwmOut fuseGate(FUSE_GATE);
 
 DigitalOut motor5Enable(M5_ENABLE);
 DigitalOut motor5Step(M5_STEP);
@@ -174,74 +67,35 @@ DrillMotor drillMotor(&motor4In1);
 QEI verticalEncoder(ENC3_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
 Stepper loadingMotor(&motor5Step, &motor5Enable);
+QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
+QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
-Thread encoderThread(osPriorityAboveNormal, 1024, nullptr, "encoder");
+I2C i2c(I2C_SDA, I2C_SCL);
 
-Thread stepperThread(osPriorityRealtime, 1024, nullptr, "stepper");
-
-int previousRev;
-
-void encoderThreadLoop() {
-  while (true) {
-    printf("pulses: %d, rev: %d, rpm: %d\n", verticalEncoder.getPulses(), verticalEncoder.getRevolutions(),
-           (verticalEncoder.getRevolutions() - previousRev) * 60 * 10);
-
-    previousRev = verticalEncoder.getRevolutions();
-
-    ThisThread::sleep_for(100ms);
-  }
-}
-
-void stepperThreadLoop() {
-  while (true) {
-    loadingMotor.rotate(360.0 / 7.0, 0.3);
-
-    ThisThread::sleep_for(500ms);
-  }
->>>>>>> origin/probe
-}
-
-#include "PinAssignment.h"
-
-#include "MU2.h"
-
-BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
-
+LSM9DS1 imu(&i2c);
 MU2 mu2(&bufferedSerial);
-
-#include "PinAssignment.h"
-
-#include "BME280.h"
-
-I2C i2c(I2C_SDA, I2C_SCL);
-
 BME280 bme280(&i2c);
-
-#include "PinAssignment.h"
-
-#include "Fusing.h"
-
-PwmOut fuseGate(FUSE_GATE);
-
-Fusing fusing(&fuseGate);
-
-DigitalOut led(LED1);
-
-#include "PinAssignment.h"
-
-#include "PA1010D.h"
-
-I2C i2c(I2C_SDA, I2C_SCL);
 
 PA1010D pa1010d(&i2c);
 
+Fusing fusing(&fuseGate);
+DigitalOut led(LED1);
+
+MotorSpeed leftMotorSpeed(&leftEncoder, 298.0);
+MotorSpeed rightMotorSpeed(&rightEncoder, 298.0);
+
+WheelPID leftPID;
+WheelPID rightPID;
+
+WheelControl leftControl(&leftWheelMotor,&leftPID,&leftMotorSpeed);
+WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
+
+DigitalIn SafetyPin(FUSE_GATE);
+
+BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
+
 // main() runs in its own thread in the OS
 int main() {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     int i = 0;
     while(true){
         if(SafetyPin==0){
@@ -278,9 +132,8 @@ int main() {
         i++;
         ThisThread::sleep_for(10ms);
     }
-
-=======
-  loadingMotor.idleCurrent(false);
+    
+    loadingMotor.idleCurrent(false);
 
   encoderThread.start(encoderThreadLoop);
 
@@ -335,8 +188,6 @@ int main() {
       ThisThread::sleep_for(1ms);
     }
   }
->>>>>>> origin/probe
-=======
   mu2.init();
 
   while (true) {
@@ -345,8 +196,7 @@ int main() {
 
     ThisThread::sleep_for(5s);
   }
->>>>>>> origin/mu-2
-=======
+
   i2c.frequency(400000);
 
   bme280.start();
@@ -358,8 +208,6 @@ int main() {
 
     ThisThread::sleep_for(100ms);
   }
->>>>>>> origin/bme280
-=======
   led = 0;
 
   ThisThread::sleep_for(10s);
@@ -369,8 +217,7 @@ int main() {
   fusing.heat(10s);
 
   led = 0;
->>>>>>> origin/fusing
-=======
+
   ThisThread::sleep_for(2s);
 
   i2c.frequency(400000);
@@ -413,5 +260,4 @@ int main() {
 
     ThisThread::sleep_for(5s);
   }
->>>>>>> origin/gps
 }
