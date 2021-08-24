@@ -23,6 +23,7 @@ public:
     double y();
     double v();
     double theta();
+    double omega();
 private:
     void threadLoop();
     double getAngularVelocityFromWheelOdometry();

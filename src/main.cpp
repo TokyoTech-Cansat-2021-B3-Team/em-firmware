@@ -2,6 +2,7 @@
 #include "PinAssignment.h"
 
 #include "lsm9ds1.h"
+#include <cstdio>
 #include <cstring>
 #include <exception>
 
@@ -37,7 +38,7 @@ enum ExperimentMode{
 };
 
 ExperimentMode flag = RunningNoControle;
-const double cruiseSpeed = 60.0;
+const double cruiseSpeed = 20.0;
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -53,8 +54,8 @@ QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
 LSM9DS1 imu(&i2c);
 
-MotorSpeed leftMotorSpeed(&leftEncoder, 298.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 298.0);
+MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
+MotorSpeed rightMotorSpeed(&rightEncoder, 1000.0);
 
 WheelPID leftPID;
 WheelPID rightPID;
@@ -76,9 +77,11 @@ DigitalIn SafetyPin(FUSE_GATE);
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
-void printThreadLoop(){
+void printThreadLoop() {
+  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp thta x y v thta' x' y'\r\n");
+  serial.write(printBuffer, strlen(printBuffer));
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y(),  localization.v(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y(), simpleLocalization.theta());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(), localization.theta(), localization.omega(), localization.x(), localization.y(),  localization.v(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y());
         //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
         
         serial.write(printBuffer,strlen(printBuffer));

@@ -33,6 +33,7 @@ void Localization::threadLoop(){
         _xpk = _ekf->getX(3);
         _ypk = _ekf->getX(4);
         _vpk = _ekf->getX(5);
+        _omega_zk = _ekf->getX(1);
         ThisThread::sleep_for(LOCALIZATION_PERIOD);
     }
 }
@@ -67,4 +68,8 @@ double Localization::v(){
 
 double Localization::theta(){
     return _theta;
+}
+
+double Localization::omega() {
+  return _omega_zk;
 }
