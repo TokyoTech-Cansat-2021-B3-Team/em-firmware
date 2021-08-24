@@ -32,12 +32,13 @@ void Localization::threadLoop(){
         _theta = _ekf->getX(0);
         _xpk = _ekf->getX(3);
         _ypk = _ekf->getX(4);
+        _vpk = _ekf->getX(5);
         ThisThread::sleep_for(LOCALIZATION_PERIOD);
     }
 }
 
 double Localization::getAngularVelocityFromWheelOdometry(){
-    return (-getVelocityLeft() + getVelocityRight()) / _wheelDistance;
+    return ( - getVelocityLeft() + getVelocityRight()) / _wheelDistance;
 }
 
 double Localization::getVelocityFromWheelOdometry(){
@@ -58,6 +59,10 @@ double Localization::x(){
 
 double Localization::y(){
     return _ypk;
+}
+
+double Localization::v(){
+    return _vpk;
 }
 
 double Localization::theta(){

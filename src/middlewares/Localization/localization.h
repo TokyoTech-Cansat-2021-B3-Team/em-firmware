@@ -21,6 +21,7 @@ public:
     void stop();
     double x();
     double y();
+    double v();
     double theta();
 private:
     void threadLoop();

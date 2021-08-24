@@ -33,11 +33,11 @@ char printBuffer[PRINT_BUFFER_SIZE];
 enum ExperimentMode{
     RunningAllSequence,
     RunningPoleToPole,
-    RunningNoControle,
+    RunningNoControle
 };
 
 ExperimentMode flag = RunningNoControle;
-const double cruiseSpeed = 40.0;
+const double cruiseSpeed = 60.0;
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -78,7 +78,7 @@ Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y(), simpleLocalization.theta());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y(),  localization.v(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y(), simpleLocalization.theta());
         //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
         
         serial.write(printBuffer,strlen(printBuffer));

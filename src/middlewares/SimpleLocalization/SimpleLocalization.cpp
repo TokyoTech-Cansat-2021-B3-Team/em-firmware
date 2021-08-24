@@ -35,7 +35,7 @@ void SimpleLocalization::threadLoop(){
 }
 
 double SimpleLocalization::getAngularVelocityFromWheelOdometry(){
-    return (-getVelocityLeft() + getVelocityRight()) / _wheelDistance;
+    return (- getVelocityLeft() + getVelocityRight()) / _wheelDistance;
 }
 
 double SimpleLocalization::getVelocityFromWheelOdometry(){
