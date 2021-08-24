@@ -78,10 +78,10 @@ Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
-  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp thta x y v thta' x' y'\r\n");
+  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
   serial.write(printBuffer, strlen(printBuffer));
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(), localization.theta(), localization.omega(), localization.x(), localization.y(),  localization.v(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(), localization.getAngularVelocityFromWheelOdometry(), imu.gyrZ(), localization.theta(), localization.omega(), localization.x(), localization.y(),  localization.v(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y());
         //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
         
         serial.write(printBuffer,strlen(printBuffer));

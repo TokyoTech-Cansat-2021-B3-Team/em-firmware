@@ -24,10 +24,10 @@ public:
     double v();
     double theta();
     double omega();
-private:
-    void threadLoop();
     double getAngularVelocityFromWheelOdometry();
     double getVelocityFromWheelOdometry();
+private:
+    void threadLoop();
     double getVelocityLeft();
     double getVelocityRight();
     const double _wheelDistance;
