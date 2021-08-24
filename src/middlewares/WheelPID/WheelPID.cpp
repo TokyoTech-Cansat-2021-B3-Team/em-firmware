@@ -11,12 +11,13 @@ void WheelPID::setTargetSpeed(double speed){
 }
 
 void WheelPID::updatePIDOutput(double sensorSpeed, chrono::microseconds period){
-    float deviation = _targetSpeed - sensorSpeed;
-    _integral += deviation * chrono::duration<float>(period).count();
-    _diff += deviation * chrono::duration<float>(period).count();
-    _previousSpeed = _sensorSpeed;
+    float diff = _targetSpeed - sensorSpeed;
+    float deviation = sensorSpeed - _previousSpeed;
+    _integral += diff * chrono::duration<float>(period).count();
+    _diff += deviation / chrono::duration<float>(period).count();
+    _previousSpeed = sensorSpeed;
     
-    _output = deviation * _pGain + _integral * _iGain + _diff * _dGain;
+    _output = diff * _pGain + _integral * _iGain + _diff * _dGain;
 }
 
 double WheelPID::getOutput(){

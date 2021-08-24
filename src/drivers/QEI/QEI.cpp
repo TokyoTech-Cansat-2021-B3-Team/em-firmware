@@ -137,6 +137,9 @@ QEI::QEI(PinName channelA, PinName channelB, PinName index, int pulsesPerRev, En
   pulsesPerRev_ = pulsesPerRev;
   encoding_ = encoding;
 
+  channelA_.mode(PullUp);
+  channelB_.mode(PullUp);
+
   // Workout what the current state is.
   int chanA = channelA_.read();
 

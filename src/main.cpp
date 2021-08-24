@@ -6,6 +6,7 @@
 
 #include "WheelMotor.h"
 #include "WheelPID.h"
+#include "MotorSpeed.h"
 
 #define SPEED_TASK_PERIOD 10ms
 #define PRINT_BUFFER_SIZE 128
@@ -25,6 +26,9 @@ WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
+MotorSpeed leftMotorSpeed(&leftEncoder, 298.0);
+MotorSpeed rightMotorSpeed(&rightEncoder, 298.0);
+
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
@@ -40,24 +44,18 @@ double pulsesToRpm(int pulses, chrono::microseconds period, double gear_ratio) {
 }
 
 void speedThreadLoop() {
-  while (true) {
-      leftSpeed = pulsesToRpm(leftEncoder.getPulses(), SPEED_TASK_PERIOD, 1000.0);
-      leftEncoder.reset();
-      rightSpeed = pulsesToRpm(rightEncoder.getPulses(), SPEED_TASK_PERIOD, 249.8);
-      rightEncoder.reset();
-      leftPID.updatePIDOutput(leftSpeed, SPEED_TASK_PERIOD);
-      rightPID.updatePIDOutput(rightSpeed, SPEED_TASK_PERIOD);
-      //leftWheelMotor.forward(leftPID.getOutput());
-      //rightWheelMotor.forward(rightPID.getOutput());
-      motor1In1 = leftPID.getOutput();
-      motor2In1 = rightPID.getOutput();
+    while (true) {
+      leftPID.updatePIDOutput(leftMotorSpeed.currentSpeedRPM(), SPEED_TASK_PERIOD);
+      rightPID.updatePIDOutput(rightMotorSpeed.currentSpeedRPM(), SPEED_TASK_PERIOD);
+      leftWheelMotor.forward(leftPID.getOutput());
+      rightWheelMotor.forward(rightPID.getOutput());
       rtos::ThisThread::sleep_for(SPEED_TASK_PERIOD);
   }
 }
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$L:%f R:%f ;\r\n",leftSpeed,rightSpeed);
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$L:%f %f R:%f %f ;\r\n",leftMotorSpeed.currentSpeedRPM(), leftPID.getOutput(), rightMotorSpeed.currentSpeedRPM(), rightPID.getOutput());
         serial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(100ms);
     }
@@ -65,25 +63,27 @@ void printThreadLoop(){
 
 // main() runs in its own thread in the OS
 int main() {
+  leftMotorSpeed.start();
+  rightMotorSpeed.start();
   leftPID.setTargetSpeed(20);
   rightPID.setTargetSpeed(20);
   speedThread.start(speedThreadLoop);
   printThread.start(printThreadLoop);
   int i = 0;
   int j = 0;
-  double output[3] = {20.0, 10.0, 0.0};
-  while (true) {
-    i++;
-    if(i*100 > 5000){
-        i = 0;
-        j++;
+  while(true){
+    if(i * 100 > 5000){
+        double output[3] = {20.0, 10.0, 0.0};
         leftPID.setTargetSpeed(output[j%3]);
         rightPID.setTargetSpeed(output[j%3]);
         if((j%3)==2){
             leftPID.resetIntegral();
             rightPID.resetIntegral();
         }
+        j++;
+        i = 0;
     }
     ThisThread::sleep_for(100ms);
+    i++;
   }
 }

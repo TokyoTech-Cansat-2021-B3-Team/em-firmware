@@ -13,12 +13,11 @@ public:
 private:
     void updateSensorSpeed();
     double _targetSpeed = 0.0;
-    double _sensorSpeed = 0.0;
     double _previousSpeed = 0.0;
     double _output = 0.0;
     double _integral = 0.0;
     double _diff = 0.0;
     double _pGain = 0.01;
-    double _iGain = 0.05;
-    double _dGain = 0.02;
+    double _iGain = 0.07;
+    double _dGain = 0.0002;
 };
