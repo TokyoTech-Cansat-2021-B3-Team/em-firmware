@@ -10,6 +10,7 @@ public:
     void resetIntegral();
     void updatePIDOutput(double sensorSpeed, chrono::microseconds period);
     double getOutput();
+    double targetSpeed();
 private:
     void updateSensorSpeed();
     double _targetSpeed = 0.0;

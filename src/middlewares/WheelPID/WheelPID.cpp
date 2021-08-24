@@ -27,3 +27,7 @@ double WheelPID::getOutput(){
 void WheelPID::resetIntegral(){
     _integral = 0.0;
 }
+
+double WheelPID::targetSpeed() {
+  return _targetSpeed;
+}

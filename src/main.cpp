@@ -26,8 +26,8 @@ WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
-MotorSpeed leftMotorSpeed(&leftEncoder, 298.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 298.0);
+MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
+MotorSpeed rightMotorSpeed(&rightEncoder, 1000.0);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
@@ -71,17 +71,18 @@ int main() {
   printThread.start(printThreadLoop);
   int i = 0;
   int j = 0;
+  double output[3] = {20.0, 18.0, 0.0};    
   while(true){
-    if(i * 100 > 5000){
-        double output[3] = {20.0, 10.0, 0.0};
-        leftPID.setTargetSpeed(output[j%3]);
-        rightPID.setTargetSpeed(output[j%3]);
-        if((j%3)==2){
-            leftPID.resetIntegral();
-            rightPID.resetIntegral();
-        }
-        j++;
-        i = 0;
+    if (i * 100 > 5000) {
+      double nextTarget = output[j % 3];
+      leftPID.setTargetSpeed(nextTarget);
+      rightPID.setTargetSpeed(nextTarget);
+      if ((j % 3) == 2) {
+        leftPID.resetIntegral();
+        rightPID.resetIntegral();
+      }
+      j++;
+      i = 0;
     }
     ThisThread::sleep_for(100ms);
     i++;
