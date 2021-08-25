@@ -11,7 +11,7 @@
     ],
     "config": {
         "main_stack_size": {
-            "value": 1024
+            "value": 2048
         }
     },
     "target_overrides": {
