@@ -16,6 +16,7 @@
 #include "Logger.h"
 
 // sequences
+#include "GPSDownlink.h"
 
 // defines
 #define SPI_FREQUENCY 25000000
@@ -38,11 +39,14 @@ Logger logger(&sdBlockDevice, &littleFileSystem2);
 Console console(&mu2, &logger);
 
 // sequences
+GPSDownlink gpsDownlink(&pa1010d, &console, &logger);
 
 // main() runs in its own thread in the OS
 int main() {
   // I2C速度変更
   i2c.frequency(I2C_FREQUENCY);
+
+  gpsDownlink.start();
 
   while (true) {
     ThisThread::sleep_for(1s);
