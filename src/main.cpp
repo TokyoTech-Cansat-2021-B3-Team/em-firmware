@@ -17,6 +17,7 @@
 #include "Logger.h"
 
 // sequences
+#include "GPSDownlink.h"
 #include "FusingSequence.h"
 #include "LandingSequence.h"
 
@@ -50,6 +51,7 @@ Console console(&mu2, &logger);
 Variometer variometer(&bme280);
 
 // sequences
+GPSDownlink gpsDownlink(&pa1010d, &console, &logger);
 LandingSequence landingSequence(&variometer, &console);
 FusingSequence fusingSequence(&fusing, &console);
 
@@ -99,6 +101,9 @@ void fusingSequenceSyncStart() {
 int main() {
   // I2C速度変更
   i2c.frequency(I2C_FREQUENCY);
+
+  // GPSダウンリンク
+  gpsDownlink.start();
 
   // 着地検知シーケンス
   syncLandingSequence();
