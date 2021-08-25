@@ -31,22 +31,27 @@ PwmOut fuseGate(FUSE_GATE);
 
 I2C i2c(I2C_SDA, I2C_SCL);
 BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
+
 SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, SPI_FREQUENCY);
 LittleFileSystem2 littleFileSystem2(nullptr);
 
 // drivers
-MU2 mu2(&bufferedSerial);
 Fusing fusing(&fuseGate);
+
 PA1010D pa1010d(&i2c);
 BME280 bme280(&i2c);
+
+MU2 mu2(&bufferedSerial);
 
 // middlewares
 Logger logger(&sdBlockDevice, &littleFileSystem2);
 Console console(&mu2, &logger);
+
 Variometer variometer(&bme280);
 
 // sequences
 LandingSequence landingSequence(&variometer, &console);
+FusingSequence fusingSequence(&fusing, &console);
 
 // 着地検知シーケンス
 void syncLandingSequence() {
@@ -73,8 +78,6 @@ void syncLandingSequence() {
   landingSequence.stop();
 }
 
-FusingSequence fusingSequence(&fusing, &console);
-
 // パラシュート分離シーケンス
 void fusingSequenceSyncStart() {
   fusingSequence.start();
@@ -99,9 +102,12 @@ int main() {
 
   // 着地検知シーケンス
   syncLandingSequence();
-  
+
   // パラシュート分離シーケンス
   fusingSequenceSyncStart();
+
+  console.log("main", "All Sequence Complete");
+  console.log("main", "Start Sleep Forever");
 
   while (true) {
     ThisThread::sleep_for(1s);
