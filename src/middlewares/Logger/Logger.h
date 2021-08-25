@@ -22,6 +22,15 @@ public:
     char ewIndicator;             // E: 東経, W: 西経
     uint8_t positionFixIndicator; // 0: Fix not avalilable, 1: GPS fix, 2: Differencial GPS fix
   };
+  using RunningData = struct {
+    double x;
+    double y;
+    double theta;
+    double leftTargetSpeed;
+    double rightTargetSpeed;
+    double leftSpeed;
+    double rightSpeed;
+  };
 #pragma pack()
 
 private:
@@ -66,4 +75,6 @@ public:
 
   // GPSログの書き込み
   void gpsLog(GPSLogData *data);
+  // 位置制御情報の書き込み
+  void runningLog(RunningData *data);
 };

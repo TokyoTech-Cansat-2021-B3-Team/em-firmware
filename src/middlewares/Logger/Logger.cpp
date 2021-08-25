@@ -195,3 +195,5 @@ int Logger::vlprintf(const char *group, const char *format, va_list ap) {
 void Logger::gpsLog(GPSLogData *data) {
   write(_gpsFile, data, sizeof(GPSLogData));
 }
+
+

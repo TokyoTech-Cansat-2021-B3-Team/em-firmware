@@ -13,9 +13,6 @@ I2C i2c(I2C_SDA, I2C_SCL);//
 
 char printBuffer[PRINT_BUFFER_SIZE];
 
-
-#include "PinAssignment.h"
-
 #include "QEI.h"
 #include "lsm9ds1.h"
 #include "MU2.h"
@@ -53,7 +50,7 @@ LSM9DS1 imu(&i2c);
 MU2 mu2(&bufferedSerial);
 
 MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
+MotorSpeed rightMotorSpeed(&rightEncoder, 1000.0);
 
 WheelPID leftPID;
 WheelPID rightPID;
@@ -77,8 +74,8 @@ Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
-        //serial.write(printBuffer,strlen(printBuffer));
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        //bufferedSerial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(20ms);
     }
 }
