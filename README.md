@@ -1,47 +1,25 @@
-# em-firmware
+# mbed-template
 
-EM用プログラム
+## 使い方
 
-# コーディングルール
+1. Githubのこのリポジトリのトップページから「Use this template」をクリック
 
-## 命名規則
+2. リポジトリ名を指定して、新しいリポジトリを作成
 
-- クラス名：Upper camel case (HogeHoge)
+3. 新しく作成したリポジトリをClone
 
-- Publicメンバ：Lower camel case (hogeHoge)
+## 各ファイルの説明
 
-- Privateメンバ：_ + Lower camel case (_hogeHoge)
+- ".gitignore"：gitで無視されるファイルの定義
 
-- グローバル変数、ローカル変数、関数：Lower camel case (hogeHoge)
+    （mbed-os, BUILD, .mbed等はコミットしないこと）
 
-- マクロ：Upper snake case (HOGE_HOGE)
+- ".clang-format", ".clang-tidy"：コードの入力規則を定義 
 
-- ファイル名：Upper camel case (HogeHoge)
+- "mbed_app.json"：mbedの設定
 
-※一部型番などUpper camelですべて大文字は許容 (HOGEHoge)
+- "mbed-os.lib"：使用するmbed-osのバージョンを指定（v6.13）
 
-## ピンアサイン
-
-"PinAssignment.h"をインクルードして参照
-
-## オブジェクト
-
-- 基本的にmain.cppにグローバル変数として持つ
-
-- 依存性注入を基本とする
-
-- 初期化されていない可能性があるので、コンストラクタで依存性を参照することは禁止
-
-- 依存性を用いる初期化はinit関数を定義
-
-## Threadの使用
-
-- クラス内でThreadを使用する場合は、別途容易するパターンに従うこと
-
-- Threadは再開できないので、開始時にnew, 停止時にdeleteする必要がある
-
-- リーク防止のためThreadオブジェクトはunique_ptrで管理する
-
-- start、stop関数の実装
-
-- PriorityやStack Sizeに注意する
+- "src"：ソースファイルを入れるフォルダ
+   
+    - "main.cpp"：main関数
