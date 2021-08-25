@@ -41,7 +41,7 @@ Console console(&mu2, &logger);
 Variometer variometer(&bme280);
 
 // sequences
-LandingSequence landingSequence(&variometer);
+LandingSequence landingSequence(&variometer, &console);
 
 // 着地検知シーケンス
 void syncLandingSequence() {
