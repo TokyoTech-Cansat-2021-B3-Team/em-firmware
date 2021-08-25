@@ -3,6 +3,7 @@
 #include "BlockDevice.h"
 #include "FileSystem.h"
 #include "mbed.h"
+#include <memory>
 
 #define LOGGER_FORCE_REFORMAT false
 #define LOGGER_MESSAGE_FILE_PATH "/MessageLog.txt"
@@ -43,6 +44,9 @@ private:
   // GPSログ用のファイル
   shared_ptr<File> _gpsFile;
 
+  // 走行シーケンスログ用のファイル
+  shared_ptr<File> _runningFile;
+
   bool _isInit;
 
 public:
@@ -75,6 +79,7 @@ public:
 
   // GPSログの書き込み
   void gpsLog(GPSLogData *data);
+  
   // 位置制御情報の書き込み
   void runningLog(RunningData *data);
 };

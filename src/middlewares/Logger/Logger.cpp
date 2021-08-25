@@ -196,4 +196,6 @@ void Logger::gpsLog(GPSLogData *data) {
   write(_gpsFile, data, sizeof(GPSLogData));
 }
 
-
+void Logger::runningLog(RunningData *data) {
+  write(_runningFile, data, sizeof(RunningData));
+}

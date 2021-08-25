@@ -2,10 +2,11 @@
 
 RunningSequence::RunningSequence(Navigation *navigation, Localization *localization, LSM9DS1 *imu,
                                  MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed,
-                                 WheelControl *leftWheelControl, WheelControl *rightWheelControl, Console *console)
+                                 WheelControl *leftWheelControl, WheelControl *rightWheelControl, Console *console,
+                                 Logger *logger)
     : _navigation(navigation), _localization(localization), _imu(imu), _leftMotorSpeed(leftMotorSpeed),
       _rightMotorSpeed(rightMotorSpeed), _leftWheelControl(leftWheelControl), _rightWheelControl(rightWheelControl),
-      _console(console), _state(UNDEFINED), _thread() {
+      _console(console), _logger(logger), _state(UNDEFINED), _thread() {
   
       }
 
@@ -75,6 +76,14 @@ void RunningSequence::threadLoop(){
           break;
         }
         _currentStateCount++;
+        Logger::RunningData _tmpData = {_localization->x(),
+                                        _localization->y(),
+                                        _localization->theta(),
+                                        _navigation->leftTargetSpeed(),
+                                        _navigation->rightTargetSpeed(),
+                                        _leftMotorSpeed->currentSpeedRPM(),
+                                        _rightMotorSpeed->currentSpeedRPM()};
+        _logger->runningLog(&_tmpData);
         ThisThread::sleep_for(RUNNINGSEQUENCE_PERIOD);
     }
     //エラー時もしくは完了時はループから抜ける
@@ -177,4 +186,8 @@ bool RunningSequence::isArrived(){
 
 RunningSequenceState RunningSequence::state(){
     return _state;
+}
+
+void RunningSequence::pushDataToLogger() {
+  
 }

@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "Console.h"
+#include "Logger.h"
 #include "navigation.h"
 #include "localization.h"
 #include "MotorSpeed.h"
@@ -41,7 +42,7 @@ enum RunningSqequneceType{
 
 class RunningSequence{
 public:
-    explicit RunningSequence(Navigation* navigation, Localization* Localization, LSM9DS1* imu, MotorSpeed* leftMotorSpeed, MotorSpeed* rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl, Console* console);
+    explicit RunningSequence(Navigation* navigation, Localization* Localization, LSM9DS1* imu, MotorSpeed* leftMotorSpeed, MotorSpeed* rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl, Console* console, Logger* logger);
     void start(RunningSqequneceType sequenceType);
     void stop();
     RunningSequenceState state();
@@ -52,6 +53,7 @@ public:
     int tmp = 0;
 private:
     void init();
+    void pushDataToLogger();
     void setStatus(RunningSequenceState state);
     void threadLoop();
     void shiftStatusToMovingAndSetTargetPosition();
@@ -71,6 +73,7 @@ private:
     MotorSpeed* _rightMotorSpeed;
     WheelControl* _leftWheelControl;
     WheelControl *_rightWheelControl;
-    Console* _console;
+    Console *_console;
+    Logger *_logger;
     unique_ptr<Thread> _thread;
 };
