@@ -26,6 +26,8 @@ void FusingSequence::threadLoop() {
 }
 
 void FusingSequence::start() {
+  _console->init();
+
   if (!_isStart) {
     _thread = make_unique<Thread>(FUSING_SEQUENCE_THREAD_PRIORITY,   //
                                   FUSING_SEQUENCE_THREAD_STACK_SIZE, //
