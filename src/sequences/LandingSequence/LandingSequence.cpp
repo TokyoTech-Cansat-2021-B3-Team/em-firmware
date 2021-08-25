@@ -3,7 +3,8 @@
 LandingSequence::LandingSequence(Variometer *variometer, Console *console)
     : _thread(),               //
       _variometer(variometer), //
-      _console(console)        //
+      _console(console),       //
+      _isStart(false)          //
 {}
 
 void LandingSequence::threadLoop() {
@@ -83,16 +84,24 @@ void LandingSequence::waitLanding() {
 void LandingSequence::start() {
   _variometer->start();
 
-  _thread = make_unique<Thread>(LANDING_SEQUENCE_THREAD_PRIORITY,   //
-                                LANDING_SEQUENCE_THREAD_STACK_SIZE, //
-                                nullptr,                            //
-                                LANDING_SEQUENCE_THREAD_NAME);
-  _thread->start(callback(this, &LandingSequence::threadLoop));
+  if (!_isStart) {
+    _thread = make_unique<Thread>(LANDING_SEQUENCE_THREAD_PRIORITY,   //
+                                  LANDING_SEQUENCE_THREAD_STACK_SIZE, //
+                                  nullptr,                            //
+                                  LANDING_SEQUENCE_THREAD_NAME);
+    _thread->start(callback(this, &LandingSequence::threadLoop));
+
+    _isStart = true;
+  }
 }
 
 void LandingSequence::stop() {
-  _thread->terminate();
-  _thread.reset();
+  if (_isStart) {
+    _thread->terminate();
+    _thread.reset();
+
+    _isStart = false;
+  }
 }
 
 LandingSequence::LandingSequenceState LandingSequence::state() {

@@ -31,6 +31,8 @@ private:
 
   LandingSequenceState _state;
 
+  bool _isStart;
+
 public:
 private:
   void threadLoop();
