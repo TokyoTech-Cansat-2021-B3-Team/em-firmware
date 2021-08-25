@@ -1,31 +1,30 @@
 #include "RunningSequence.h"
-#include <algorithm>
 
-RunningSequence::RunningSequence(Navigation* navigation, Localization* localization, LSM9DS1* imu, MotorSpeed* leftMotorSpeed, MotorSpeed* rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl):
-_navigation(navigation),
-_localization(localization),
-_imu(imu),
-_leftMotorSpeed(leftMotorSpeed),
-_rightMotorSpeed(rightMotorSpeed),
-_leftWheelControl(leftWheelControl),
-_rightWheelControl(rightWheelControl),
-_state(UNDEFINED),
-_thread()
-{
-
-}
+RunningSequence::RunningSequence(Navigation *navigation, Localization *localization, LSM9DS1 *imu,
+                                 MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed,
+                                 WheelControl *leftWheelControl, WheelControl *rightWheelControl, Console *console)
+    : _navigation(navigation), _localization(localization), _imu(imu), _leftMotorSpeed(leftMotorSpeed),
+      _rightMotorSpeed(rightMotorSpeed), _leftWheelControl(leftWheelControl), _rightWheelControl(rightWheelControl),
+      _console(console), _state(UNDEFINED), _thread() {
+  
+      }
 
 void RunningSequence::start(RunningSqequneceType sequenceType) {
-    if(sequenceType==FIRST){
-        init();
-        setStatus(WAITING_FIRST_TO_SECOND_POLE);
-    }else if(sequenceType==SECOND){
-        setStatus(WAITING_SECOND_TO_THIRD_POLE);
-    }else if(sequenceType==THIRD){
-        setStatus(WAITING_THIRD_TO_FOURTH_POLE);
-    }
-    _thread = make_unique<Thread>(RUNNINGSEQUENCE_THREAD_PRIORITY, RUNNINGSEQUENCE_THREAD_STACK_SIZE, nullptr, RUNNINGSEQUENCE_THREAD_NAME);
-    _thread->start(callback(this, &RunningSequence::threadLoop));
+  if (sequenceType == FIRST) {
+    init();
+    _console->lprintf("running", "init running sequence\n");
+    setStatus(WAITING_FIRST_TO_SECOND_POLE);
+    _console->lprintf("running", "waiting first to second pole\n");
+  } else if (sequenceType == SECOND) {
+    setStatus(WAITING_SECOND_TO_THIRD_POLE);
+    _console->lprintf("running", "waiting second to third pole\n");
+  } else if (sequenceType == THIRD) {
+    setStatus(WAITING_THIRD_TO_FOURTH_POLE);
+    _console->lprintf("running", "waiting third to fourth pole\n");
+  }
+  _thread = make_unique<Thread>(RUNNINGSEQUENCE_THREAD_PRIORITY, RUNNINGSEQUENCE_THREAD_STACK_SIZE, nullptr,
+                                RUNNINGSEQUENCE_THREAD_NAME);
+  _thread->start(callback(this, &RunningSequence::threadLoop));
 }
 
 void RunningSequence::init(){
@@ -71,8 +70,9 @@ void RunningSequence::threadLoop(){
         }
         //強制終了の確認
         if(_currentStateCount > 600){
-            break;
-            setStatus(TERMINATE);
+          setStatus(TERMINATE);
+          _console->lprintf("running", "terminate\n");
+          break;
         }
         _currentStateCount++;
         ThisThread::sleep_for(RUNNINGSEQUENCE_PERIOD);
@@ -86,37 +86,43 @@ void RunningSequence::setStatus(RunningSequenceState state){
 }
 
 void RunningSequence::shiftStatusToArrived(){
-    switch(_state){
-        case MOVING_FIRST_TO_SECOND_POLE:
-            setStatus(ARRIVED_SECOND_POLE);
-            break;
-        case MOVING_SECOND_TO_THIRD_POLE:
-            setStatus(ARRIVED_THIRD_POLE);
-            break;
-        case MOVING_THIRD_TO_FOURTH_POLE:
-            setStatus(ARRIVED_FOURTH_POLE);
-            break;
-        default:
-            break;
+  switch (_state) {
+  case MOVING_FIRST_TO_SECOND_POLE:
+    setStatus(ARRIVED_SECOND_POLE);
+    _console->lprintf("running", "arrived second pole\n");
+    break;
+  case MOVING_SECOND_TO_THIRD_POLE:
+    setStatus(ARRIVED_THIRD_POLE);
+    _console->lprintf("running", "arrived third pole\n");
+    break;
+  case MOVING_THIRD_TO_FOURTH_POLE:
+    setStatus(ARRIVED_FOURTH_POLE);
+    _console->lprintf("running", "arrived fourth pole\n");
+    break;
+  default:
+    break;
     }
 }
 
 void RunningSequence::shiftStatusToMovingAndSetTargetPosition(){
     switch (_state) {
     case WAITING_FIRST_TO_SECOND_POLE:
-        setStatus(MOVING_FIRST_TO_SECOND_POLE);
-        _navigation->setTargetPosition(_secondPolePosition[0], _secondPolePosition[1], _secondPoleEPS);
-        break;
+      setStatus(MOVING_FIRST_TO_SECOND_POLE);
+      _console->lprintf("running", "moving first to second pole\n");
+      _navigation->setTargetPosition(_secondPolePosition[0], _secondPolePosition[1], _secondPoleEPS);
+      break;
     case WAITING_SECOND_TO_THIRD_POLE:
-        setStatus(MOVING_SECOND_TO_THIRD_POLE);
-        _navigation->setTargetPosition(_thirdPolePosition[0], _thirdPolePosition[1], _thirdPoleEPS);
-        break;
+      setStatus(MOVING_SECOND_TO_THIRD_POLE);
+      _navigation->setTargetPosition(_thirdPolePosition[0], _thirdPolePosition[1], _thirdPoleEPS);
+      _console->lprintf("running", "moving second to third pole\n");
+      break;
     case WAITING_THIRD_TO_FOURTH_POLE:
-        setStatus(MOVING_THIRD_TO_FOURTH_POLE);
-        _navigation->setTargetPosition(_fourthPolePosition[0], _fourthPolePosition[1], _fourthPoleEPS);
-        break;
+      setStatus(MOVING_THIRD_TO_FOURTH_POLE);
+      _navigation->setTargetPosition(_fourthPolePosition[0], _fourthPolePosition[1], _fourthPoleEPS);
+      _console->lprintf("running", "moving third to fourth pole\n");
+      break;
     default:
-        break;
+      break;
     }
 }
 

@@ -3,6 +3,7 @@
 #include "mbed.h"
 #include <cstdint>
 
+#include "Console.h"
 #include "navigation.h"
 #include "localization.h"
 #include "MotorSpeed.h"
@@ -40,7 +41,7 @@ enum RunningSqequneceType{
 
 class RunningSequence{
 public:
-    explicit RunningSequence(Navigation* navigation, Localization* Localization, LSM9DS1* imu, MotorSpeed* leftMotorSpeed, MotorSpeed* rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl);
+    explicit RunningSequence(Navigation* navigation, Localization* Localization, LSM9DS1* imu, MotorSpeed* leftMotorSpeed, MotorSpeed* rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl, Console* console);
     void start(RunningSqequneceType sequenceType);
     void stop();
     RunningSequenceState state();
@@ -69,6 +70,7 @@ private:
     MotorSpeed* _leftMotorSpeed;
     MotorSpeed* _rightMotorSpeed;
     WheelControl* _leftWheelControl;
-    WheelControl* _rightWheelControl;
+    WheelControl *_rightWheelControl;
+    Console* _console;
     unique_ptr<Thread> _thread;
 };
