@@ -1,7 +1,9 @@
 #include "mbed.h"
+#include "LittleFileSystem2.h"
+#include "SDBlockDevice.h"
+
 #include "PinAssignment.h"
 
-#include "lsm9ds1.h"
 #include <cstring>
 
 #define PRINT_BUFFER_SIZE 128
@@ -15,7 +17,11 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "PinAssignment.h"
 
 #include "QEI.h"
+#include "lsm9ds1.h"
+#include "MU2.h"
 
+#include "Console.h"
+#include "Logger.h"
 #include "fusion-odometry.h"
 #include "WheelMotor.h"
 #include "WheelPID.h"
@@ -34,6 +40,9 @@ PwmOut motor1In2(M1_IN2);
 PwmOut motor2In1(M2_IN1);
 PwmOut motor2In2(M2_IN2);
 
+SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
+LittleFileSystem2 littleFileSystem2(nullptr);
+
 WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
 WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 
@@ -41,6 +50,7 @@ QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
 LSM9DS1 imu(&i2c);
+MU2 mu2(&bufferedSerial);
 
 MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
 MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
@@ -48,12 +58,15 @@ MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
 WheelPID leftPID;
 WheelPID rightPID;
 
+Logger logger(&sdBlockDevice, &littleFileSystem2);
+Console console(&mu2, &logger);
+
 WheelControl leftControl(&leftWheelMotor,&leftPID,&leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 
 FusionOdometry ekf(KALMANFILTER_PERIOD);
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 62.0e-3);
+Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
@@ -70,28 +83,6 @@ void printThreadLoop(){
     }
 }
 
-#include "LittleFileSystem2.h"
-#include "SDBlockDevice.h"
-
-#include "PinAssignment.h"
-
-#include "MU2.h"
-#include "PA1010D.h"
-
-#include "Console.h"
-#include "Logger.h"
-
-I2C i2c(I2C_SDA, I2C_SCL);
-PA1010D pa1010d(&i2c);
-
-SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
-LittleFileSystem2 littleFileSystem2(nullptr);
-
-BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
-MU2 mu2(&bufferedSerial);
-
-Logger logger(&sdBlockDevice, &littleFileSystem2);
-Console console(&mu2, &logger);
 
 // main() runs in its own thread in the OS
 int main() {
@@ -108,12 +99,12 @@ int main() {
   while(true){
       if(runningSequence.state() == ARRIVED_SECOND_POLE){
           runningSequence.stop();
-          ThisThread::sleep_for(1s);
+          ThisThread::sleep_for(5s);
           runningSequence.start(SECOND);
       }
       if(runningSequence.state() == ARRIVED_THIRD_POLE){
           runningSequence.stop();
-          ThisThread::sleep_for(1s);
+          ThisThread::sleep_for(5s);
           runningSequence.start(THIRD);
       }
       if(runningSequence.state() == ARRIVED_FOURTH_POLE){
@@ -125,15 +116,5 @@ int main() {
           }
       }
       ThisThread::sleep_for(100ms);
-      /*
-      =======
-        console.init();
-
-        while (true) {
-          console.lprintf("main", "log and downlink message\n");
-
-          ThisThread::sleep_for(1s);
-      >>>>>>> origin/console
-      */
   }
 }
