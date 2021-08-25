@@ -8,6 +8,7 @@
 #define LOGGER_FORCE_REFORMAT false
 #define LOGGER_MESSAGE_FILE_PATH "/MessageLog.txt"
 #define LOGGER_GPS_FILE_PATH "/GPSLog.bin"
+#define LOGGER_RUNNING_FILE_PATH "/RunningLog.bin"
 
 #define LOGGER_PRINTF_BUFFER_SIZE 256
 
@@ -64,6 +65,8 @@ private:
   void dumpMessageLog();
 
   void dumpGPSLog();
+
+  void dumpRunningLog();
 
 public:
   explicit Logger(BlockDevice *blockDevice, FileSystem *fileSystem);

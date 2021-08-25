@@ -112,6 +112,18 @@ void Logger::dumpGPSLog() {
   }
 }
 
+void Logger::dumpRunningLog() {
+  printf("Dumping \"%s\":\n", LOGGER_RUNNING_FILE_PATH);
+
+  RunningData data;
+  while (read(_runningFile, &data, sizeof(data)) != 0) {
+    printf("%lf, %lf, %lf, %lf, %lf, %lf %lf\n", //
+           data.x, data.y, data.theta,
+           data.leftTargetSpeed,data.rightTargetSpeed,data.leftSpeed,data.rightSpeed
+    );
+  }
+}
+
 void Logger::init() {
   if (!_isInit) {
     // ファイルシステムのマウント
@@ -127,6 +139,11 @@ void Logger::init() {
 
     //   dumpGPSLog();
 
+    //走行シーケンスログ用のファイル
+    _runningFile = open(LOGGER_RUNNING_FILE_PATH);
+
+    dumpRunningLog();
+
     _isInit = true;
   }
 }
@@ -138,6 +155,9 @@ void Logger::deinit() {
 
     // GPSログ用のファイル
     close(_gpsFile, LOGGER_GPS_FILE_PATH);
+
+    // 走行シーケンス用のファイル
+    close(_runningFile, LOGGER_RUNNING_FILE_PATH);
 
     _isInit = false;
   }
