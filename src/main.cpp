@@ -45,9 +45,9 @@ FusingSequence fusingSequence(&fusing, &console);
 
 // パラシュート分離シーケンス
 void fusingSequenceSyncStart() {
-  fusingSequence.start();
-
   console.log("main", "Fusing Sequence Sync Start");
+
+  fusingSequence.start();
 
   // 正常終了
   // フィードバックなしなので必ず起こる
