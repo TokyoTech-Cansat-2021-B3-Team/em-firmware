@@ -8,7 +8,7 @@
 
 #define PRINT_BUFFER_SIZE 128
 
-BufferedSerial serial(UART_TX, UART_RX);//
+BufferedSerial bufferedSerial(UART_TX, UART_RX);//
 I2C i2c(I2C_SDA, I2C_SCL);//
 
 char printBuffer[PRINT_BUFFER_SIZE];
@@ -70,15 +70,15 @@ Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
-RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl);
+RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &bufferedSerial);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
-        serial.write(printBuffer,strlen(printBuffer));
+        //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        //serial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(20ms);
     }
 }
@@ -89,10 +89,10 @@ int main() {
   runningSequence.start(FIRST);
   if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
-      serial.write(printBuffer,strlen(printBuffer));
+      //bufferedSerial.write(printBuffer,strlen(printBuffer));
   }else{
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
-      serial.write(printBuffer,strlen(printBuffer));
+      //bufferedSerial.write(printBuffer,strlen(printBuffer));
   }
   printThread.start(printThreadLoop);
   int i = 0;
@@ -110,7 +110,7 @@ int main() {
       if(runningSequence.state() == ARRIVED_FOURTH_POLE){
           runningSequence.stop();
           snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
-          serial.write(printBuffer,strlen(printBuffer));
+          //bufferedSerial.write(printBuffer,strlen(printBuffer));
           while(true){
             ThisThread::sleep_for(100ms);
           }
