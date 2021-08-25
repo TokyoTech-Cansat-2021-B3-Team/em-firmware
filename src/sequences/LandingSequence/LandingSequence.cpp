@@ -12,6 +12,10 @@ void LandingSequence::threadLoop() {
   _state = Running;
   _console->log("Landing", "start Landing Sequence\n");
 
+  // タイムアウト設定
+  Timeout timeout;
+  timeout.attach(callback(this, &LandingSequence::timeoutCallback), LANDING_SEQUENCE_TIMEOUT);
+
   // 落下開始まで待機
   _console->log("Landing", "waiting for start falling\n");
 
@@ -79,6 +83,12 @@ void LandingSequence::waitLanding() {
   }
 
   timer.stop();
+}
+
+void LandingSequence::timeoutCallback() {
+  // タイムアウトにより、シーケンス終了
+  // stopはISRではじかれるのでmainから行う
+  _state = SequenceTimeout;
 }
 
 void LandingSequence::start() {

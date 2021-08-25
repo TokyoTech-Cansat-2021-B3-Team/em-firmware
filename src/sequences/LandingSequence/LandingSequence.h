@@ -14,6 +14,8 @@
 #define LANDING_SEQUENCE_LANDING_DURATION 10s             // 静止判定の持続時間 10s
 #define LANDING_SEQUENCE_FALLING_DURATION 1s              // 落下判定の持続時間 1s
 
+#define LANDING_SEQUENCE_TIMEOUT 1min // シーケンスのタイムアウト時間
+
 class LandingSequence {
 private:
 public:
@@ -22,6 +24,7 @@ public:
     WaitFalling,
     WaitLanding,
     Complete,
+    SequenceTimeout,
   };
 
 private:
@@ -42,6 +45,8 @@ private:
   void waitFalling();
 
   void waitLanding();
+
+  void timeoutCallback();
 
 public:
   explicit LandingSequence(Variometer *variometer, Console *console);
