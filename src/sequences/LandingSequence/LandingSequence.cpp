@@ -3,35 +3,40 @@
 LandingSequence::LandingSequence(Variometer *variometer, Console *console)
     : _thread(),               //
       _variometer(variometer), //
-      _console(console)        //
+      _console(console),       //
+      _isStart(false)          //
 {}
 
 void LandingSequence::threadLoop() {
   // シーケンス開始
   _state = Running;
-  _console->lprintf("Landing", "start Landing Sequence\n");
+  _console->log("Landing", "start Landing Sequence\n");
+
+  // タイムアウト設定
+  Timeout timeout;
+  timeout.attach(callback(this, &LandingSequence::timeoutCallback), LANDING_SEQUENCE_TIMEOUT);
 
   // 落下開始まで待機
-  _console->lprintf("Landing", "waiting for start falling\n");
+  _console->log("Landing", "waiting for start falling\n");
 
   _state = WaitFalling;
   waitFalling();
 
   // 落下検知
-  _console->lprintf("Landing", "detect falling\n");
+  _console->log("Landing", "detect falling\n");
 
   // 着地まで待機
-  _console->lprintf("Landing", "waiting for start landing\n");
+  _console->log("Landing", "waiting for start landing\n");
 
   _state = WaitLanding;
   waitLanding();
 
   // 着地検知
-  _console->lprintf("Landing", "detect landing\n");
+  _console->log("Landing", "detect landing\n");
 
   // シーケンス終了
   _state = Complete;
-  _console->lprintf("Landing", "Landing Sequence complete\n");
+  _console->log("Landing", "Landing Sequence complete\n");
 }
 
 bool LandingSequence::isFalling() {
@@ -80,19 +85,33 @@ void LandingSequence::waitLanding() {
   timer.stop();
 }
 
+void LandingSequence::timeoutCallback() {
+  // タイムアウトにより、シーケンス終了
+  // stopはISRではじかれるのでmainから行う
+  _state = SequenceTimeout;
+}
+
 void LandingSequence::start() {
   _variometer->start();
 
-  _thread = make_unique<Thread>(LANDING_SEQUENCE_THREAD_PRIORITY,   //
-                                LANDING_SEQUENCE_THREAD_STACK_SIZE, //
-                                nullptr,                            //
-                                LANDING_SEQUENCE_THREAD_NAME);
-  _thread->start(callback(this, &LandingSequence::threadLoop));
+  if (!_isStart) {
+    _thread = make_unique<Thread>(LANDING_SEQUENCE_THREAD_PRIORITY,   //
+                                  LANDING_SEQUENCE_THREAD_STACK_SIZE, //
+                                  nullptr,                            //
+                                  LANDING_SEQUENCE_THREAD_NAME);
+    _thread->start(callback(this, &LandingSequence::threadLoop));
+
+    _isStart = true;
+  }
 }
 
 void LandingSequence::stop() {
-  _thread->terminate();
-  _thread.reset();
+  if (_isStart) {
+    _thread->terminate();
+    _thread.reset();
+
+    _isStart = false;
+  }
 }
 
 LandingSequence::LandingSequenceState LandingSequence::state() {

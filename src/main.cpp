@@ -45,9 +45,23 @@ LandingSequence landingSequence(&variometer, &console);
 
 // 着地検知シーケンス
 void syncLandingSequence() {
+  console.log("main", "Landing Sequence Sync Start");
+
   landingSequence.start();
 
-  while (landingSequence.state() != LandingSequence::Complete) {
+  while (true) {
+    // 正常終了
+    if (landingSequence.state() == LandingSequence::Complete) {
+      console.log("main", "Landing Sequence Complete");
+      break;
+    }
+
+    // タイムアウト
+    if (landingSequence.state() == LandingSequence::SequenceTimeout) {
+      console.log("main", "Landing Sequence Timeout");
+      break;
+    }
+
     ThisThread::sleep_for(1s);
   }
 
