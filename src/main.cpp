@@ -53,7 +53,7 @@ WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 
 FusionOdometry ekf(KALMANFILTER_PERIOD);
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
+Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 62.0e-3);
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
