@@ -7,7 +7,9 @@
         "sd",
         "filesystem",
         "fat_chan",
-        "littlefs2"
+        "littlefs2",
+        "kvstore",
+        "tdbstore"
     ],
     "config": {
         "main_stack_size": {

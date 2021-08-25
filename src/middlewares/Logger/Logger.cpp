@@ -1,11 +1,12 @@
 #include "Logger.h"
 
-Logger::Logger(BlockDevice *blockDevice, FileSystem *fileSystem)
-    : _blockDevice(blockDevice), //
-      _fileSystem(fileSystem),   //
-      _messageFile(),            //
-      _gpsFile(),                //
-      _isInit(false)             //
+Logger::Logger(BlockDevice *fsBlockDevice, FileSystem *fileSystem, KVStore *kvStore)
+    : _fsBlockDevice(fsBlockDevice), //
+      _fileSystem(fileSystem),       //
+      _kvStore(kvStore),             //
+      _messageFile(),                //
+      _gpsFile(),                    //
+      _isInit(false)                 //
 {}
 
 void Logger::mount() {
@@ -13,7 +14,7 @@ void Logger::mount() {
   printf("Mounting the filesystem... ");
   fflush(stdout);
 
-  int err = _fileSystem->mount(_blockDevice);
+  int err = _fileSystem->mount(_fsBlockDevice);
 
   printf("%s\n", (err ? "Fail :(" : "OK"));
 
@@ -22,7 +23,7 @@ void Logger::mount() {
     printf("formatting... ");
     fflush(stdout);
 
-    err = _fileSystem->reformat(_blockDevice);
+    err = _fileSystem->reformat(_fsBlockDevice);
 
     printf("%s\n", (err ? "Fail :(" : "OK"));
   }
@@ -114,6 +115,9 @@ void Logger::dumpGPSLog() {
 
 void Logger::init() {
   if (!_isInit) {
+    // KVStore
+    _kvStore->init();
+
     // ファイルシステムのマウント
     mount();
 
