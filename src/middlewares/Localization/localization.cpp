@@ -26,7 +26,7 @@ void Localization::stop() {
 
 void Localization::threadLoop(){
     while(true){
-        double gyrZ_rps = _imu->gyrZ() * PI() / 180.0;
+        double gyrZ_rps = _imu->gyrZ() * PI / 180.0;
         double z[] = {getAngularVelocityFromWheelOdometry(),gyrZ_rps,getVelocityFromWheelOdometry()};
         _ekf->step_with_updateQR(z);
         _theta = _ekf->getX(0);
@@ -41,7 +41,7 @@ double Localization::getAngularVelocityFromWheelOdometry(){
 }
 
 double Localization::getVelocityFromWheelOdometry(){
-    return (getVelocityRight() + getVelocityRight())/2.0;
+    return (getVelocityLeft() + getVelocityRight())/2.0;
 }
 
 double Localization::getVelocityLeft(){
