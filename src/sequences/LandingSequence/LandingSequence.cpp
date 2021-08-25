@@ -92,6 +92,7 @@ void LandingSequence::timeoutCallback() {
 }
 
 void LandingSequence::start() {
+  _console->init();
   _variometer->start();
 
   if (!_isStart) {
