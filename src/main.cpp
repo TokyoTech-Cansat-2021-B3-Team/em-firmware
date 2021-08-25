@@ -16,6 +16,7 @@
 #include "Logger.h"
 
 // sequences
+#include "LandingSequence.h"
 
 // defines
 #define SPI_FREQUENCY 25000000
@@ -32,17 +33,34 @@ LittleFileSystem2 littleFileSystem2(nullptr);
 // drivers
 MU2 mu2(&bufferedSerial);
 PA1010D pa1010d(&i2c);
+BME280 bme280(&i2c);
 
 // middlewares
 Logger logger(&sdBlockDevice, &littleFileSystem2);
 Console console(&mu2, &logger);
+Variometer variometer(&bme280);
 
 // sequences
+LandingSequence landingSequence(&variometer);
+
+// 着地検知シーケンス
+void syncLandingSequence() {
+  landingSequence.start();
+
+  while (landingSequence.state() != LandingSequence::Complete) {
+    ThisThread::sleep_for(1s);
+  }
+
+  landingSequence.stop();
+}
 
 // main() runs in its own thread in the OS
 int main() {
   // I2C速度変更
   i2c.frequency(I2C_FREQUENCY);
+
+  // 着地検知シーケンス
+  syncLandingSequence();
 
   while (true) {
     ThisThread::sleep_for(1s);
