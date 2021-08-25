@@ -9,7 +9,6 @@
 
 // drivers
 #include "MU2.h"
-#include "PA1010D.h"
 
 // middlewares
 #include "Console.h"
@@ -32,7 +31,6 @@ LittleFileSystem2 littleFileSystem2(nullptr);
 
 // drivers
 MU2 mu2(&bufferedSerial);
-PA1010D pa1010d(&i2c);
 BME280 bme280(&i2c);
 
 // middlewares
@@ -41,7 +39,7 @@ Console console(&mu2, &logger);
 Variometer variometer(&bme280);
 
 // sequences
-LandingSequence landingSequence(&variometer);
+LandingSequence landingSequence(&variometer, &console);
 
 // 着地検知シーケンス
 void syncLandingSequence() {
