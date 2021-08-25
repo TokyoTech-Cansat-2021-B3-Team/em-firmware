@@ -3,7 +3,7 @@
 #include "mbed.h"
 
 #define FUSING_PWM_PERIOD 20ms
-#define FUSING_PWM_DUTY 1.0
+#define FUSING_PWM_DUTY 0.5
 
 class Fusing {
 private:
