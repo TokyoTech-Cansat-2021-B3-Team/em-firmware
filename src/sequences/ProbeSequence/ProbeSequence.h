@@ -39,10 +39,11 @@ private:
 
   void set(double L, double stroke, double duty);
 
-  void drilling(double angle, double speed, double stroke, double dl, double L, double dutyA_connect,
+  void drilling(double angle, double angle_0, double speed, double stroke, double dl, double L, double dutyA_connect,
                 double dutyB_connect, double dutyA_drilling, double dutyB_drilling, double duty_back);
 
   void s(double pwmA, double pwmB, double stroke, double L);
+
 public:
   explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder);
 
