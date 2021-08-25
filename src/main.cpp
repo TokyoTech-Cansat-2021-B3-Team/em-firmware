@@ -8,6 +8,7 @@
 #include "SDBlockDevice.h"
 
 // drivers
+#include "Fusing.h"
 #include "MU2.h"
 #include "PA1010D.h"
 
@@ -16,6 +17,7 @@
 #include "Logger.h"
 
 // sequences
+#include "FusingSequence.h"
 #include "LandingSequence.h"
 
 // defines
@@ -25,6 +27,8 @@
 // objects
 
 // embedded
+PwmOut fuseGate(FUSE_GATE);
+
 I2C i2c(I2C_SDA, I2C_SCL);
 BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, SPI_FREQUENCY);
@@ -32,6 +36,7 @@ LittleFileSystem2 littleFileSystem2(nullptr);
 
 // drivers
 MU2 mu2(&bufferedSerial);
+Fusing fusing(&fuseGate);
 PA1010D pa1010d(&i2c);
 BME280 bme280(&i2c);
 
@@ -68,6 +73,25 @@ void syncLandingSequence() {
   landingSequence.stop();
 }
 
+FusingSequence fusingSequence(&fusing, &console);
+
+// パラシュート分離シーケンス
+void fusingSequenceSyncStart() {
+  fusingSequence.start();
+
+  console.log("main", "Fusing Sequence Sync Start");
+
+  // 正常終了
+  // フィードバックなしなので必ず起こる
+  while (fusingSequence.state() != FusingSequence::Complete) {
+    ThisThread::sleep_for(1s);
+  }
+
+  console.log("main", "Fusing Sequence Complete");
+
+  fusingSequence.stop();
+}
+
 // main() runs in its own thread in the OS
 int main() {
   // I2C速度変更
@@ -75,6 +99,9 @@ int main() {
 
   // 着地検知シーケンス
   syncLandingSequence();
+  
+  // パラシュート分離シーケンス
+  fusingSequenceSyncStart();
 
   while (true) {
     ThisThread::sleep_for(1s);
