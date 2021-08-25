@@ -1,37 +1,34 @@
-#include "mbed.h"
 #include "PinAssignment.h"
+#include "mbed.h"
 
 #include <cstring>
 #include <exception>
 
+#include "BME280.h"
+#include "MU2.h"
+#include "PA1010D.h"
 #include "QEI.h"
 #include "lsm9ds1.h"
-#include "MU2.h"
-#include "BME280.h"
-#include "PA1010D.h"
 
 #include "Fusing.h"
 
-#include "WheelMotor.h"
-#include "WheelPID.h"
-#include "WheelControl.h"
-#include "MotorSpeed.h"
 #include "DCMotor.h"
 #include "DrillMotor.h"
+#include "MotorSpeed.h"
 #include "Stepper.h"
+#include "WheelControl.h"
+#include "WheelMotor.h"
+#include "WheelPID.h"
 
-#define PRINT_BUFFER_SIZE 128
+#define PRINT_BUFFER_SIZE 256
 
-BufferedSerial serial(UART_TX, UART_RX);//
-
-
-enum ExperimentMode{
-    CHECK_ALL
-};
+enum ExperimentMode { CHECK_ALL };
 
 char printBuffer[PRINT_BUFFER_SIZE];
 
 ExperimentMode flag = CHECK_ALL;
+
+BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -63,7 +60,7 @@ QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 I2C i2c(I2C_SDA, I2C_SCL);
 
 LSM9DS1 imu(&i2c);
-MU2 mu2(&serial);
+MU2 mu2(&bufferedSerial);
 BME280 bme280(&i2c);
 
 PA1010D pa1010d(&i2c);
@@ -77,136 +74,165 @@ MotorSpeed rightMotorSpeed(&rightEncoder, 298.0);
 WheelPID leftPID;
 WheelPID rightPID;
 
-WheelControl leftControl(&leftWheelMotor,&leftPID,&leftMotorSpeed);
-WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
-
-DigitalIn SafetyPin(FUSE_GATE);
-
-BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
+WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
+WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
 // main() runs in its own thread in the OS
 int main() {
-    if(flag==CHECK_ALL){
-        //init GPIO
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Initializing GPIO and Setting I2C\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        loadingMotor.idleCurrent(false);
-        i2c.frequency(400000);
+  if (flag == CHECK_ALL) {
+    // while (true) {
+    //   led = !led;
+    //   ThisThread::sleep_for(1s);
+    // }
 
-        //Check Wheel Motor
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check Wheel Motor\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Target Speed is 15RPM\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        leftControl.setTargetSpeed(15);
-        rightControl.setTargetSpeed(15);
-        //5s間実行
-        for(int i = 0; i < 50; i++){
-            snprintf(printBuffer, PRINT_BUFFER_SIZE, "L : %f \t R : %f [RPM]\r\n", leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM());
-            serial.write(printBuffer,strlen(printBuffer));
-            ThisThread::sleep_for(100ms);
-        }
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Left and Right Motor OFF\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        leftControl.setTargetSpeed(0);
-        rightControl.setTargetSpeed(0);
+    // // Check MU-2
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check MU-2\r\n");
+    // mu2.transmit(printBuffer, strlen(printBuffer));
+    // mu2.init();
+    // while (true) {
+    //   const char *str = "MU2 Downlink";
+    //   mu2.transmit(str, strlen(str));
+
+    //   ThisThread::sleep_for(1s);
+    // }
+
+    // init GPIO
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Initializing GPIO and Setting I2C");
+    mu2.transmit(printBuffer, strlen(printBuffer));
+    // loadingMotor.idleCurrent(false);
+    i2c.frequency(400000);
+
+    // // Check Wheel Motor
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check Wheel Motor\r\n");
+    // bufferedSerial.write(printBuffer, strlen(printBuffer));
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "Target Speed is 15RPM\r\n");
+    // bufferedSerial.write(printBuffer, strlen(printBuffer));
+    // leftMotorSpeed.start();
+    // rightMotorSpeed.start();
+    // leftControl.setTargetSpeed(15);
+    // rightControl.setTargetSpeed(15);
+    // // 5s間実行
+    // for (int i = 0; i < 50; i++) {
+    //   snprintf(printBuffer, PRINT_BUFFER_SIZE, "L : %f \t R : %f [RPM]\r\n", leftMotorSpeed.currentSpeedRPM(),
+    //            rightMotorSpeed.currentSpeedRPM());
+    //   bufferedSerial.write(printBuffer, strlen(printBuffer));
+    //   ThisThread::sleep_for(100ms);
+    // }
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "Left and Right Motor OFF\r\n");
+    // bufferedSerial.write(printBuffer, strlen(printBuffer));
+    // leftControl.setTargetSpeed(0);
+    // rightControl.setTargetSpeed(0);
+    // ThisThread::sleep_for(1s);
+
+    // leftWheelMotor.reverse(1.0);
+    // rightWheelMotor.reverse(1.0);
+
+    // for (int i = 0; i < 10; i++) {
+    //   snprintf(printBuffer, PRINT_BUFFER_SIZE, "left: %d, right: %d\r\n", leftEncoder.getPulses(),
+    //            rightEncoder.getPulses());
+    //   mu2.transmit(printBuffer, strlen(printBuffer));
+    //   ThisThread::sleep_for(1s);
+    // }
+
+    // leftWheelMotor.stop();
+    // rightWheelMotor.stop();
+
+    // drillMotor.forward(1.0);
+    // ThisThread::sleep_for(5s);
+    // drillMotor.stop();
+
+    // printf("%d\n", verticalEncoder.getPulses());
+    // verticalMotor.reverse(0.5);
+    // ThisThread::sleep_for(5s);
+    // verticalMotor.forward(0.5);
+    // ThisThread::sleep_for(5s);
+    // verticalMotor.stop();
+
+    // while (true) {
+    //   ThisThread::sleep_for(1s);
+    // }
+
+    // while (true) {
+    //   loadingMotor.idleCurrent(true);
+    //   loadingMotor.rotate(10, 0.01);
+    //   loadingMotor.idleCurrent(false);
+    //   //   ThisThread::sleep_for(1s);
+    // }
+
+    // Check LSM9DS1
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check LSM9DS1");
+    mu2.transmit(printBuffer, strlen(printBuffer));
+    imu.start();
+    if (imu.getStatus() == LSM9DS1_STATUS_SUCCESS_TO_CONNECT) {
+      imu.start();
+      // 2s間みる
+      for (int i = 0; i < 10; i++) {
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f %f %f %f %f;", imu.accX(), imu.accY(), imu.accZ(),
+                 imu.gyrX(), imu.gyrY(), imu.gyrZ(), imu.magX(), imu.magY(), imu.magZ());
+        mu2.transmit(printBuffer, strlen(printBuffer));
         ThisThread::sleep_for(1s);
-
-        //Check LSM9DS1
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check LSM9DS1\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        imu.start();
-        if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
-            imu.start();
-            //2s間みる
-            for(int i = 0; i < 100; i++){
-                snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f %f %f %f %f;\r\n",imu.accX(), imu.accY(), imu.accZ(), imu.gyrX(), imu.gyrY(), imu.gyrZ(), imu.magX(), imu.magY(), imu.magZ());
-                serial.write(printBuffer,strlen(printBuffer));  
-                ThisThread::sleep_for(20ms);
-            }
-            imu.stop();
-        }
-        
-        //Check MU-2
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check MU-2\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        mu2.init();
-        for (int i = 0; i < 10; i++) {
-            const char *str = "Hello MU2";
-            mu2.transmit(str, strlen(str));
-
-            ThisThread::sleep_for(1s);
-        }
-
-        //Check bme280
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check BME280\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        bme280.start();
-        for (int i = 0; i < 50; i++) {
-            printf("press: %lf Pa\n", bme280.getPressure());
-            printf("temp: %lf DegC\n", bme280.getTemprature());
-            printf("hum: %lf %%RH\n", bme280.getHumidity());
-
-            ThisThread::sleep_for(100ms);
-        }
-
-        //Check Fuse
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check Fuse in 5s\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Heating will start in 10s. \r\n CAUTION!!!!!!\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        led = 0;
-        ThisThread::sleep_for(10s);
-        led = 1;
-        fusing.heat(10s);
-        led = 0;
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Cooling Start\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        ThisThread::sleep_for(2s);
-
-        //Check PA1010D
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check PA1010A\r\n");
-        serial.write(printBuffer,strlen(printBuffer));
-        pa1010d.start();
-        //   PA1010D::RMCPacket rmc;
-        PA1010D::GGAPacket gga;
-        for (int i = 0; i < 5; i++) {
-            // pa1010d.getRMC(&rmc);
-
-            // printf("utc: %lf\n", rmc.utc);
-            // printf("status: %c\n", rmc.status);
-            // printf("latitude: %lf\n", rmc.latitude);
-            // printf("nsIndicator: %c\n", rmc.nsIndicator);
-            // printf("longitude: %lf\n", rmc.longitude);
-            // printf("ewIndicator: %c\n", rmc.ewIndicator);
-            // printf("speedOverGround: %f\n", rmc.speedOverGround);
-            // printf("courseOverGround: %f\n", rmc.courseOverGround);
-            // printf("date: %u\n", rmc.date);
-            // printf("magneticVariation: %f\n", rmc.magneticVariation);
-            // printf("variationDirection: %c\n", rmc.variationDirection);
-            // printf("mode: %c\n", rmc.mode);
-
-            pa1010d.getGGA(&gga);
-
-            printf("utc: %lf\n", gga.utc);
-            printf("latitude: %lf\n", gga.latitude);
-            printf("nsIndicator: %c\n", gga.nsIndicator);
-            printf("longitude: %lf\n", gga.longitude);
-            printf("ewIndicator: %c\n", gga.ewIndicator);
-            printf("positionFixIndicator: %u\n", gga.positionFixIndicator);
-            printf("satellitesUsed: %u\n", gga.satellitesUsed);
-            printf("hdop: %f\n", gga.hdop);
-            printf("mslAltitude: %f\n", gga.mslAltitude);
-            printf("geoidalSeparation: %f\n", gga.geoidalSeparation);
-            printf("ageOfDiffCorr: %f\n", gga.ageOfDiffCorr);
-            printf("stationID: %u\n", gga.stationID);
-
-            ThisThread::sleep_for(1s);
-        }
-        while(true){
-            snprintf(printBuffer, PRINT_BUFFER_SIZE, "All Checking is DONE\r\n");
-            serial.write(printBuffer,strlen(printBuffer));
-            ThisThread::sleep_for(500ms);
-        }
+      }
+      imu.stop();
     }
+
+    // Check bme280
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check BME280");
+    mu2.transmit(printBuffer, strlen(printBuffer));
+    bme280.start();
+    for (int i = 0; i < 10; i++) {
+
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "press: %lf Pa, temp: %lf DegC", bme280.getPressure(),
+               bme280.getTemprature());
+      mu2.transmit(printBuffer, strlen(printBuffer));
+
+      ThisThread::sleep_for(1s);
+    }
+
+    // Check PA1010D
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check PA1010A");
+    mu2.transmit(printBuffer, strlen(printBuffer));
+
+    pa1010d.start();
+
+    PA1010D::GGAPacket gga;
+    for (int i = 0; i < 5; i++) {
+
+      pa1010d.getGGA(&gga);
+
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "utc: %lf, lat: %lf, ns: %c, lng: %lf, ew: %c, fix: %u", gga.utc,
+               gga.latitude, gga.nsIndicator ? gga.nsIndicator : ' ', gga.longitude,
+               gga.ewIndicator ? gga.ewIndicator : ' ', gga.positionFixIndicator);
+      mu2.transmit(printBuffer, strlen(printBuffer));
+
+      ThisThread::sleep_for(1s);
+    }
+
+    // Check Fuse
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check Fuse in 5s");
+    mu2.transmit(printBuffer, strlen(printBuffer));
+
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Heating will start in 10s. CAUTION!!!!!!");
+    mu2.transmit(printBuffer, strlen(printBuffer));
+
+    led = 0;
+    ThisThread::sleep_for(10s);
+
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Heating start");
+    mu2.transmit(printBuffer, strlen(printBuffer));
+
+    led = 1;
+    fusing.heat(10s);
+
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Cooling Start");
+    mu2.transmit(printBuffer, strlen(printBuffer));
+
+    led = 0;
+    ThisThread::sleep_for(2s);
+
+    while (true) {
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "All Checking is DONE");
+      mu2.transmit(printBuffer, strlen(printBuffer));
+      ThisThread::sleep_for(1s);
+    }
+  }
 }
