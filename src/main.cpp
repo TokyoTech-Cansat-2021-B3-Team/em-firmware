@@ -70,7 +70,7 @@ Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
-RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &bufferedSerial);
+RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &console);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
