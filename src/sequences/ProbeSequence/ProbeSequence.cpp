@@ -18,7 +18,6 @@ void ProbeSequence::threadLoop() {
     set(20, 0.8, 0.3);
     //変位、ストローク、デューティー比
 
-    drilling(72.0, 0.125, 0.8, 5, 50, 0.1, 0.1, 1.0, 0.3, 0.3);
     //ホルダー回転角度、回転速さ(rps)、ストローク、電極接続長さ、刺しこみ長さ
     //デューティー比(接続、ドリル)、デューティー比(接続、上下)、デューティー比(刺しこみ、ドリル)、デューティー比(刺しこみ、上下)
     //デューティー比(初期位置移動、上下)
@@ -27,7 +26,6 @@ void ProbeSequence::threadLoop() {
 
   // 2～4本
   else {
-    drilling(72.0, 0.125, 0.8, 5, 50, 0.1, 0.1, 1.0, 0.3, 0.3);
     //ホルダー回転角度、回転速さ(rps)、ストローク、電極接続長さ、刺しこみ長さ
     //デューティー比(接続、ドリル)、デューティー比(接続、上下)、デューティー比(刺しこみ、ドリル)、デューティー比(刺しこみ、上下)
     //デューティー比(初期位置移動、上下)
@@ -50,14 +48,11 @@ void ProbeSequence::set(double L, double stroke, double duty) {
 }
 
 //刺しこみ一連の動作
-void ProbeSequence::drilling(double angle, double speed, double stroke, double dl, double L, double dutyA_connect,
-                             double dutyB_connect, double dutyA_drilling, double dutyB_drilling, double duty_back) {
 void ProbeSequence::drilling(double angle, double angle_0, double speed, double stroke, double dl, double L,
                              double dutyA_connect, double dutyB_connect, double dutyA_drilling, double dutyB_drilling,
                              double duty_back) {
 
   //～ホルダー回転～
-  _loadingMotor->rotate(angle, speed);
   _loadingMotor->rotate((angle - angle_0), speed);
   ThisThread::sleep_for(2s);
   _loadingMotor->rotate(angle_0, speed);
