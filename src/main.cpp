@@ -29,7 +29,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 
 #include "RunningSequence.h"
 
-#define PRINT_BUFFER_SIZE 128
+#define PRINT_BUFFER_SIZE 256
 
 enum ExperimentMode{
     RunningAllSequence,
@@ -37,7 +37,7 @@ enum ExperimentMode{
     RunningNoControle
 };
 
-ExperimentMode flag = RunningNoControle;
+ExperimentMode flag = RunningAllSequence;
 const double cruiseSpeed = 20.0;
 
 PwmOut motor1In1(M1_IN1);
@@ -65,8 +65,8 @@ WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 
 FusionOdometry ekf(KALMANFILTER_PERIOD);
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 62.0e-3);
-SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 62.0e-3);
+Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
+SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 68.0e-3);
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
@@ -78,11 +78,13 @@ Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
-  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
+  //snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
+  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
   serial.write(printBuffer, strlen(printBuffer));
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(), localization.getAngularVelocityFromWheelOdometry(), imu.gyrZ(), localization.theta(), localization.omega(), localization.x(), localization.y(),  localization.v(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y());
-        //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
+        //snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(), localization.getAngularVelocityFromWheelOdometry(), imu.gyrZ(), localization.theta(), localization.omega(), localization.x(), localization.y(),  localization.v(), simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y());
+        
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
         
         serial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(20ms);
@@ -92,7 +94,7 @@ void printThreadLoop() {
 void speedThreadLoop(){
     if(flag==RunningAllSequence){
         runningSequence.start(FIRST);
-        //simpleLocalization.start();
+        simpleLocalization.start();
         if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
             snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
             serial.write(printBuffer,strlen(printBuffer));
@@ -104,12 +106,12 @@ void speedThreadLoop(){
         while(true){
             if(runningSequence.state() == ARRIVED_SECOND_POLE){
                 runningSequence.stop();
-                ThisThread::sleep_for(1s);
+                ThisThread::sleep_for(5s);
                 runningSequence.start(SECOND);
             }
             if(runningSequence.state() == ARRIVED_THIRD_POLE){
                 runningSequence.stop();
-                ThisThread::sleep_for(1s);
+                ThisThread::sleep_for(5s);
                 runningSequence.start(THIRD);
             }
             if(runningSequence.state() == ARRIVED_FOURTH_POLE){
