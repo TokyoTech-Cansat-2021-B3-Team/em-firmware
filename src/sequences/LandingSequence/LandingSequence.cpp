@@ -10,29 +10,29 @@ LandingSequence::LandingSequence(Variometer *variometer, Console *console)
 void LandingSequence::threadLoop() {
   // シーケンス開始
   _state = Running;
-  _console->lprintf("Landing", "start Landing Sequence\n");
+  _console->log("Landing", "start Landing Sequence\n");
 
   // 落下開始まで待機
-  _console->lprintf("Landing", "waiting for start falling\n");
+  _console->log("Landing", "waiting for start falling\n");
 
   _state = WaitFalling;
   waitFalling();
 
   // 落下検知
-  _console->lprintf("Landing", "detect falling\n");
+  _console->log("Landing", "detect falling\n");
 
   // 着地まで待機
-  _console->lprintf("Landing", "waiting for start landing\n");
+  _console->log("Landing", "waiting for start landing\n");
 
   _state = WaitLanding;
   waitLanding();
 
   // 着地検知
-  _console->lprintf("Landing", "detect landing\n");
+  _console->log("Landing", "detect landing\n");
 
   // シーケンス終了
   _state = Complete;
-  _console->lprintf("Landing", "Landing Sequence complete\n");
+  _console->log("Landing", "Landing Sequence complete\n");
 }
 
 bool LandingSequence::isFalling() {
