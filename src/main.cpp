@@ -128,6 +128,11 @@ void probeSequenceSyncStart(ProbeSequence::ProbeNumber number) {
 
 // main() runs in its own thread in the OS
 int main() {
+  // ダウンリンクとログの有効化
+  console.init();
+
+  console.log("main", "Initialize Program !!");
+
   // I2C速度変更
   i2c.frequency(I2C_FREQUENCY);
 
