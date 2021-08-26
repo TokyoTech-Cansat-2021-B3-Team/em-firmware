@@ -114,10 +114,10 @@ void ProbeSequence::start(ProbeNumber probeNumber) {
   if (!_isStart) {
     _probeNumber = probeNumber;
 
-    _thread = make_unique<Thread>(THREAD_PATTERN_THREAD_PRIORITY,   //
-                                  THREAD_PATTERN_THREAD_STACK_SIZE, //
+    _thread = make_unique<Thread>(PROBE_SEQUENCE_THREAD_PRIORITY,   //
+                                  PROBE_SEQUENCE_THREAD_STACK_SIZE, //
                                   nullptr,                          //
-                                  THREAD_PATTERN_THREAD_NAME);
+                                  PROBE_SEQUENCE_THREAD_NAME);
     _thread->start(callback(this, &ProbeSequence::threadLoop));
 
     _isStart = true;
@@ -133,6 +133,6 @@ void ProbeSequence::stop() {
   }
 }
 
-ProbeSequenceState ProbeSequence::state() {
+ProbeSequence::ProbeSequenceState ProbeSequence::state() {
   return _state;
 }
