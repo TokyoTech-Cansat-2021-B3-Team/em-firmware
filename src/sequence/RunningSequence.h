@@ -1,16 +1,17 @@
 #pragma once
 
 #include "mbed.h"
-#include <cstdint>
 
 #include "MotorSpeed.h"
 #include "WheelControl.h"
 #include "localization.h"
 #include "lsm9ds1.h"
 #include "navigation.h"
+#include "Logger.h"
+#include "Console.h"
 
 #define RUNNINGSEQUENCE_THREAD_PRIORITY osPriorityHigh
-#define RUNNINGSEQUENCE_THREAD_STACK_SIZE 1024
+#define RUNNINGSEQUENCE_THREAD_STACK_SIZE 2048
 #define RUNNINGSEQUENCE_THREAD_NAME "RUNNINGSEQUENCE"
 
 #define RUNNINGSEQUENCE_PERIOD 100ms
@@ -36,8 +37,8 @@ enum RunningSqequneceType { FIRST, SECOND, THIRD };
 class RunningSequence {
 public:
   explicit RunningSequence(Navigation *navigation, Localization *Localization, LSM9DS1 *imu, MotorSpeed *leftMotorSpeed,
-                           MotorSpeed *rightMotorSpeed, WheelControl *leftWheelControl,
-                           WheelControl *rightWheelControl);
+                           MotorSpeed *rightMotorSpeed, WheelControl *leftWheelControl, WheelControl *rightWheelControl,
+                           Console *console, Logger *logger);
   void start(RunningSqequneceType sequenceType);
   void stop();
   RunningSequenceState state();
@@ -49,6 +50,7 @@ public:
 
 private:
   void init();
+  void pushDataToLogger();
   void setStatus(RunningSequenceState state);
   void threadLoop();
   void shiftStatusToMovingAndSetTargetPosition();
@@ -68,5 +70,7 @@ private:
   MotorSpeed *_rightMotorSpeed;
   WheelControl *_leftWheelControl;
   WheelControl *_rightWheelControl;
+  Console *_console;
+  Logger *_logger;
   unique_ptr<Thread> _thread;
 };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "mbed.h"
-#include <cstdint>
 
 #include "MotorSpeed.h"
 #include "QEI.h"

@@ -8,6 +8,10 @@ void WheelPID::setTargetSpeed(double speed) {
   _targetSpeed = speed;
 }
 
+double WheelPID::getOutput() {
+  return _output;
+}
+
 void WheelPID::updatePIDOutput(double sensorSpeed, chrono::microseconds period) {
   float diff = _targetSpeed - sensorSpeed;
   float deviation = sensorSpeed - _previousSpeed;
@@ -16,10 +20,6 @@ void WheelPID::updatePIDOutput(double sensorSpeed, chrono::microseconds period) 
   _previousSpeed = sensorSpeed;
 
   _output = diff * _pGain + _integral * _iGain + _diff * _dGain;
-}
-
-double WheelPID::getOutput() {
-  return _output;
 }
 
 void WheelPID::resetIntegral() {

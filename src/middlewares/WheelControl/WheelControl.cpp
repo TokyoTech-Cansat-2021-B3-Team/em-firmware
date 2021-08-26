@@ -1,10 +1,4 @@
 #include "WheelControl.h"
-#include "MotorSpeed.h"
-#include "QEI.h"
-#include "WheelMotor.h"
-#include "WheelPID.h"
-#include "mbed.h"
-#include <memory>
 
 WheelControl::WheelControl(WheelMotor *wheelmotor, WheelPID *wheelpid, MotorSpeed *motorSpeed)
     : _wheelmotor(wheelmotor), _wheelpid(wheelpid), _motorSpeed(motorSpeed), _direction(FOWARD), _thread() {}
