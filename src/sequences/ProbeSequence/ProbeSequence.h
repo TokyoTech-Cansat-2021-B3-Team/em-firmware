@@ -2,6 +2,7 @@
 
 #include "mbed.h"
 
+#include "Console.h"
 #include "DCMotor.h"
 #include "DrillMotor.h"
 #include "QEI.h"
@@ -65,6 +66,8 @@ private:
   Stepper *_loadingMotor;
   QEI *_verticalEncoder;
 
+  Console *_console;
+
   // 電極の番号をThreadに通知
   ProbeNumber _probeNumber;
 
@@ -98,7 +101,8 @@ private:
   double revToLength(int revolution);
 
 public:
-  explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder);
+  explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder,
+                         Console *console);
 
   void start(ProbeNumber probeNumber);
 

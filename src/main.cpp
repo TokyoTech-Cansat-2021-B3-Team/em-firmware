@@ -52,7 +52,7 @@ Logger logger(&sdBlockDevice, &littleFileSystem2);
 Console console(&mu2, &logger);
 
 // sequences
-ProbeSequence probeSequence(&drillMotor, &verticalMotor, &loadingMotor, &verticalEncoder);
+ProbeSequence probeSequence(&drillMotor, &verticalMotor, &loadingMotor, &verticalEncoder, &console);
 
 // 刺し込みシーケンス
 void probeSequenceSyncStart(ProbeSequence::ProbeNumber number) {

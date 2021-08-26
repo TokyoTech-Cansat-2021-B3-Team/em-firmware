@@ -1,7 +1,7 @@
 #include "ProbeSequence.h"
 
 ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor,
-                             QEI *verticalEncoder)
+                             QEI *verticalEncoder, Console *console)
     : _thread(),                         //
       _drillMotor(drillMotor),           //
       _verticalMotor(verticalMotor),     //
@@ -9,7 +9,8 @@ ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Ste
       _probeNumber(Probe1),              //
       _verticalEncoder(verticalEncoder), //
       _isStart(false),                   //
-      _state(Stop)                       //
+      _state(Stop),                      //
+      _console(console)                  //
 {}
 
 void ProbeSequence::threadLoop() {
@@ -18,25 +19,32 @@ void ProbeSequence::threadLoop() {
 
   // シーケンス開始
   _state = Running;
+  _console->log("Probe", "Start Probe%d Sequence\n", _probeNumber);
 
   // 1本目のみ初期位置への移動
   if (_probeNumber == Probe1) {
+    _console->log("Probe", "Setup Init Position\n");
     verticalMove(PROBE_SEQUENCE_SETUP_VERTICAL_DUTY, PROBE_SEQUENCE_SETUP_LENGTH);
   }
 
   // ホルダーの回転
+  _console->log("Probe", "Rotate holder to next position\n");
   holderToNext();
 
   // 電極接続
+  _console->log("Probe", "Start Connect to Probe\n");
   connect();
 
   // 刺し込み
+  _console->log("Probe", "Start Drilling\n");
   drilling();
 
   // 初期位置へ戻る
+  _console->log("Probe", "Back to Init Position\n");
   back();
 
-  // シーケンス終了
+  // シーケンス終了s
+  _console->log("Probe", "Probe%d Sequence Complete\n", _probeNumber);
   _state = Complete;
 }
 
