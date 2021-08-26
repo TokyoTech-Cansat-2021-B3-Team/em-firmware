@@ -107,12 +107,13 @@ void ProbeSequence::verticalMove(double duty, double L) {
 }
 
 double ProbeSequence::revToLength(int revolution) {
-  return revolution * PROBE_SEQUENCE_VERTICAL_RATIO * PROBE_SEQUENCE_VERTICAL_LEAD;
+  return ((double)revolution / PROBE_SEQUENCE_VERTICAL_RATIO) * PROBE_SEQUENCE_VERTICAL_LEAD;
 }
 
 void ProbeSequence::start(ProbeNumber probeNumber) {
   if (!_isStart) {
     _probeNumber = probeNumber;
+    _state = Stop;
 
     _thread = make_unique<Thread>(PROBE_SEQUENCE_THREAD_PRIORITY,   //
                                   PROBE_SEQUENCE_THREAD_STACK_SIZE, //
