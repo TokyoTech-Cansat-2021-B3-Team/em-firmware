@@ -33,8 +33,8 @@ protected:
     double _eps = 0.0;
 private:
     void threadLoop();
-    const double _gainKL = 0.2;//1mのずれで2RPMの差
-    const double _gainKT = 0.4;
+    const double _gainKL = 1.0;//1mのずれで2RPMの差
+    const double _gainKT = 0.3;
     double _cruiseSpeed = 18.0;//rpm
     double _deltaV = 0.0;
     double _leftTargetSpeed = 0.0;
