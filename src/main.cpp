@@ -83,7 +83,6 @@ void printThreadLoop() {
 
 // main() runs in its own thread in the OS
 int main() {
-  logger.init();
   runningSequence.start(FIRST);
   if (imu.getStatus() == LSM9DS1_STATUS_SUCCESS_TO_CONNECT) {
     snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");

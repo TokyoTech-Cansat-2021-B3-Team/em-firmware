@@ -34,6 +34,8 @@ void RunningSequence::init() {
   _leftWheelControl->start();
   _rightWheelControl->start();
   _navigation->start();
+  _logger->init();
+  _console->init();
 }
 
 void RunningSequence::stop() {
