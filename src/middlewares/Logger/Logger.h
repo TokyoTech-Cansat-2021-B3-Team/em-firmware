@@ -3,10 +3,12 @@
 #include "BlockDevice.h"
 #include "FileSystem.h"
 #include "mbed.h"
+#include <memory>
 
 #define LOGGER_FORCE_REFORMAT false
 #define LOGGER_MESSAGE_FILE_PATH "/MessageLog.txt"
 #define LOGGER_GPS_FILE_PATH "/GPSLog.bin"
+#define LOGGER_RUNNING_FILE_PATH "/RunningLog.bin"
 
 #define LOGGER_PRINTF_BUFFER_SIZE 256
 
@@ -22,6 +24,15 @@ public:
     char ewIndicator;             // E: 東経, W: 西経
     uint8_t positionFixIndicator; // 0: Fix not avalilable, 1: GPS fix, 2: Differencial GPS fix
   };
+  using RunningData = struct {
+    double x;
+    double y;
+    double theta;
+    double leftTargetSpeed;
+    double rightTargetSpeed;
+    double leftSpeed;
+    double rightSpeed;
+  };
 #pragma pack()
 
 private:
@@ -33,6 +44,9 @@ private:
 
   // GPSログ用のファイル
   shared_ptr<File> _gpsFile;
+
+  // 走行シーケンスログ用のファイル
+  shared_ptr<File> _runningFile;
 
   bool _isInit;
 
@@ -52,6 +66,8 @@ private:
 
   void dumpGPSLog();
 
+  void dumpRunningLog();
+
 public:
   explicit Logger(BlockDevice *blockDevice, FileSystem *fileSystem);
 
@@ -66,4 +82,7 @@ public:
 
   // GPSログの書き込み
   void gpsLog(GPSLogData *data);
+  
+  // 位置制御情報の書き込み
+  void runningLog(RunningData *data);
 };
