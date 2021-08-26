@@ -13,11 +13,9 @@ class WheelMotor : public DCMotor {
 private:
 public:
 private:
-  enum DIRECTION{
-    FOWARD,
-    REVERSE
-  };
+  enum DIRECTION { FOWARD, REVERSE };
   DIRECTION _direction;
+
 public:
   explicit WheelMotor(PwmOut *in1, PwmOut *in2);
 
