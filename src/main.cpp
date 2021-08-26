@@ -79,6 +79,38 @@ WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
 // main() runs in its own thread in the OS
 int main() {
+  leftWheelMotor.reverse(1.0);
+  rightWheelMotor.reverse(1.0);
+
+  ThisThread::sleep_for(1s);
+
+  leftWheelMotor.stop();
+  rightWheelMotor.stop();
+
+  ThisThread::sleep_for(2s);
+
+  leftWheelMotor.forward(1.0);
+  rightWheelMotor.forward(1.0);
+
+  ThisThread::sleep_for(500ms);
+
+  leftWheelMotor.stop();
+  rightWheelMotor.stop();
+
+  ThisThread::sleep_for(2s);
+
+  leftWheelMotor.reverse(1.0);
+  rightWheelMotor.reverse(1.0);
+
+  ThisThread::sleep_for(2s);
+
+  leftWheelMotor.stop();
+  rightWheelMotor.stop();
+
+  while (true) {
+    ThisThread::sleep_for(1s);
+  }
+
   if (flag == CHECK_ALL) {
     // while (true) {
     //   led = !led;
