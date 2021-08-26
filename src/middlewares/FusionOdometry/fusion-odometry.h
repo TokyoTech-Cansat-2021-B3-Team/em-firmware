@@ -6,12 +6,12 @@
 #define Mobs 6 //the size of measurements
 
 #include "TinyEKF.h"
+#include "mbed.h"
 
 class FusionOdometry : public TinyEKF{
     public:
-        double dt;
-        FusionOdometry(std::chrono::duration<double> period_seconds):
-        dt(period_seconds.count())
+      FusionOdometry()
+          : _timer(Timer())
         {
             //process noise
             this->setQ(0,0,sigma_3_w); //theta
@@ -54,40 +54,41 @@ class FusionOdometry : public TinyEKF{
             */
         }
         void updateR(double* z){
-            sigma_w_w = delta_w_w * this->dt * z[0] + delta_w_w * this->dt * z[2];
-            sigma_w_v = delta_w_v * this->dt * z[0] + delta_w_v * this->dt * z[2];
+            sigma_w_w = delta_w_w * this->_dt * z[0] + delta_w_w * this->_dt * z[2];
+            sigma_w_v = delta_w_v * this->_dt * z[0] + delta_w_v * this->_dt * z[2];
             this->setR(0,0,sigma_w_w); //w_w Dynamic
             this->setR(2,2,sigma_w_v); //v_w Dynamic
         }
-        
-        bool step_with_updateQR(double * z) 
-        { 
-            updateQ();
-            updateR(z);
-            return this->step(z);
+
+        bool step_with_updateQR(double *z) {
+          _dt = (_timer.elapsed_time().count() - _previousTime) * 1.0e-6;
+          _previousTime = _timer.elapsed_time().count();
+          updateQ();
+          updateR(z);
+          return this->step(z);
         }
     protected:
         void model(double fx[Nsta], double F[Nsta][Nsta], double hx[Mobs], double H[Mobs][Nsta]){
             //process model
             //refer to p1295 column L
-            fx[0] = this->x[0] + this->x[2] * this->dt;
+            fx[0] = this->x[0] + this->x[2] * this->_dt;
             fx[1] = this->x[1];
             fx[2] = this->x[2];
-            fx[3] = this->x[3] + cos(this->x[0]) * this->dt * this->x[5];
-            fx[4] = this->x[4] + sin(this->x[0]) * this->dt * this->x[5];
+            fx[3] = this->x[3] + cos(this->x[0]) * this->_dt * this->x[5];
+            fx[4] = this->x[4] + sin(this->x[0]) * this->_dt * this->x[5];
             fx[5] = this->x[5];
 
             //Matrix F
             F[0][0] = 1;
-            F[0][2] = this->dt;
+            F[0][2] = this->_dt;
             F[1][1] = 1;
             F[2][2] = 1;
             F[3][3] = 1;
-            F[3][0] = -sin(this->x[0]) * this->dt * this->x[5];
-            F[3][5] = cos(this->x[0]) * this->dt;
+            F[3][0] = -sin(this->x[0]) * this->_dt * this->x[5];
+            F[3][5] = cos(this->x[0]) * this->_dt;
             F[4][4] = 1;
-            F[4][0] = cos(this->x[0]) * this->dt * this->x[5];
-            F[4][5] = sin(this->x[0]) * this->dt;
+            F[4][0] = cos(this->x[0]) * this->_dt * this->x[5];
+            F[4][5] = sin(this->x[0]) * this->_dt;
             F[5][5] = 1;
 
             //measurements function
@@ -137,4 +138,7 @@ class FusionOdometry : public TinyEKF{
         const double sigma_d_theta = 0.01f; // 調整する変数
         const double sigma_d_x = 0.01f;     // 調整する変数
         const double sigma_d_y = 0.01f;     // 調整する変数
+        double _dt = 0;
+        double _previousTime = 0;
+        Timer _timer;
 };
