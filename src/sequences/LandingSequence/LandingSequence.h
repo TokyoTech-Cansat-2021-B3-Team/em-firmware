@@ -11,7 +11,7 @@
 
 #define LANDING_SEQUENCE_POLLING_PERIOD VARIOMETER_PERIOD // 垂直速度確認の周期
 #define LANDING_SEQUENCE_FALLING_THRESHOLD -1.0           // 落下判定の垂直速度の閾値 -1.0 m/s
-#define LANDING_SEQUENCE_LANDING_DURATION 10s             // 静止判定の持続時間 10s
+#define LANDING_SEQUENCE_LANDING_DURATION 30s             // 静止判定の持続時間 30s
 #define LANDING_SEQUENCE_FALLING_DURATION 1s              // 落下判定の持続時間 1s
 
 #define LANDING_SEQUENCE_TIMEOUT 1min // シーケンスのタイムアウト時間
