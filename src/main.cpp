@@ -1,32 +1,48 @@
 #include "mbed.h"
 
+// includes
 #include "PinAssignment.h"
 
-#include "DCMotor.h"
-#include "DrillMotor.h"
-#include "ProbeSequence.h"
-#include "QEI.h"
-#include "Stepper.h"
+// embedded
+#include "LittleFileSystem2.h"
+#include "SDBlockDevice.h"
 
-PwmOut motor3In1(M3_IN1);
-PwmOut motor3In2(M3_IN2);
+// drivers
+#include "MU2.h"
+#include "PA1010D.h"
 
-PwmOut motor4In1(M4_IN1);
+// middlewares
+#include "Console.h"
+#include "Logger.h"
 
-DigitalOut motor5Enable(M5_ENABLE);
-DigitalOut motor5Step(M5_STEP);
+// sequences
 
-DCMotor verticalMotor(&motor3In1, &motor3In2);
-DrillMotor drillMotor(&motor4In1);
-QEI verticalEncoder(ENC3_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
+// defines
+#define SPI_FREQUENCY 25000000
+#define I2C_FREQUENCY 400000
 
-Stepper loadingMotor(&motor5Step, &motor5Enable);
+// objects
 
-ProbeSequence probeSequence(&drillMotor, &verticalMotor, &loadingMotor, &verticalEncoder);
+// embedded
+I2C i2c(I2C_SDA, I2C_SCL);
+BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
+SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, SPI_FREQUENCY);
+LittleFileSystem2 littleFileSystem2(nullptr);
+
+// drivers
+MU2 mu2(&bufferedSerial);
+PA1010D pa1010d(&i2c);
+
+// middlewares
+Logger logger(&sdBlockDevice, &littleFileSystem2);
+Console console(&mu2, &logger);
+
+// sequences
 
 // main() runs in its own thread in the OS
 int main() {
-  loadingMotor.idleCurrent(false);
+  // I2C速度変更
+  i2c.frequency(I2C_FREQUENCY);
 
   while (true) {
     ThisThread::sleep_for(1s);
