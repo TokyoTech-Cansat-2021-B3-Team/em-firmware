@@ -14,8 +14,17 @@
 #include "MU2.h"
 #include "QEI.h"
 #include "Stepper.h"
+#include "lsm9ds1.h"
 
 // middlewares
+#include "MotorSpeed.h"
+#include "WheelControl.h"
+#include "WheelMotor.h"
+#include "WheelPID.h"
+#include "fusion-odometry.h"
+#include "localization.h"
+#include "navigation.h"
+
 #include "Console.h"
 #include "Logger.h"
 
@@ -24,6 +33,7 @@
 #include "GPSDownlink.h"
 #include "LandingSequence.h"
 #include "ProbeSequence.h"
+#include "RunningSequence.h"
 
 // defines
 #define SPI_FREQUENCY 25000000
@@ -32,12 +42,16 @@
 // objects
 
 // embedded
-PwmOut fuseGate(FUSE_GATE);
+PwmOut motor1In1(M1_IN1);
+PwmOut motor1In2(M1_IN2);
+PwmOut motor2In1(M2_IN1);
+PwmOut motor2In2(M2_IN2);
 PwmOut motor3In1(M3_IN1);
 PwmOut motor3In2(M3_IN2);
 PwmOut motor4In1(M4_IN1);
 DigitalOut motor5Enable(M5_ENABLE);
 DigitalOut motor5Step(M5_STEP);
+PwmOut fuseGate(FUSE_GATE);
 
 I2C i2c(I2C_SDA, I2C_SCL);
 BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
@@ -46,6 +60,11 @@ SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, SPI_FREQUENC
 LittleFileSystem2 littleFileSystem2(nullptr);
 
 // drivers
+WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
+WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
+QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
+QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
+
 Fusing fusing(&fuseGate);
 DCMotor verticalMotor(&motor3In1, &motor3In2);
 DrillMotor drillMotor(&motor4In1);
@@ -55,8 +74,19 @@ QEI verticalEncoder(ENC3_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 PA1010D pa1010d(&i2c);
 BME280 bme280(&i2c);
 MU2 mu2(&bufferedSerial);
+LSM9DS1 imu(&i2c);
 
 // middlewares
+MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
+MotorSpeed rightMotorSpeed(&rightEncoder, 1000.0);
+WheelPID leftPID;
+WheelPID rightPID;
+WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
+WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
+FusionOdometry ekf(KALMANFILTER_PERIOD);
+Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
+Navigation navi(&localization, &leftControl, &rightControl);
+
 Logger logger(&sdBlockDevice, &littleFileSystem2);
 Console console(&mu2, &logger);
 Variometer variometer(&bme280);
@@ -66,6 +96,8 @@ GPSDownlink gpsDownlink(&pa1010d, &console, &logger);
 LandingSequence landingSequence(&variometer, &console);
 FusingSequence fusingSequence(&fusing, &console);
 ProbeSequence probeSequence(&drillMotor, &verticalMotor, &loadingMotor, &verticalEncoder, &console);
+RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
+                                &rightControl, &console, &logger);
 
 // 着地検知シーケンス
 void syncLandingSequence() {
@@ -126,6 +158,40 @@ void probeSequenceSyncStart(ProbeSequence::ProbeNumber number) {
   probeSequence.stop();
 }
 
+void runningSequenceSyncStart(RunningSqequneceType type) {
+
+  runningSequence.start(type);
+
+  if (imu.getStatus() == LSM9DS1_STATUS_SUCCESS_TO_CONNECT) {
+    console.log("main", "Succeeded connecting LSM9DS1.\n");
+  } else {
+    console.log("main", "Failed to connect LSM9DS1.\n");
+  }
+
+  while (true) {
+    if (runningSequence.state() == ARRIVED_SECOND_POLE) {
+      runningSequence.stop();
+      console.log("main", "Arrived Seconds Pole");
+      break;
+    }
+    if (runningSequence.state() == ARRIVED_THIRD_POLE) {
+      runningSequence.stop();
+      console.log("main", "Arrived Third Pole");
+      break;
+    }
+    if (runningSequence.state() == ARRIVED_FOURTH_POLE) {
+      runningSequence.stop();
+      console.log("main", "Arrived Fourth Pole");
+      break;
+    }
+    if (runningSequence.state() == TERMINATE) {
+      runningSequence.stop();
+      console.log("main", "Running Sequence Terminate");
+      break;
+    }
+  }
+}
+
 // main() runs in its own thread in the OS
 int main() {
   // ダウンリンクとログの有効化
@@ -151,11 +217,20 @@ int main() {
   // 刺し込みシーケンス1
   probeSequenceSyncStart(ProbeSequence::Probe1);
 
+  // 走行シーケンス1
+  runningSequenceSyncStart(FIRST);
+
   // 刺し込みシーケンス2
   probeSequenceSyncStart(ProbeSequence::Probe2);
 
+  // 走行シーケンス2
+  runningSequenceSyncStart(SECOND);
+
   // 刺し込みシーケンス3
   probeSequenceSyncStart(ProbeSequence::Probe3);
+
+  // 走行シーケンス3
+  runningSequenceSyncStart(THIRD);
 
   // 刺し込みシーケンス4
   probeSequenceSyncStart(ProbeSequence::Probe4);
