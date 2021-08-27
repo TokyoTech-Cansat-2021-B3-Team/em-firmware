@@ -83,7 +83,7 @@ WheelPID leftPID;
 WheelPID rightPID;
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
-FusionOdometry ekf(KALMANFILTER_PERIOD);
+FusionOdometry ekf;
 Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
 Navigation navi(&localization, &leftControl, &rightControl);
 
@@ -194,6 +194,12 @@ void runningSequenceSyncStart(RunningSqequneceType type) {
 
 // main() runs in its own thread in the OS
 int main() {
+  //   verticalMotor.forward(1.0);
+
+  //   while (true) {
+  //     ThisThread::sleep_for(1s);
+  //   }
+
   // ダウンリンクとログの有効化
   console.init();
 
@@ -215,25 +221,25 @@ int main() {
   fusingSequenceSyncStart();
 
   // 刺し込みシーケンス1
-  probeSequenceSyncStart(ProbeSequence::Probe1);
+  //   probeSequenceSyncStart(ProbeSequence::Probe1);
 
   // 走行シーケンス1
   runningSequenceSyncStart(FIRST);
 
   // 刺し込みシーケンス2
-  probeSequenceSyncStart(ProbeSequence::Probe2);
+  //   probeSequenceSyncStart(ProbeSequence::Probe2);
 
   // 走行シーケンス2
   runningSequenceSyncStart(SECOND);
 
   // 刺し込みシーケンス3
-  probeSequenceSyncStart(ProbeSequence::Probe3);
+  //   probeSequenceSyncStart(ProbeSequence::Probe3);
 
   // 走行シーケンス3
   runningSequenceSyncStart(THIRD);
 
   // 刺し込みシーケンス4
-  probeSequenceSyncStart(ProbeSequence::Probe4);
+  //   probeSequenceSyncStart(ProbeSequence::Probe4);
 
   console.log("main", "All Sequence Complete");
   console.log("main", "Start Sleep Forever");
