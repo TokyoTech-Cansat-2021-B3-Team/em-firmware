@@ -115,7 +115,7 @@ void ProbeSequence::verticalMove(double duty, double L) {
     _verticalMotor->reverse(duty);
   }
 
-  while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) || //
+  while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
          timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
     ThisThread::sleep_for(PROBE_SEQUENCE_VERTICAL_POLLING);
   }
