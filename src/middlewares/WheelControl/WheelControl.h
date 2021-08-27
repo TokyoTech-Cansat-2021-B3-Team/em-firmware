@@ -7,7 +7,7 @@
 #include "WheelMotor.h"
 #include "WheelPID.h"
 
-#define WHEELCONTROL_THREAD_PRIORITY osPriorityHigh
+#define WHEELCONTROL_THREAD_PRIORITY osPriorityAboveNormal
 #define WHEELCONTROL_THREAD_STACK_SIZE 1024
 #define WHEELCONTROL_THREAD_NAME "WHEELCONTROL"
 
