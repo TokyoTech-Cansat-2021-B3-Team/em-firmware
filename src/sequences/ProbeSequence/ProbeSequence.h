@@ -82,7 +82,7 @@ private:
   void set(double L, double stroke, double duty);
 
   // ホルダーの回転
-  void holderToNext();
+  void holderToNext(double first, double second);
 
   // 電極の接続
   void connect();
