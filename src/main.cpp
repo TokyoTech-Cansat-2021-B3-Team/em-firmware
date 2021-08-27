@@ -32,7 +32,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 
 enum ExperimentMode { RunningAllSequence, RunningPoleToPole, RunningNoControle };
 
-ExperimentMode flag = RunningAllSequence;
+ExperimentMode flag = RunningPoleToPole;
 const double cruiseSpeed = 20.0;
 
 PwmOut motor1In1(M1_IN1);
@@ -40,6 +40,8 @@ PwmOut motor1In2(M1_IN2);
 
 PwmOut motor2In1(M2_IN1);
 PwmOut motor2In2(M2_IN2);
+
+DigitalOut motor5Enable(M5_ENABLE);
 
 SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
 LittleFileSystem2 littleFileSystem2(nullptr);
@@ -82,21 +84,23 @@ void printThreadLoop() {
   // snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm
   // y_sm'\r\n");
   snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
-  bufferedSerial.write(printBuffer, strlen(printBuffer));
+  //bufferedSerial.write(printBuffer, strlen(printBuffer));
   while (true) {
-    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f
-    // %f;\r\n",runningSequence.state(), navi.leftTargetSpeed(),
-    // navi.rightTargetSpeed(),leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(),
-    // localization.getAngularVelocityFromWheelOdometry(), imu.gyrZ(), localization.theta(), localization.omega(),
-    // localization.x(), localization.y(),  localization.v(), simpleLocalization.theta(), simpleLocalization.x(),
-    // simpleLocalization.y());
+       
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",
+                 runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),
+       leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(),
+       localization.getAngularVelocityFromWheelOdometry(), imu.gyrY(), localization.theta(), localization.omega(),
+       localization.x(), localization.y(), localization.v(), simpleLocalization.theta(), simpleLocalization.x(),
+       simpleLocalization.y());
+       
+    //snprintf(printBuffer, PRINT_BUFFER_SIZE, "%f %f %f \r\n", localization.x(), localization.y(),sqrt(localization.x()*localization.x()+localization.y()*localization.y()));
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n", runningSequence.state(),
+    //         navi.leftTargetSpeed(), navi.rightTargetSpeed(), leftMotorSpeed.currentSpeedRPM(),
+    //         rightMotorSpeed.currentSpeedRPM(), localization.theta(), localization.x(), localization.y());
 
-    snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n", runningSequence.state(),
-             navi.leftTargetSpeed(), navi.rightTargetSpeed(), leftMotorSpeed.currentSpeedRPM(),
-             rightMotorSpeed.currentSpeedRPM(), localization.theta(), localization.x(), localization.y());
-
-    bufferedSerial.write(printBuffer, strlen(printBuffer));
-    ThisThread::sleep_for(20ms);
+             bufferedSerial.write(printBuffer, strlen(printBuffer));
+             ThisThread::sleep_for(20ms);
   }
 }
 
@@ -115,12 +119,12 @@ void speedThreadLoop() {
     while (true) {
       if (runningSequence.state() == ARRIVED_SECOND_POLE) {
         runningSequence.stop();
-        ThisThread::sleep_for(5s);
+        ThisThread::sleep_for(1s);
         runningSequence.start(SECOND);
       }
       if (runningSequence.state() == ARRIVED_THIRD_POLE) {
         runningSequence.stop();
-        ThisThread::sleep_for(5s);
+        ThisThread::sleep_for(1s);
         runningSequence.start(THIRD);
       }
       if (runningSequence.state() == ARRIVED_FOURTH_POLE) {
@@ -142,7 +146,7 @@ void speedThreadLoop() {
     leftControl.start();
     rightControl.start();
     navi.start();
-    navi.setTargetPosition(5.0, 0.0, 0.5);
+    navi.setTargetPosition(10.0, 0.0, 0.5);
   } else if (flag == RunningNoControle) {
     imu.start();
     leftMotorSpeed.start();
@@ -167,10 +171,11 @@ void speedThreadLoop() {
 // main() runs in its own thread in the OS
 int main() {
   int i = 0;
-  logger.init();
-  console.init();
-  //leftControl.setDirection(REVERSE);
-  //rightControl.setDirection(REVERSE);
+  // logger.init();
+  // console.init();
+  motor5Enable = 0;
+  // leftControl.setDirection(REVERSE);
+  // rightControl.setDirection(REVERSE);
   while (true) {
     if (i < 51) {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");

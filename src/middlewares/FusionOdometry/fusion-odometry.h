@@ -58,9 +58,10 @@ public:
     this->setR(2, 2, sigma_w_v); // v_w Dynamic
   }
 
-  bool step_with_updateQR(double *z) {
-    _dt = (_timer.elapsed_time().count() - _previousTime) * 1.0e-6;
-    _previousTime = _timer.elapsed_time().count();
+  bool step_with_updateQR(double *z, double dt) {
+    // this->_dt = (_timer.elapsed_time().count() - _previousTime);
+    //_previousTime = _timer.elapsed_time().count();
+    _dt = dt;
     updateQ();
     updateR(z);
     return this->step(z);

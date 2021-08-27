@@ -40,10 +40,12 @@ private:
   double _xpk = 0.0;
   double _ypk = 0.0;
   double _vpk = 0.0;
+  int _previousTime = 0;
   MotorSpeed *_leftMotorSpeed;
   MotorSpeed *_rightMotorSpeed;
   LSM9DS1 *_imu;
   FusionOdometry *_ekf;
+  Timer _timer;
   unique_ptr<Thread> _thread;
   double _stateVector[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 };
