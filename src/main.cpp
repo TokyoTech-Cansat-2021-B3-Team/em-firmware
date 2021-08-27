@@ -1,8 +1,6 @@
-#include "PinAssignment.h"
 #include "mbed.h"
 
-#include <cstring>
-#include <exception>
+#include "PinAssignment.h"
 
 #include "BME280.h"
 #include "MU2.h"
@@ -97,9 +95,12 @@ int main() {
     // }
 
     // init GPIO
+    mu2.init();
+
     snprintf(printBuffer, PRINT_BUFFER_SIZE, "Initializing GPIO and Setting I2C");
     mu2.transmit(printBuffer, strlen(printBuffer));
-    // loadingMotor.idleCurrent(false);
+
+    loadingMotor.idleCurrent(false);
     i2c.frequency(400000);
 
     // // Check Wheel Motor
@@ -207,27 +208,27 @@ int main() {
       ThisThread::sleep_for(1s);
     }
 
-    // Check Fuse
-    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check Fuse in 5s");
-    mu2.transmit(printBuffer, strlen(printBuffer));
+    // // Check Fuse
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "Check Fuse in 5s");
+    // mu2.transmit(printBuffer, strlen(printBuffer));
 
-    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Heating will start in 10s. CAUTION!!!!!!");
-    mu2.transmit(printBuffer, strlen(printBuffer));
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "Heating will start in 10s. CAUTION!!!!!!");
+    // mu2.transmit(printBuffer, strlen(printBuffer));
 
-    led = 0;
-    ThisThread::sleep_for(10s);
+    // led = 0;
+    // ThisThread::sleep_for(10s);
 
-    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Heating start");
-    mu2.transmit(printBuffer, strlen(printBuffer));
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "Heating start");
+    // mu2.transmit(printBuffer, strlen(printBuffer));
 
-    led = 1;
-    fusing.heat(10s);
+    // led = 1;
+    // fusing.heat(10s);
 
-    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Cooling Start");
-    mu2.transmit(printBuffer, strlen(printBuffer));
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "Cooling Start");
+    // mu2.transmit(printBuffer, strlen(printBuffer));
 
-    led = 0;
-    ThisThread::sleep_for(2s);
+    // led = 0;
+    // ThisThread::sleep_for(2s);
 
     while (true) {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "All Checking is DONE");
