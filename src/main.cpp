@@ -221,25 +221,25 @@ int main() {
   fusingSequenceSyncStart();
 
   // 刺し込みシーケンス1
-  //   probeSequenceSyncStart(ProbeSequence::Probe1);
+  probeSequenceSyncStart(ProbeSequence::Probe1);
 
   // 走行シーケンス1
   runningSequenceSyncStart(FIRST);
 
   // 刺し込みシーケンス2
-  //   probeSequenceSyncStart(ProbeSequence::Probe2);
+  probeSequenceSyncStart(ProbeSequence::Probe2);
 
   // 走行シーケンス2
   runningSequenceSyncStart(SECOND);
 
   // 刺し込みシーケンス3
-  //   probeSequenceSyncStart(ProbeSequence::Probe3);
+  probeSequenceSyncStart(ProbeSequence::Probe3);
 
   // 走行シーケンス3
   runningSequenceSyncStart(THIRD);
 
   // 刺し込みシーケンス4
-  //   probeSequenceSyncStart(ProbeSequence::Probe4);
+  probeSequenceSyncStart(ProbeSequence::Probe4);
 
   console.log("main", "All Sequence Complete");
   console.log("main", "Start Sleep Forever");
