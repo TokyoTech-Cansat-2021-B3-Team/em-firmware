@@ -189,6 +189,8 @@ void runningSequenceSyncStart(RunningSqequneceType type) {
       console.log("main", "Running Sequence Terminate");
       break;
     }
+
+    ThisThread::sleep_for(1s);
   }
 }
 
