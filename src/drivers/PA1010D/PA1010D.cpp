@@ -226,7 +226,6 @@ void PA1010D::rmcDecode() {
 
   // MV
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _rmc.magneticVariation = strtof(ptr + 1, nullptr);
@@ -306,28 +305,24 @@ void PA1010D::ggaDecode() {
 
   // HDOP
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _gga.hdop = strtof(ptr + 1, nullptr);
 
   // MSLALT
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _gga.mslAltitude = strtof(ptr + 1, nullptr);
 
   // GEOSEP
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _gga.geoidalSeparation = strtof(ptr + 1, nullptr);
 
   // AGE
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _gga.ageOfDiffCorr = strtof(ptr + 1, nullptr);
