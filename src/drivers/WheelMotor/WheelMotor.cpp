@@ -1,6 +1,6 @@
 #include "WheelMotor.h"
 
-WheelMotor::WheelMotor(PwmOut *in1, PwmOut *in2) : DCMotor(in1, in2, WHEEL_MOTOR_PWM_PERIOD), _direction(FOWARD) {
+WheelMotor::WheelMotor(PwmOut *in1, PwmOut *in2) : DCMotor(in1, in2, WHEEL_MOTOR_PWM_PERIOD), _direction(STOP) {
   if (_in2 != nullptr) {
     *_in2 = 0.0;
     _in2->suspend();
@@ -45,6 +45,9 @@ void WheelMotor::reverse(float duty) {
 }
 
 void WheelMotor::stop() {
+  if (_direction != STOP) {
+    _direction = STOP;
+  }
   if (_in1 != nullptr) {
     *_in1 = 0.0;
   }
