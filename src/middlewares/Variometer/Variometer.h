@@ -4,7 +4,7 @@
 
 #include "BME280.h"
 
-#define VARIOMETER_THREAD_PRIORITY osPriorityNormal
+#define VARIOMETER_THREAD_PRIORITY osPriorityAboveNormal
 #define VARIOMETER_THREAD_STACK_SIZE 1024
 #define VARIOMETER_THREAD_NAME "Variometer"
 

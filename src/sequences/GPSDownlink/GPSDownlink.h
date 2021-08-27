@@ -5,7 +5,7 @@
 #include "Console.h"
 #include "PA1010D.h"
 
-#define GPS_DOWNLINK_THREAD_PRIORITY osPriorityNormal
+#define GPS_DOWNLINK_THREAD_PRIORITY osPriorityBelowNormal1
 #define GPS_DOWNLINK_THREAD_STACK_SIZE 2048
 #define GPS_DOWNLINK_THREAD_NAME "GPSDownlink"
 

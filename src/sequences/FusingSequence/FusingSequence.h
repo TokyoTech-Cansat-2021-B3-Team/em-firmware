@@ -5,7 +5,7 @@
 #include "Console.h"
 #include "Fusing.h"
 
-#define FUSING_SEQUENCE_THREAD_PRIORITY osPriorityNormal
+#define FUSING_SEQUENCE_THREAD_PRIORITY osPriorityBelowNormal
 #define FUSING_SEQUENCE_THREAD_STACK_SIZE 2048
 #define FUSING_SEQUENCE_THREAD_NAME "FusingSequences"
 

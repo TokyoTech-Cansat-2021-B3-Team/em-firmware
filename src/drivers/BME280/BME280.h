@@ -2,7 +2,7 @@
 
 #include "mbed.h"
 
-#define BME280_THREAD_PRIORITY osPriorityNormal
+#define BME280_THREAD_PRIORITY osPriorityHigh
 #define BME280_THREAD_STACK_SIZE 1024
 #define BME280_THREAD_NAME "BME280"
 

@@ -5,7 +5,7 @@
 #include "Console.h"
 #include "Variometer.h"
 
-#define LANDING_SEQUENCE_THREAD_PRIORITY osPriorityNormal
+#define LANDING_SEQUENCE_THREAD_PRIORITY osPriorityBelowNormal
 #define LANDING_SEQUENCE_THREAD_STACK_SIZE 2048
 #define LANDING_SEQUENCE_THREAD_NAME "LandingSequence"
 
