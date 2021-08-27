@@ -16,6 +16,7 @@
 #define PROBE_SEQUENCE_VERTICAL_LEAD 0.8     // 上下駆動のねじリード 0.8 mm
 #define PROBE_SEQUENCE_VERTICAL_RATIO 249    // 上下駆動のギア比 1:249
 #define PROBE_SEQUENCE_VERTICAL_POLLING 10ms // エンコーダの値の確認周期
+#define PROBE_SEQUENCE_VERTICAL_TIMEOUT 1min // 上下駆動のタイムアウト時間
 
 // 1本目刺し込み前の初期位置への移動
 #define PROBE_SEQUENCE_SETUP_VERTICAL_DUTY 0.3 // 上下Duty
@@ -82,7 +83,7 @@ private:
   void set(double L, double stroke, double duty);
 
   // ホルダーの回転
-  void holderToNext();
+  void holderToNext(double first, double second);
 
   // 電極の接続
   void connect();

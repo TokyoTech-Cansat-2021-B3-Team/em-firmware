@@ -27,9 +27,15 @@ void ProbeSequence::threadLoop() {
     verticalMove(PROBE_SEQUENCE_SETUP_VERTICAL_DUTY, PROBE_SEQUENCE_SETUP_LENGTH);
   }
 
-  // ホルダーの回転
-  _console->log("Probe", "Rotate holder to next position\n");
-  holderToNext();
+  // 1本目は回転角が大きい
+  if (_probeNumber == Probe1) {
+    // ホルダーの回転
+    _console->log("Probe", "Rotate holder to next position\n");
+    holderToNext(30.0, PROBE_SEQUENCE_HOLDER_ANGLE_SECOND);
+  } else {
+    _console->log("Probe", "Rotate holder to next position\n");
+    holderToNext(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST, PROBE_SEQUENCE_HOLDER_ANGLE_SECOND);
+  }
 
   // 電極接続
   _console->log("Probe", "Start Connect to Probe\n");
@@ -43,20 +49,26 @@ void ProbeSequence::threadLoop() {
   _console->log("Probe", "Back to Init Position\n");
   back();
 
+  // 4本目のみ20mm戻す
+  if (_probeNumber == Probe4) {
+    _console->log("Probe", "return Park Position\n");
+    verticalMove(PROBE_SEQUENCE_SETUP_VERTICAL_DUTY, -(PROBE_SEQUENCE_SETUP_LENGTH));
+  }
+
   // シーケンス終了s
   _console->log("Probe", "Probe%d Sequence Complete\n", _probeNumber);
   _state = Complete;
 }
 
-void ProbeSequence::holderToNext() {
+void ProbeSequence::holderToNext(double first, double second) {
   // 1段階目
-  _loadingMotor->rotate(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST, PROBE_SEQUENCE_HOLDER_SPEED);
+  _loadingMotor->rotate(first, PROBE_SEQUENCE_HOLDER_SPEED);
 
   // 待ち
   ThisThread::sleep_for(PROBE_SEQUENCE_HOLDER_DELAY);
 
   // 2段目
-  _loadingMotor->rotate(PROBE_SEQUENCE_HOLDER_ANGLE_SECOND, PROBE_SEQUENCE_HOLDER_SPEED);
+  _loadingMotor->rotate(second, PROBE_SEQUENCE_HOLDER_SPEED);
 }
 
 void ProbeSequence::connect() {
@@ -91,7 +103,11 @@ void ProbeSequence::back() {
 }
 
 void ProbeSequence::verticalMove(double duty, double L) {
+
   _verticalEncoder->reset();
+
+  Timer timer;
+  timer.start();
 
   if (L >= 0.0) {
     _verticalMotor->forward(duty);
@@ -99,9 +115,12 @@ void ProbeSequence::verticalMove(double duty, double L) {
     _verticalMotor->reverse(duty);
   }
 
-  while (revToLength(_verticalEncoder->getRevolutions()) < L) {
-    ThisThread::sleep_for(10ms);
+  while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) || //
+         timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
+    ThisThread::sleep_for(PROBE_SEQUENCE_VERTICAL_POLLING);
   }
+
+  timer.stop();
 
   _verticalMotor->stop();
 }
