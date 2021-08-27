@@ -9,36 +9,36 @@ DCMotor::DCMotor(PwmOut *in1, PwmOut *in2, chrono::microseconds period)
 
 void DCMotor::forward(float duty) {
   if (_in1 != nullptr) {
-    if (!_setPeriod) {
-      _in1->period_us(_periodUs);
-      _setPeriod = true;
-    }
+    // if (!_setPeriod) {
+    _in1->period_us(_periodUs);
+    //   _setPeriod = true;
+    // }
     *_in1 = duty;
   }
 
   if (_in2 != nullptr) {
-    if (!_setPeriod) {
-      _in2->period_us(_periodUs);
-      _setPeriod = true;
-    }
+    // if (!_setPeriod) {
+    _in2->period_us(_periodUs);
+    //   _setPeriod = true;
+    // }
     *_in2 = 0.0;
   }
 }
 
 void DCMotor::reverse(float duty) {
   if (_in1 != nullptr) {
-    if (!_setPeriod) {
-      _in1->period_us(_periodUs);
-      _setPeriod = true;
-    }
+    // if (!_setPeriod) {
+    _in1->period_us(_periodUs);
+    //   _setPeriod = true;
+    // }
     *_in1 = 0.0;
   }
 
   if (_in2 != nullptr) {
-    if (!_setPeriod) {
-      _in2->period_us(_periodUs);
-      _setPeriod = true;
-    }
+    // if (!_setPeriod) {
+    _in2->period_us(_periodUs);
+    //   _setPeriod = true;
+    // }
     *_in2 = duty;
   }
 }
