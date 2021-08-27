@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mbed.h"
+#include <cstdint>
 
 #include "MotorSpeed.h"
 #include "fusion-odometry.h"
@@ -21,12 +22,14 @@ public:
   void stop();
   double x();
   double y();
+  double v();
   double theta();
+  double omega();
+  double getAngularVelocityFromWheelOdometry();
+  double getVelocityFromWheelOdometry();
 
 private:
   void threadLoop();
-  double getAngularVelocityFromWheelOdometry();
-  double getVelocityFromWheelOdometry();
   double getVelocityLeft();
   double getVelocityRight();
   const double _wheelDistance;
