@@ -70,7 +70,10 @@ void RunningSequence::threadLoop() {
       break;
     }
     //強制終了の確認
-    if (_currentStateCount > 600) {
+    if ((_currentStateCount * RUNNINGSEQUENCE_PERIOD.count()) > RUNNINGSEQUENCE_TERMINATE_TIME.count()) {
+      _leftWheelControl->setTargetSpeed(0);
+      _rightWheelControl->setTargetSpeed(0);
+
       setStatus(TERMINATE);
       _console->lprintf("running", "terminate\n");
       break;
