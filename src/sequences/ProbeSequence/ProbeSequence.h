@@ -8,7 +8,7 @@
 #include "QEI.h"
 #include "Stepper.h"
 
-#define PROBE_SEQUENCE_THREAD_PRIORITY osPriorityNormal
+#define PROBE_SEQUENCE_THREAD_PRIORITY osPriorityBelowNormal
 #define PROBE_SEQUENCE_THREAD_STACK_SIZE 2048
 #define PROBE_SEQUENCE_THREAD_NAME "ProbeSequence"
 
