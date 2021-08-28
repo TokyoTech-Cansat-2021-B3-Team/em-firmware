@@ -361,7 +361,7 @@ void PA1010D::setTime() {
           static_cast<int>(_rmc.date) % 100 + 2000 - 1900, // year
       };
       set_time(mktime(&t));
-      _isSetTime = true;
+      //   _isSetTime = true;
     }
     // else if (PA1010D_GGA_OUTPUT && _gga.positionFixIndicator > 0) {
     //     tm t = {
