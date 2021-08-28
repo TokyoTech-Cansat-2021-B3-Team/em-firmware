@@ -56,6 +56,7 @@ private:
   void shiftStatusToMovingAndSetTargetPosition();
   void shiftStatusToArrived();
   int _currentStateCount = 0;
+  unsigned long _previousTime = 0;
   const double _secondPolePosition[2] = {1.0, 0.0};
   const double _thirdPolePosition[2] = {2.0, 0.0};
   const double _fourthPolePosition[2] = {3.0, 0.0};
@@ -72,5 +73,6 @@ private:
   WheelControl *_rightWheelControl;
   Console *_console;
   Logger *_logger;
+  Timer _timer;
   unique_ptr<Thread> _thread;
 };
