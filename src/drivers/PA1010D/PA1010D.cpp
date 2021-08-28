@@ -351,7 +351,8 @@ void PA1010D::ggaDecode() {
 void PA1010D::setTime() {
   if (!_isSetTime) {
     // if (PA1010D_RMC_OUTPUT && _rmc.status == 'A') {
-    if (PA1010D_RMC_OUTPUT) {
+    // if (PA1010D_RMC_OUTPUT) {
+    if (PA1010D_RMC_OUTPUT && _rmc.date != 0) {
       tm t = {
           static_cast<int>(_rmc.utc) % 100,                // sec
           static_cast<int>(_rmc.utc / 100) % 100,          // min
@@ -361,7 +362,7 @@ void PA1010D::setTime() {
           static_cast<int>(_rmc.date) % 100 + 2000 - 1900, // year
       };
       set_time(mktime(&t));
-      //   _isSetTime = true;
+      _isSetTime = true;
     }
     // else if (PA1010D_GGA_OUTPUT && _gga.positionFixIndicator > 0) {
     //     tm t = {
