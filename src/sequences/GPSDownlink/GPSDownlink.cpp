@@ -46,7 +46,7 @@ void GPSDownlink::downlink() {
 
 void GPSDownlink::start() {
   _pa1010d->start();
-  _logger->init();
+  //   _logger->init();
   _console->init();
 
   if (!_isStart) {

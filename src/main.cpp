@@ -218,6 +218,8 @@ int main() {
 
   // 着地検知シーケンス
   syncLandingSequence();
+  // ログ書き込み有効化
+  logger.init();
 
   // パラシュート分離シーケンス
   fusingSequenceSyncStart();
