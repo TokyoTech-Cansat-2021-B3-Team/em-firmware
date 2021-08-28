@@ -16,7 +16,7 @@
 
 #define RUNNINGSEQUENCE_PERIOD 100ms
 
-#define RUNNINGSEQUENCE_TERMINATE_TIME 300s
+#define RUNNINGSEQUENCE_TERMINATE_TIME 60s
 
 enum RunningSequenceState {
   UNDEFINED,
@@ -56,7 +56,7 @@ private:
   void shiftStatusToMovingAndSetTargetPosition();
   void shiftStatusToArrived();
   int _currentStateCount = 0;
-  unsigned long _previousTime = 0;
+  chrono::microseconds _previousTime = 0s;
   const double _secondPolePosition[2] = {1.0, 0.0};
   const double _thirdPolePosition[2] = {2.0, 0.0};
   const double _fourthPolePosition[2] = {3.0, 0.0};
