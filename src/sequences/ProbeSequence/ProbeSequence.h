@@ -29,8 +29,8 @@
 #define PROBE_SEQUENCE_HOLDER_SPEED 0.125       // 回転速度 (rps)
 
 // 電極接続
-#define PROBE_SEQUENCE_CONNECT_DRILL_DUTY 0.5    // ドリルDuty
-#define PROBE_SEQUENCE_CONNECT_VERTICAL_DUTY 0.5 // 上下Duty
+#define PROBE_SEQUENCE_CONNECT_DRILL_DUTY 0.3    // ドリルDuty
+#define PROBE_SEQUENCE_CONNECT_VERTICAL_DUTY 0.3 // 上下Duty
 #define PROBE_SEQUENCE_CONNECT_LENGTH 15         // 上下駆動下降量 (mm)
 
 // 刺し込み
