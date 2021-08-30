@@ -2,15 +2,15 @@
 
 #include "mbed.h"
 
+#include "Console.h"
+#include "Logger.h"
 #include "MotorSpeed.h"
 #include "WheelControl.h"
 #include "localization.h"
 #include "lsm9ds1.h"
 #include "navigation.h"
-#include "Logger.h"
-#include "Console.h"
 
-#define RUNNINGSEQUENCE_THREAD_PRIORITY osPriorityHigh
+#define RUNNINGSEQUENCE_THREAD_PRIORITY osPriorityBelowNormal
 #define RUNNINGSEQUENCE_THREAD_STACK_SIZE 2048
 #define RUNNINGSEQUENCE_THREAD_NAME "RUNNINGSEQUENCE"
 
@@ -56,12 +56,13 @@ private:
   void shiftStatusToMovingAndSetTargetPosition();
   void shiftStatusToArrived();
   int _currentStateCount = 0;
-  const double _secondPolePosition[2] = {10.0, 0.0};
-  const double _thirdPolePosition[2] = {20.0, 0.0};
-  const double _fourthPolePosition[2] = {30.0, 0.0};
-  const double _secondPoleEPS = 0.0;
-  const double _thirdPoleEPS = 0.0;
-  const double _fourthPoleEPS = 0.0;
+  unsigned long _previousTime = 0;
+  const double _secondPolePosition[2] = {1.0, 0.0};
+  const double _thirdPolePosition[2] = {2.0, 0.0};
+  const double _fourthPolePosition[2] = {3.0, 0.0};
+  const double _secondPoleEPS = 0.1;
+  const double _thirdPoleEPS = 0.1;
+  const double _fourthPoleEPS = 0.1;
   RunningSequenceState _state;
   Navigation *_navigation;
   Localization *_localization;
@@ -72,5 +73,6 @@ private:
   WheelControl *_rightWheelControl;
   Console *_console;
   Logger *_logger;
+  Timer _timer;
   unique_ptr<Thread> _thread;
 };
