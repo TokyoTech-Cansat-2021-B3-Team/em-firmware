@@ -32,6 +32,8 @@ public:
     this->setR(3, 3, sigma_d_theta); // theta_d
     this->setR(4, 4, sigma_d_x);     // xd
     this->setR(5, 5, sigma_d_y);     // yd
+
+    _timer.start();
   }
 
   void updateQ() {
@@ -58,10 +60,9 @@ public:
     this->setR(2, 2, sigma_w_v); // v_w Dynamic
   }
 
-  bool step_with_updateQR(double *z, double dt) {
-    // this->_dt = (_timer.elapsed_time().count() - _previousTime);
-    //_previousTime = _timer.elapsed_time().count();
-    _dt = dt;
+  bool step_with_updateQR(double *z) {
+    _dt = (_timer.elapsed_time().count() - _previousTime) * 1.0e-6;
+    _previousTime = _timer.elapsed_time().count();
     updateQ();
     updateR(z);
     return this->step(z);
