@@ -6,7 +6,7 @@ RunningSequence::RunningSequence(Navigation *navigation, Localization *localizat
                                  Logger *logger)
     : _navigation(navigation), _localization(localization), _imu(imu), _leftMotorSpeed(leftMotorSpeed),
       _rightMotorSpeed(rightMotorSpeed), _leftWheelControl(leftWheelControl), _rightWheelControl(rightWheelControl),
-      _console(console), _logger(logger), _state(UNDEFINED), _timer(Timer()), _thread() {}
+      _console(console), _logger(logger), _state(UNDEFINED), _timer(), _thread() {}
 
 void RunningSequence::start(RunningSqequneceType sequenceType) {
   if (sequenceType == FIRST) {
@@ -56,7 +56,7 @@ void RunningSequence::threadLoop() {
   */
   if (isWaiting()) {
     shiftStatusToMovingAndSetTargetPosition();
-    _previousTime = _timer.elapsed_time().count();
+    _previousTime = _timer.elapsed_time();
   } else {
     // WAITING状態でない状態でstartされた場合は待機
     while (!isWaiting()) {
@@ -72,8 +72,7 @@ void RunningSequence::threadLoop() {
       break;
     }
     //強制終了の確認
-    if ((_timer.elapsed_time().count() - _previousTime) >
-        chrono::duration<double>(RUNNINGSEQUENCE_TERMINATE_TIME).count()) {
+    if ((_timer.elapsed_time() - _previousTime) > RUNNINGSEQUENCE_TERMINATE_TIME) {
       _leftWheelControl->setTargetSpeed(0);
       _rightWheelControl->setTargetSpeed(0);
 
