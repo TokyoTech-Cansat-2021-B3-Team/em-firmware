@@ -6,7 +6,7 @@
 #include "localization.h"
 #include "WheelControl.h"
 
-#define NAVIGATION_THREAD_PRIORITY osPriorityHigh
+#define NAVIGATION_THREAD_PRIORITY osPriorityAboveNormal
 #define NAVIGATION_THREAD_STACK_SIZE 1024
 #define NAVIGATION_THREAD_NAME "NAVIGATION"
 
@@ -16,6 +16,7 @@ class Navigation{
 public:
     explicit Navigation(Localization* localization, WheelControl* leftWheelControl, WheelControl* rightWheelControl);
     void setTargetPosition(double targetX, double targetY, double eps);
+    void setCruiseSpeed(double cruiseSpeed);
     void start();
     void stop();
     double leftTargetSpeed();
@@ -32,9 +33,9 @@ protected:
     double _eps = 0.0;
 private:
     void threadLoop();
-    const double _gainKL = 0.2;//1mのずれで2RPMの差
-    const double _gainKT = 0.4;
-    const double _cruiseSpeed = 18.0;//rpm
+    const double _gainKL = 1.0;//1mのずれで2RPMの差
+    const double _gainKT = 0.3;
+    double _cruiseSpeed = 18.0;//rpm
     double _deltaV = 0.0;
     double _leftTargetSpeed = 0.0;
     double _rightTargetSpeed = 0.0;

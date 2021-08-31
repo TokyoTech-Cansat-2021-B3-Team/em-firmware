@@ -2,21 +2,30 @@
     "requires": [
         "bare-metal",
         "rtos",
-        "cmsis-cmsis5-rtos2"
+        "cmsis-cmsis5-rtos2",
+        "events",
+        "sd",
+        "filesystem",
+        "fat_chan",
+        "littlefs2"
     ],
     "config": {
         "main_stack_size": {
-            "value": 1024
+            "value": 2048
         }
     },
     "target_overrides": {
         "*": {
-            "target.c_lib": "small",
-            "target.printf_lib": "minimal-printf",
+            "platform.stdio-baud-rate": 57600,
+            "platform.default-serial-baud-rate": 57600,
             "platform.minimal-printf-enable-floating-point": true,
-            "platform.stdio-minimal-console-only": true,
-            "platform.stdio-baud-rate": 115200,
-            "platform.default-serial-baud-rate": 115200
+            "sd.SPI_MOSI": "NC",
+            "sd.SPI_MISO": "NC",
+            "sd.SPI_CLK": "NC",
+            "sd.SPI_CS": "NC",
+            "target.components_add": [
+                "SD"
+            ]
         }
     }
 }

@@ -14,6 +14,7 @@ protected:
   PwmOut *_in2;
 
   const int _periodUs;
+  bool _setPeriod;
 
 public:
 private:
