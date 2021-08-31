@@ -38,8 +38,10 @@
 // defines
 #define SPI_FREQUENCY 25000000
 #define I2C_FREQUENCY 400000
+#define PRINT_BUFFER_SIZE 128
 
 // objects
+char printBuffer[PRINT_BUFFER_SIZE];
 
 // embedded
 PwmOut motor1In1(M1_IN1);
@@ -54,6 +56,7 @@ I2C i2c(I2C_SDA, I2C_SCL);
 BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 
 // drivers
+Stepper loadingMotor(&motor5Step, &motor5Enable);
 WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
 WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
@@ -71,23 +74,18 @@ WheelPID rightPID;
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
+Thread printTask(osPriorityRealtime, 512, nullptr, nullptr);
 
-    Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
+Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
 
-    void printThreadLoop() {
-      while (true) {
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f;\r\n", stabilize.currentTheta(), stabilize.currentOutput());
-        serial.write(printBuffer, strlen(printBuffer));
-        ThisThread::sleep_for(20ms);
-      }
-      if (runningSequence.state() == TERMINATE) {
-        runningSequence.stop();
-        console.log("main", "Running Sequence Terminate");
-        break;
-      }
+void printThreadLoop() {
+  while (true) {
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f;\r\n", stabilize.currentTheta(), stabilize.currentOutput());
+    bufferedSerial.write(printBuffer, strlen(printBuffer));
+    ThisThread::sleep_for(20ms);
+  }
 
-      ThisThread::sleep_for(1s);
-    }
+  ThisThread::sleep_for(1s);
   }
 
   // main() runs in its own thread in the OS
@@ -99,14 +97,14 @@ WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
     ThisThread::sleep_for(100ms);
     if (imu.getStatus() == LSM9DS1_STATUS_SUCCESS_TO_CONNECT) {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
-      serial.write(printBuffer, strlen(printBuffer));
+      bufferedSerial.write(printBuffer, strlen(printBuffer));
     } else {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
-      serial.write(printBuffer, strlen(printBuffer));
+      bufferedSerial.write(printBuffer, strlen(printBuffer));
     }
 
     stabilize.start();
-    printThread.start(printThreadLoop);
+    printTask.start(printThreadLoop);
     while (true) {
       ThisThread::sleep_for(100ms);
     }
