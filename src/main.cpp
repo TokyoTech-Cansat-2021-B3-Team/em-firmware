@@ -15,7 +15,6 @@
 #include "QEI.h"
 #include "Stepper.h"
 #include "lsm9ds1.h"
-
 // middlewares
 #include "MotorSpeed.h"
 #include "WheelControl.h"
@@ -72,24 +71,6 @@ WheelPID rightPID;
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
-// 着地検知シーケンス
-void syncLandingSequence() {
-  console.log("main", "Landing Sequence Sync Start");
-
-  landingSequence.start();
-
-  while (true) {
-    // 正常終了
-    if (landingSequence.state() == LandingSequence::Complete) {
-      console.log("main", "Landing Sequence Complete");
-      break;
-    }
-
-    // タイムアウト
-    if (landingSequence.state() == LandingSequence::SequenceTimeout) {
-      console.log("main", "Landing Sequence Timeout");
-      break;
-    }
 
     Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
 
