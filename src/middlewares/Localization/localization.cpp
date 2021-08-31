@@ -7,7 +7,7 @@
 Localization::Localization(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, LSM9DS1 *imu, FusionOdometry *ekf,
                            double wheelDistance, double wheelRadius)
     : _leftMotorSpeed(leftMotorSpeed), _rightMotorSpeed(rightMotorSpeed), _wheelDistance(wheelDistance),
-      _wheelRadius(wheelRadius), _imu(imu), _ekf(ekf), _timer(Timer()), _thread() {}
+      _wheelRadius(wheelRadius), _imu(imu), _ekf(ekf), _thread() {}
 
 void Localization::start() {
   _thread = make_unique<Thread>(LOCALIZATION_THREAD_PRIORITY, LOCALIZATION_THREAD_STACK_SIZE, nullptr,
@@ -21,14 +21,10 @@ void Localization::stop() {
 }
 
 void Localization::threadLoop() {
-  _timer.start();
   while (true) {
-    double gyrZ_rps = _imu->gyrY() * PI / 180.0;
-    double z[] = {getAngularVelocityFromWheelOdometry(), gyrZ_rps, getVelocityFromWheelOdometry()};
-    long now = _timer.elapsed_time().count();
-    double dt = (_previousTime - now) * 1.0e-6;
-    _previousTime = now;
-    _ekf->step_with_updateQR(z, dt);
+    double gyrZ_rps = _imu->gyrZ() * PI / 180.0;
+    double z[] = {getAngularVelocityFromWheelOdometry(), -gyrZ_rps, getVelocityFromWheelOdometry()};
+    _ekf->step_with_updateQR(z);
     _theta = _ekf->getX(0);
     _xpk = _ekf->getX(3);
     _ypk = _ekf->getX(4);
@@ -47,11 +43,11 @@ double Localization::getVelocityFromWheelOdometry() {
 }
 
 double Localization::getVelocityLeft() {
-  return -1 * _leftMotorSpeed->currentSpeedRPS() * _wheelRadius;
+  return _leftMotorSpeed->currentSpeedRPS() * _wheelRadius;
 }
 
 double Localization::getVelocityRight() {
-  return -1 * _rightMotorSpeed->currentSpeedRPS() * _wheelRadius;
+  return _rightMotorSpeed->currentSpeedRPS() * _wheelRadius;
 }
 
 double Localization::x() {
