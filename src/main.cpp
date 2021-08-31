@@ -80,7 +80,7 @@ Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
 
 void printThreadLoop() {
   while (true) {
-    snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f;\r\n", stabilize.currentTheta(), stabilize.currentOutput());
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f;\r\n", stabilize.currentTheta() * 180.0 / 3.14159265358, stabilize.currentOutput());
     bufferedSerial.write(printBuffer, strlen(printBuffer));
     ThisThread::sleep_for(20ms);
   }
