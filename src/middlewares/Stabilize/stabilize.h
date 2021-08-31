@@ -22,8 +22,8 @@ public:
 private:
     void threadLoop();
     double getTheta(double accX, double accY, double accZ);
-    const double _pGain = 200;
-    const double _iGain = 10;
+    const double _pGain = 0.2;
+    const double _iGain = 0.01;
     const double _eps = 0.08; // 5度程度
     double _integral = 0.0;
     double _output = 0.0;

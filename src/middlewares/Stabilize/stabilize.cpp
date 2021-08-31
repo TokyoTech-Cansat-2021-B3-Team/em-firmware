@@ -32,8 +32,8 @@ void Stabilize::threadLoop(){
             _leftWheelMotor->reverse(_output);
             _rightWheelMotor->reverse(_output);
         }else{
-            _leftWheelMotor->reverse(_output);
-            _rightWheelMotor->reverse(_output);
+            _leftWheelMotor->forward(_output);
+            _rightWheelMotor->forward(_output);
         }
         ThisThread::sleep_for(STABILIZE_PERIOD);
     }

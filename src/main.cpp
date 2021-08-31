@@ -61,7 +61,7 @@ Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop(){
     while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f;\r\n",stabilize.currentTheta(), stabilize.currentTheta());
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f;\r\n",stabilize.currentTheta(), stabilize.currentOutput());
         serial.write(printBuffer,strlen(printBuffer));
         ThisThread::sleep_for(20ms);
     }
@@ -69,7 +69,18 @@ void printThreadLoop(){
 
 // main() runs in its own thread in the OS
 int main() {
+    imu.start();
+    ThisThread::sleep_for(100ms);
+    if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
+        serial.write(printBuffer,strlen(printBuffer));
+    }else{
+        snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
+        serial.write(printBuffer,strlen(printBuffer));
+    }
+    
     stabilize.start();
+    printThread.start(printThreadLoop);
     while(true){
         ThisThread::sleep_for(100ms);
     }
