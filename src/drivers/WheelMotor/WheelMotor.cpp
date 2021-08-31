@@ -39,7 +39,7 @@ void WheelMotor::reverse(float duty) {
       _in2->resume();
 
       _in2->period_us(_periodUs);
-      *_in1 = duty;
+      *_in2 = duty;
     }
   }
 }
