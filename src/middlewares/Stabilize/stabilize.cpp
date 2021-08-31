@@ -1,7 +1,7 @@
 #include "stabilize.h"
 #include "lsm9ds1.h"
 #include "WheelControl.h"
-#include <cmath>
+#include <math.h>
 
 Stabilize::Stabilize(LSM9DS1* imu, WheelMotor* leftWheelMotor, WheelMotor* rightWheelMotor):
 _imu(imu),
@@ -32,22 +32,15 @@ void Stabilize::threadLoop(){
             _leftWheelMotor->reverse(_output);
             _rightWheelMotor->reverse(_output);
         }else{
-            _leftWheelMotor->forward(_output);
-            _rightWheelMotor->forward(_output);
+            _leftWheelMotor->forward(-1 * _output);
+            _rightWheelMotor->forward(-1 * _output);
         }
         ThisThread::sleep_for(STABILIZE_PERIOD);
     }
 }
 
 double Stabilize::getTheta(double accX, double accY, double accZ){
-    double accNorm = sqrt(accX * accX + accY * accY + accZ * accZ);
-    if(abs(accX)>abs(accZ)){
-        //45度以上傾斜する場合
-        return asin(accX / accNorm);
-    }else{
-        //45度未満で傾斜する場合
-        return acos(accZ / accNorm);
-    }
+    return  -1 * atan2(-accX, accZ); // 走行EMの座標系で調整
 }
 
 double Stabilize::currentOutput(){
