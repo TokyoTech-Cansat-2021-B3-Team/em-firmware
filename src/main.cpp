@@ -102,7 +102,27 @@ void printThreadLoop() {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
       bufferedSerial.write(printBuffer, strlen(printBuffer));
     }
-
+    for (int i = 0; i < 10; i++) {
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting ... \r\n");
+      bufferedSerial.write(printBuffer, strlen(printBuffer));
+      ThisThread::sleep_for(1s);
+    }
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Break Stabilizer!!!\r\n");
+    bufferedSerial.write(printBuffer, strlen(printBuffer));
+    leftWheelMotor.forward(0.6);
+    rightWheelMotor.forward(0.6);
+    ThisThread::sleep_for(700ms);
+    leftWheelMotor.forward(0);
+    rightWheelMotor.forward(0);
+    ThisThread::sleep_for(500ms);
+    leftWheelMotor.forward(1);
+    rightWheelMotor.forward(1);
+    ThisThread::sleep_for(1s);
+    leftWheelMotor.reverse(0.6);
+    rightWheelMotor.reverse(0.6);
+    ThisThread::sleep_for(100ms);
+    leftWheelMotor.forward(0);
+    rightWheelMotor.forward(0);
     stabilize.start();
     printTask.start(printThreadLoop);
     while (true) {
