@@ -67,6 +67,9 @@ void ProbeSequence::holderToNext(double first, double second) {
   // 待ち
   ThisThread::sleep_for(PROBE_SEQUENCE_HOLDER_DELAY);
 
+  // 電極の押し下げ
+  probepush();
+
   // 2段目
   _loadingMotor->rotate(second, PROBE_SEQUENCE_HOLDER_SPEED);
 }
