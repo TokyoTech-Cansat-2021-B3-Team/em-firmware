@@ -28,6 +28,9 @@
 #define PROBE_SEQUENCE_HOLDER_DELAY 2s          // 1段階目と2段階目の間の時間
 #define PROBE_SEQUENCE_HOLDER_SPEED 0.125       // 回転速度 (rps)
 
+// 電極の押し下げ
+#define PROBE_SEQUENCE_PROBEPUSH_VERTICAL_DUTY 0.3 // 上下Duty
+
 // 電極接続
 #define PROBE_SEQUENCE_CONNECT_DRILL_DUTY 0.3    // ドリルDuty
 #define PROBE_SEQUENCE_CONNECT_VERTICAL_DUTY 0.3 // 上下Duty
@@ -84,6 +87,9 @@ private:
 
   // ホルダーの回転
   void holderToNext(double first, double second);
+
+  // 電極の押し下げ
+  void probepush();
 
   // 電極の接続
   void connect();

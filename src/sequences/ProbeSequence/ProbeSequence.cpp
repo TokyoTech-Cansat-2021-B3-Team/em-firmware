@@ -71,6 +71,15 @@ void ProbeSequence::holderToNext(double first, double second) {
   _loadingMotor->rotate(second, PROBE_SEQUENCE_HOLDER_SPEED);
 }
 
+void ProbeSequence::probepush() {
+  //上下駆動指定量下降
+  verticalMove(PROBE_SEQUENCE_PROBEPUSH_VERTICAL_DUTY, //
+               PROBE_SEQUENCE_CONNECT_LENGTH + PROBE_SEQUENCE_DRILLING_LENGTH);
+  //上下駆動指定量上昇
+  verticalMove(PROBE_SEQUENCE_BACK_VERTIVAL_DUTY, //
+               -(PROBE_SEQUENCE_CONNECT_LENGTH + PROBE_SEQUENCE_DRILLING_LENGTH));
+}
+
 void ProbeSequence::connect() {
   // ドリル回転開始
   _drillMotor->forward(PROBE_SEQUENCE_CONNECT_DRILL_DUTY);
