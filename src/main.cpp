@@ -109,6 +109,7 @@ void printThreadLoop() {
     }
     snprintf(printBuffer, PRINT_BUFFER_SIZE, "Break Stabilizer!!!\r\n");
     bufferedSerial.write(printBuffer, strlen(printBuffer));
+    /*
     leftWheelMotor.forward(0.6);
     rightWheelMotor.forward(0.6);
     ThisThread::sleep_for(700ms);
@@ -123,6 +124,7 @@ void printThreadLoop() {
     ThisThread::sleep_for(100ms);
     leftWheelMotor.forward(0);
     rightWheelMotor.forward(0);
+*/
     stabilize.start();
     printTask.start(printThreadLoop);
     while (true) {

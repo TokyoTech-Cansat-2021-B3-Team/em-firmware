@@ -17,9 +17,32 @@ void Stabilize::stop() {
 }
 
 void Stabilize::threadLoop() {
-  invokeStabilizer();
+  _leftWheelMotor->forward(1.0);
+  _rightWheelMotor->forward(1.0);
+  ThisThread::sleep_for(500ms);
+  _leftWheelMotor->forward(0);
+  _rightWheelMotor->forward(0);
+  /*
+  if (!checkStabilizerOpend()) {
+    invokeStabilizer();
+    printf("--------- invoke Stabilier -----------\r\n");
+    printf("--------- invoke Stabilier -----------\r\n");
+    printf("--------- invoke Stabilier -----------\r\n");
+    printf("--------- invoke Stabilier -----------\r\n");
+  }
   waitingStabilizerOpening();
-  invokeAntiTolque();
+  _leftWheelMotor->forward(1);
+  _rightWheelMotor->forward(1);
+  ThisThread::sleep_for(500ms);
+  _output = 1.0;
+  while (_output > 0) {
+    _output -= 0.01;
+    _leftWheelMotor->forward(_output);
+    _rightWheelMotor->forward(_output);
+    ThisThread::sleep_for(50ms);
+  }
+  //invokeAntiTolque();
+*/
   while (true) {
     _theta = getTheta(_imu->accX(), _imu->accY(), _imu->accZ());
     double diff = _theta;
@@ -77,4 +100,13 @@ void Stabilize::invokeAntiTolque() {
   ThisThread::sleep_for(100ms);
   _leftWheelMotor->forward(0);
   _rightWheelMotor->forward(0);
+}
+
+bool Stabilize::checkStabilizerOpend() {
+  _theta = getTheta(_imu->accX(), _imu->accY(), _imu->accZ());
+  if (fabs(_theta) > 2.4434) {
+    // 140deg * 180 / pi = 2.44346095279
+    return false;
+  }
+  return true;
 }

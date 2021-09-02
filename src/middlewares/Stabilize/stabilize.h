@@ -35,7 +35,8 @@ private:
   void invokeStabilizer();
   void waitingStabilizerOpening();
   void invokeAntiTolque();
-  void checkCompleteStabilize();
+  bool checkStabilizerOpend();
+  bool checkCompleteStabilize();
   double getTheta(double accX, double accY, double accZ);
   const double _pGain = 1.0;
   const double _iGain = 0;
