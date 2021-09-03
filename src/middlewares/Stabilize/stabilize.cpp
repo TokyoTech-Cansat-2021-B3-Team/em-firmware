@@ -19,32 +19,10 @@ void Stabilize::stop() {
 }
 
 void Stabilize::threadLoop() {
-  _leftWheelMotor->forward(1.0);
-  _rightWheelMotor->forward(1.0);
-  ThisThread::sleep_for(500ms);
-  _leftWheelMotor->forward(0);
-  _rightWheelMotor->forward(0);
-  /*
   if (!checkStabilizerOpend()) {
     invokeStabilizer();
-    printf("--------- invoke Stabilier -----------\r\n");
-    printf("--------- invoke Stabilier -----------\r\n");
-    printf("--------- invoke Stabilier -----------\r\n");
-    printf("--------- invoke Stabilier -----------\r\n");
   }
   waitingStabilizerOpening();
-  _leftWheelMotor->forward(1);
-  _rightWheelMotor->forward(1);
-  ThisThread::sleep_for(500ms);
-  _output = 1.0;
-  while (_output > 0) {
-    _output -= 0.01;
-    _leftWheelMotor->forward(_output);
-    _rightWheelMotor->forward(_output);
-    ThisThread::sleep_for(50ms);
-  }
-  //invokeAntiTolque();
-*/
   while (true) {
     _theta = getTheta(_imu->accX(), _imu->accY(), _imu->accZ());
     double diff = _theta - _targetTheta;
@@ -78,9 +56,7 @@ double Stabilize::currentTheta() {
 
 void Stabilize::invokeStabilizer() {
   _state = INVOKE_STABILIZER;
-  _leftWheelMotor->forward(0.6);
-  _rightWheelMotor->forward(0.6);
-  ThisThread::sleep_for(700ms);
+  pulseTorque(CCW);
 }
 
 void Stabilize::waitingStabilizerOpening() {
@@ -88,19 +64,6 @@ void Stabilize::waitingStabilizerOpening() {
   _leftWheelMotor->forward(0.0);
   _rightWheelMotor->forward(0.0);
   ThisThread::sleep_for(500ms);
-}
-
-void Stabilize::invokeAntiTolque() {
-  _state = PREPARING_INVOKE_ANTI_TOLQUE;
-  _leftWheelMotor->forward(1);
-  _rightWheelMotor->forward(1);
-  ThisThread::sleep_for(1s);
-  _state = INVOKE_ANTI_TOLQUE;
-  _leftWheelMotor->reverse(0.6);
-  _rightWheelMotor->reverse(0.6);
-  ThisThread::sleep_for(100ms);
-  _leftWheelMotor->forward(0);
-  _rightWheelMotor->forward(0);
 }
 
 bool Stabilize::checkStabilizerOpend() {
