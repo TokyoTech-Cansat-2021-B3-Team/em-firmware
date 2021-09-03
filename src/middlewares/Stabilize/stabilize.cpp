@@ -122,4 +122,25 @@ void Stabilize::changeAllWheelOutput(double output) {
   }
 }
 
-void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {}
+void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {
+  if (dir == CW) {
+    _leftWheelControl->setDirection(FOWARD);
+    _rightWheelControl->setDirection(FOWARD);
+  } else if (dir == CCW) {
+    _leftWheelControl->setDirection(REVERSE);
+    _rightWheelControl->setDirection(REVERSE);
+  }
+  _leftWheelControl->start();
+  _rightWheelControl->start();
+  _leftWheelControl->setTargetSpeed(45); //無負荷では45rpmが最大
+  _leftWheelControl->setTargetSpeed(45);
+  ThisThread::sleep_for(500ms); // 500msあれば最大速度まで達するであろう
+  _leftWheelControl->stop();//WheelControlによるPID制御をオフ
+  _rightWheelControl->stop();
+  if (dir == CW) {
+    changeAllWheelOutput(-1.0);
+  } else {
+    changeAllWheelOutput(1.0);
+  }
+  ThisThread::sleep_for(200ms);
+}
