@@ -3,8 +3,10 @@
 #include "lsm9ds1.h"
 #include <math.h>
 
-Stabilize::Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor)
-    : _imu(imu), _leftWheelMotor(leftWheelMotor), _rightWheelMotor(rightWheelMotor), _thread() {}
+Stabilize::Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor,
+                     WheelControl *leftWheelControl, WheelControl *rightWheelControl)
+    : _imu(imu), _leftWheelMotor(leftWheelMotor), _rightWheelMotor(rightWheelMotor),
+      _leftWheelControl(leftWheelControl), _rightWheelControl(rightWheelControl), _thread() {}
 
 void Stabilize::start() {
   _thread = make_unique<Thread>(STABILIZE_THREAD_PRIORITY, STABILIZE_THREAD_STACK_SIZE, nullptr, STABILIZE_THREAD_NAME);
@@ -120,5 +122,4 @@ void Stabilize::changeAllWheelOutput(double output) {
   }
 }
 
-void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {
-}
+void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {}
