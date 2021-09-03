@@ -45,9 +45,8 @@ void Stabilize::threadLoop() {
 */
   while (true) {
     _theta = getTheta(_imu->accX(), _imu->accY(), _imu->accZ());
-    double diff = _theta;
+    double diff = _theta - _targetTheta;
     _integral += diff * chrono::duration<float>(STABILIZE_PERIOD).count();
-    ;
     _output = diff * _pGain + _integral * _iGain;
     // if (_output > 0.6) _output = 0.6;
     // if(_output < -0.6)_output = -0.6;
@@ -109,4 +108,17 @@ bool Stabilize::checkStabilizerOpend() {
     return false;
   }
   return true;
+}
+
+void Stabilize::changeAllWheelOutput(double output) {
+  if (output >= 0.0) {
+    _leftWheelMotor->forward(output);
+    _rightWheelMotor->forward(output);
+  } else {
+    _leftWheelMotor->reverse(output);
+    _rightWheelMotor->reverse(output);
+  }
+}
+
+void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {
 }

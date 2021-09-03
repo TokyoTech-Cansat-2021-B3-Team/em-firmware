@@ -23,6 +23,10 @@ public:
     CALM_STABILIZE,
     COMPLETE_STABILIZE
   };
+  enum TORQUE_DIRECTION {
+    CW,
+    CCW
+  };
   explicit Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor);
   void start();
   void stop();
@@ -32,6 +36,8 @@ public:
 
 private:
   void threadLoop();
+  void changeAllWheelOutput(double output);
+  void pulseTorque(TORQUE_DIRECTION dir);
   void invokeStabilizer();
   void waitingStabilizerOpening();
   void invokeAntiTolque();
@@ -39,8 +45,9 @@ private:
   bool checkCompleteStabilize();
   double getTheta(double accX, double accY, double accZ);
   const double _pGain = 1.0;
-  const double _iGain = 0;
-  const double _eps = 0.08; // 5度程度
+  const double _iGain = 0.01;
+  const double _eps = 0.08;            // 5度程度
+  double _targetTheta = 0.01570796326; // 0.9度
   double _integral = 0.0;
   double _output = 0.0;
   double _theta = 0.0;
