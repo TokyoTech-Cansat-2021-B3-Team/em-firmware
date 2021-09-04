@@ -21,11 +21,11 @@ void ProbeSequence::threadLoop() {
   _state = Running;
   _console->log("Probe", "Start Probe%d Sequence\n", _probeNumber);
 
-  // 1本目のみ初期位置への移動
-  if (_probeNumber == Probe1) {
-    _console->log("Probe", "Setup Init Position\n");
-    verticalMove(PROBE_SEQUENCE_SETUP_VERTICAL_DUTY, PROBE_SEQUENCE_SETUP_LENGTH);
-  }
+  //   // 1本目のみ初期位置への移動
+  //   if (_probeNumber == Probe1) {
+  //     _console->log("Probe", "Setup Init Position\n");
+  //     verticalMove(PROBE_SEQUENCE_SETUP_VERTICAL_DUTY, PROBE_SEQUENCE_SETUP_LENGTH);
+  //   }
 
   // 1本目は回転角が大きい
   if (_probeNumber == Probe1) {
@@ -67,8 +67,24 @@ void ProbeSequence::holderToNext(double first, double second) {
   // 待ち
   ThisThread::sleep_for(PROBE_SEQUENCE_HOLDER_DELAY);
 
+  _console->log("Probe", "Start Probe Push\n");
+
+  // 電極の押し下げ
+  probepush();
+
+  _console->log("Probe", "Complete Probe Push\n");
+
   // 2段目
   _loadingMotor->rotate(second, PROBE_SEQUENCE_HOLDER_SPEED);
+}
+
+void ProbeSequence::probepush() {
+  //上下駆動指定量下降
+  verticalMove(PROBE_SEQUENCE_PROBEPUSH_VERTICAL_DUTY, //
+               PROBE_SEQUENCE_CONNECT_LENGTH + PROBE_SEQUENCE_DRILLING_LENGTH);
+  //上下駆動指定量上昇
+  verticalMove(PROBE_SEQUENCE_BACK_VERTIVAL_DUTY, //
+               -(PROBE_SEQUENCE_CONNECT_LENGTH + PROBE_SEQUENCE_DRILLING_LENGTH));
 }
 
 void ProbeSequence::connect() {
