@@ -25,10 +25,15 @@ void Navigation::threadLoop() {
       _leftTargetSpeed = 0.0;
       _rightTargetSpeed = 0.0;
     } else {
-      updateDifference();
-      _deltaV = _gainKL * _y_diff + _gainKT * _theta_diff;
-      _leftTargetSpeed = _cruiseSpeed + _deltaV;
-      _rightTargetSpeed = _cruiseSpeed - _deltaV;
+      if (_torqueControl->checkNavigatable()) {
+        updateDifference();
+        _deltaV = _gainKL * _y_diff + _gainKT * _theta_diff;
+        _leftTargetSpeed = _cruiseSpeed + _deltaV;
+        _rightTargetSpeed = _cruiseSpeed - _deltaV;
+      } else {
+        _leftTargetSpeed = _torqueControl->cruiseSpeed();
+        _rightTargetSpeed = _torqueControl->cruiseSpeed();
+      }
     }
     _leftWheelControl->setTargetSpeed(_leftTargetSpeed);
     _rightWheelControl->setTargetSpeed(_rightTargetSpeed);
