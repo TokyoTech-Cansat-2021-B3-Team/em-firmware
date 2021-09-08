@@ -5,6 +5,7 @@
 
 #include "localization.h"
 #include "WheelControl.h"
+#include "TorqueControl.h"
 
 #define NAVIGATION_THREAD_PRIORITY osPriorityHigh
 #define NAVIGATION_THREAD_STACK_SIZE 1024
@@ -14,7 +15,7 @@
 
 class Navigation{
 public:
-    explicit Navigation(Localization* localization, WheelControl* leftWheelControl, WheelControl* rightWheelControl);
+    explicit Navigation(Localization* localization, WheelControl* leftWheelControl, WheelControl* rightWheelControl, TorqueControl* torqueControl);
     void setTargetPosition(double targetX, double targetY, double eps);
     void setCruiseSpeed(double cruiseSpeed);
     void start();
@@ -41,5 +42,6 @@ private:
     double _rightTargetSpeed = 0.0;
     WheelControl* _leftWheelControl;
     WheelControl* _rightWheelControl;
+    TorqueControl* _torqueControl;
     unique_ptr<Thread> _thread;
 };
