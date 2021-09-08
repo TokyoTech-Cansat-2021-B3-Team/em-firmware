@@ -23,6 +23,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "MotorSpeed.h"
 #include "Localization.h"
 #include "navigation.h"
+#include "TorqueControl.h"
 
 #define PRINT_BUFFER_SIZE 128
 
@@ -53,6 +54,7 @@ FusionOdometry ekf(KALMANFILTER_PERIOD);
 
 Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
+TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed);
 Navigation navi(&localization, &leftControl, &rightControl);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);

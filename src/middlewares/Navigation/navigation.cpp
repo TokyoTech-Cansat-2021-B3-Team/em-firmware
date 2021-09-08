@@ -1,10 +1,12 @@
 #include "navigation.h"
 #include "WheelControl.h"
 #include "localization.h"
+#include "TorqueControl.h"
 
-Navigation::Navigation(Localization *localization, WheelControl *leftWheelControl, WheelControl *rightWheelControl)
+Navigation::Navigation(Localization *localization, WheelControl *leftWheelControl, WheelControl *rightWheelControl,
+                       TorqueControl *torqueControl)
     : _localization(localization), _leftWheelControl(leftWheelControl), _rightWheelControl(rightWheelControl),
-      _thread() {}
+      _torqueControl(torqueControl), _thread() {}
 
 void Navigation::start() {
   _thread =
