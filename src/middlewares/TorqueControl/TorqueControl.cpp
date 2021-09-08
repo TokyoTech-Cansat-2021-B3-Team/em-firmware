@@ -89,3 +89,7 @@ bool TorqueControl::checkNavigatable() {
   }
   return false;
 }
+
+double TorqueControl::cruiseSpeed() {
+  return _cruiseSpeed;
+}
