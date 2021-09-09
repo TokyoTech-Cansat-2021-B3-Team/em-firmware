@@ -1,6 +1,6 @@
 #include "WheelMotor.h"
 
-WheelMotor::WheelMotor(PwmOut *in1, PwmOut *in2) :
+WheelMotor::WheelMotor(PwmOut *in2, PwmOut *in1) :
  DCMotor(in1, in2, WHEEL_MOTOR_PWM_PERIOD),
  _direction(FOWARD)
  {

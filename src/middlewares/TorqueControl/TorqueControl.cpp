@@ -91,5 +91,10 @@ bool TorqueControl::checkNavigatable() {
 }
 
 double TorqueControl::cruiseSpeed() {
-  return _cruiseSpeed;
+  if (_state == GENERALSPEED) {
+    return _generalCruiseSpeed;
+  } else if (_state == SLOWSPEED) {
+    return _slowCruiseSpeed;
+  }
+  return 0;
 }

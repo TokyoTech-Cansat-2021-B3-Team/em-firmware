@@ -75,8 +75,9 @@ int main() {
   rightMotorSpeed.start();
   leftControl.start();
   rightControl.start();
-  leftControl.setDirection(FOWARD);
-  rightControl.setDirection(FOWARD);
+  torqueControl.setGeneralCruiseSpeed(20);
+  torqueControl.setSlowCruiseSpeed(5);
+  torqueControl.start();
   leftControl.setTargetSpeed(20);
   rightControl.setTargetSpeed(20);
   imu.start();
