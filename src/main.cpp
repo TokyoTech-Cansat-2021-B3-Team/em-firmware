@@ -42,7 +42,7 @@ QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 LSM9DS1 imu(&i2c);
 
 MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
+MotorSpeed rightMotorSpeed(&rightEncoder, 1000.0);
 
 WheelPID leftPID;
 WheelPID rightPID;
@@ -55,7 +55,7 @@ FusionOdometry ekf(KALMANFILTER_PERIOD);
 Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
 TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed);
-Navigation navi(&localization, &leftControl, &rightControl);
+Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
