@@ -31,12 +31,14 @@ void TorqueControl::threadLoop() {
     updateSufficientSpeedUpCount();
     if (_state == GENERALSPEED) {
       if (checkDecreasingSpeed()) {
-        _state = SLOWSPEED;
-        resetSufficientSpeedUpCount();
+        double slowingDetectSpeed = _slowingDetectSpeedRatio * _cruiseSpeed;
+        if (leftSpeed < slowingDetectSpeed || rightSpeed < slowingDetectSpeed) {
+          setSlowState();
+        }
       }
     } else if (_state == SLOWSPEED) {
       if (checkSufficientSpeedUp()) {
-        _state = GENERALSPEED;
+        setGeneralState();
       }
     }
     ThisThread::sleep_for(TORQUECONTROL_PERIOD);
@@ -91,10 +93,15 @@ bool TorqueControl::checkNavigatable() {
 }
 
 double TorqueControl::cruiseSpeed() {
-  if (_state == GENERALSPEED) {
-    return _generalCruiseSpeed;
-  } else if (_state == SLOWSPEED) {
-    return _slowCruiseSpeed;
-  }
-  return 0;
+  return _cruiseSpeed;
+}
+
+void TorqueControl::setSlowState() {
+  _state = SLOWSPEED;
+  _cruiseSpeed = _slowCruiseSpeed;
+}
+
+void TorqueControl::setGeneralState() {
+  _state = GENERALSPEED;
+  _cruiseSpeed = _generalCruiseSpeed;
 }

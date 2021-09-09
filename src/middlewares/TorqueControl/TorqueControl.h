@@ -33,8 +33,11 @@ private:
   bool checkSufficientSpeedUp();
   void updateSufficientSpeedUpCount();
   void resetSufficientSpeedUpCount();
+  void setSlowState();
+  void setGeneralState();
   const int _sufficientSpeedUpCountThreshold = 10;
   double _sufficientSpeedRatio = 0.9;
+  double _slowingDetectSpeedRatio = 0.4;
   double _generalCruiseSpeed = 0.0;
   double _slowCruiseSpeed = 0.0;
   double _leftPreviousSpeed = 0.0;
