@@ -7,9 +7,10 @@
 SimpleLocalization::SimpleLocalization(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, double wheelDistance,
                                        double wheelRadius)
     : _leftMotorSpeed(leftMotorSpeed), _rightMotorSpeed(rightMotorSpeed), _wheelDistance(wheelDistance),
-      _wheelRadius(wheelRadius), _thread() {}
+      _wheelRadius(wheelRadius), _timer(Timer()), _thread() {}
 
 void SimpleLocalization::start() {
+  _timer.start();
   _thread = make_unique<Thread>(SIMPLELOCALIZATION_THREAD_PRIORITY, SIMPLELOCALIZATION_THREAD_STACK_SIZE, nullptr,
                                 SIMPLELOCALIZATION_THREAD_NAME);
   _thread->start(callback(this, &SimpleLocalization::threadLoop));
@@ -22,7 +23,8 @@ void SimpleLocalization::stop() {
 
 void SimpleLocalization::threadLoop() {
   while (true) {
-    _dt = static_cast<std::chrono::duration<double>>(ODOMETRY_PERIOD).count();
+    _dt = (_timer.elapsed_time().count() - _previousTime) * 1.0e-6;
+    _previousTime = _timer.elapsed_time().count();
     _omega = getAngularVelocityFromWheelOdometry();
     _theta += _omega * _dt;
     _v = getVelocityFromWheelOdometry();

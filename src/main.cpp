@@ -23,7 +23,7 @@
 
 #include "RunningSequence.h"
 
-#define PRINT_BUFFER_SIZE 256
+#define PRINT_BUFFER_SIZE 384
 
 BufferedSerial bufferedSerial(UART_TX, UART_RX); //
 I2C i2c(I2C_SDA, I2C_SCL);                       //
@@ -81,10 +81,9 @@ Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
-  // snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm
-  // y_sm'\r\n");
-  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
-  //bufferedSerial.write(printBuffer, strlen(printBuffer));
+  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
+  //snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
+  bufferedSerial.write(printBuffer, strlen(printBuffer));
   while (true) {
        
         snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",
@@ -146,7 +145,7 @@ void speedThreadLoop() {
     leftControl.start();
     rightControl.start();
     navi.start();
-    navi.setTargetPosition(10.0, 0.0, 0.5);
+    navi.setTargetPosition(10.0, 0.0, 0.1);
   } else if (flag == RunningNoControle) {
     imu.start();
     leftMotorSpeed.start();
