@@ -89,7 +89,7 @@ void printThreadLoop() {
         snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",
                  runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),
        leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(),
-       localization.getAngularVelocityFromWheelOdometry(), imu.gyrY(), localization.theta(), localization.omega(),
+       localization.getAngularVelocityFromWheelOdometry(), -imu.gyrY(), localization.theta(), localization.omega(),
        localization.x(), localization.y(), localization.v(), simpleLocalization.theta(), simpleLocalization.x(),
        simpleLocalization.y());
        
