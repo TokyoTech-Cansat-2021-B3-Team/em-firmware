@@ -226,7 +226,6 @@ void PA1010D::rmcDecode() {
 
   // MV
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _rmc.magneticVariation = strtof(ptr + 1, nullptr);
@@ -306,28 +305,24 @@ void PA1010D::ggaDecode() {
 
   // HDOP
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _gga.hdop = strtof(ptr + 1, nullptr);
 
   // MSLALT
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _gga.mslAltitude = strtof(ptr + 1, nullptr);
 
   // GEOSEP
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _gga.geoidalSeparation = strtof(ptr + 1, nullptr);
 
   // AGE
   if ((ptr = strchr(ptr + 1, ',')) == nullptr) {
-    printf("return \n");
     return;
   }
   _gga.ageOfDiffCorr = strtof(ptr + 1, nullptr);
@@ -354,8 +349,10 @@ void PA1010D::ggaDecode() {
 }
 
 void PA1010D::setTime() {
-  if (_isSetTime) {
-    if (PA1010D_RMC_OUTPUT && _rmc.status == 'A') {
+  if (!_isSetTime) {
+    // if (PA1010D_RMC_OUTPUT && _rmc.status == 'A') {
+    // if (PA1010D_RMC_OUTPUT) {
+    if (PA1010D_RMC_OUTPUT && _rmc.date != 0) {
       tm t = {
           static_cast<int>(_rmc.utc) % 100,                // sec
           static_cast<int>(_rmc.utc / 100) % 100,          // min

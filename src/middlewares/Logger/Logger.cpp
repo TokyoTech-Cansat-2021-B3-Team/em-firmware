@@ -118,9 +118,7 @@ void Logger::dumpRunningLog() {
   RunningData data;
   while (read(_runningFile, &data, sizeof(data)) != 0) {
     printf("%lf, %lf, %lf, %lf, %lf, %lf %lf\n", //
-           data.x, data.y, data.theta,
-           data.leftTargetSpeed,data.rightTargetSpeed,data.leftSpeed,data.rightSpeed
-    );
+           data.x, data.y, data.theta, data.leftTargetSpeed, data.rightTargetSpeed, data.leftSpeed, data.rightSpeed);
   }
 }
 
@@ -142,7 +140,7 @@ void Logger::init() {
     //走行シーケンスログ用のファイル
     _runningFile = open(LOGGER_RUNNING_FILE_PATH);
 
-    dumpRunningLog();
+    // dumpRunningLog();
 
     _isInit = true;
   }
