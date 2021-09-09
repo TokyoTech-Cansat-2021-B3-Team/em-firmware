@@ -6,7 +6,7 @@
 #include "WheelControl.h"
 #include "localization.h"
 
-#define NAVIGATION_THREAD_PRIORITY osPriorityHigh
+#define NAVIGATION_THREAD_PRIORITY osPriorityAboveNormal
 #define NAVIGATION_THREAD_STACK_SIZE 1024
 #define NAVIGATION_THREAD_NAME "NAVIGATION"
 

@@ -65,5 +65,14 @@ void WheelMotor::stop() {
     }
 
     _dir = 0;
+  if (_direction != STOP) {
+    _direction = STOP;
+  }
+  if (_in1 != nullptr) {
+    *_in1 = 0.0;
+  }
+
+  if (_in2 != nullptr) {
+    *_in2 = 0.0;
   }
 }
