@@ -120,12 +120,12 @@ void speedThreadLoop() {
     while (true) {
       if (runningSequence.state() == ARRIVED_SECOND_POLE) {
         runningSequence.stop();
-        ThisThread::sleep_for(1s);
+        ThisThread::sleep_for(30s);
         runningSequence.start(SECOND);
       }
       if (runningSequence.state() == ARRIVED_THIRD_POLE) {
         runningSequence.stop();
-        ThisThread::sleep_for(1s);
+        ThisThread::sleep_for(30s);
         runningSequence.start(THIRD);
       }
       if (runningSequence.state() == ARRIVED_FOURTH_POLE) {
@@ -192,6 +192,10 @@ int main() {
       rightControl.setTargetSpeed(0);
       leftWheelMotor.stop();
       rightWheelMotor.stop();
+      speedThread.terminate();
+      navi.stop();
+      runningSequence.stop();
+      printThread.terminate();
       printf("stop\r\n");
       while (true) {
         ThisThread::sleep_for(10ms);
