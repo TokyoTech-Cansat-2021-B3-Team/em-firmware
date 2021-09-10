@@ -43,11 +43,13 @@ PwmOut motor2In2(M2_IN2);
 
 DigitalOut motor5Enable(M5_ENABLE);
 
+DigitalIn saftyPin(FUSE_GATE);
+
 SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
 LittleFileSystem2 littleFileSystem2(nullptr);
 
 WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
-WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
+WheelMotor rightWheelMotor(&motor2In2, &motor2In1);
 
 QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
@@ -184,6 +186,16 @@ int main() {
       navi.setCruiseSpeed(cruiseSpeed);
       printThread.start(printThreadLoop);
       speedThread.start(speedThreadLoop);
+    }
+    if (saftyPin != 1) {
+      leftControl.setTargetSpeed(0);
+      rightControl.setTargetSpeed(0);
+      leftWheelMotor.stop();
+      rightWheelMotor.stop();
+      printf("stop\r\n");
+      while (true) {
+        ThisThread::sleep_for(10ms);
+      }
     }
     i++;
     ThisThread::sleep_for(10ms);
