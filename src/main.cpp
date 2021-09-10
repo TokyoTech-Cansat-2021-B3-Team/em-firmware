@@ -32,7 +32,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 
 enum ExperimentMode { RunningAllSequence, RunningPoleToPole, RunningNoControle };
 
-ExperimentMode flag = RunningPoleToPole;
+ExperimentMode flag = RunningAllSequence;
 const double cruiseSpeed = 20.0;
 
 PwmOut motor1In1(M1_IN1);
@@ -81,7 +81,7 @@ Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
-  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
+  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stts Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
   //snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
   bufferedSerial.write(printBuffer, strlen(printBuffer));
   while (true) {
