@@ -1,4 +1,5 @@
 #include "ProbeSequence.h"
+#include <cstdio>
 
 ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor,
                              QEI *verticalEncoder, Console *console)
@@ -170,4 +171,22 @@ void ProbeSequence::stop() {
 
 ProbeSequence::ProbeSequenceState ProbeSequence::state() {
   return _state;
+}
+
+void ProbeSequence::debugThreadLoop() {
+  while (true) {
+      printf("%f\r\n", revToLength(_verticalEncoder->getRevolutions()));
+    ThisThread::sleep_for(10ms);
+  }
+}
+
+void ProbeSequence::test() {
+  _thread = make_unique<Thread>(PROBE_SEQUENCE_THREAD_PRIORITY,   //
+                                PROBE_SEQUENCE_THREAD_STACK_SIZE, //
+                                nullptr,                          //
+                                PROBE_SEQUENCE_THREAD_NAME);
+  _thread->start(callback(this, &ProbeSequence::debugThreadLoop));
+
+  //以降はデバッグ用の処理
+  verticalMove(1.0, 10);
 }

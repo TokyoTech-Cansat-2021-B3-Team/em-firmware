@@ -81,6 +81,8 @@ private:
 
 public:
 private:
+  void debugThreadLoop();
+
   void threadLoop();
 
   void set(double L, double stroke, double duty);
@@ -110,6 +112,8 @@ private:
 public:
   explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder,
                          Console *console);
+
+  void test();
 
   void start(ProbeNumber probeNumber);
 
