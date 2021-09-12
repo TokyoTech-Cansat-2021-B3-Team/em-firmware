@@ -142,7 +142,7 @@ void ProbeSequence::verticalMove(double duty, double L) {
 }
 
 double ProbeSequence::revToLength(int revolution) {
-  return revolution * PROBE_SEQUENCE_VERTICAL_RATIO * PROBE_SEQUENCE_VERTICAL_LEAD;
+  return revolution / PROBE_SEQUENCE_VERTICAL_RATIO * PROBE_SEQUENCE_VERTICAL_LEAD;
 }
 
 void ProbeSequence::start(ProbeNumber probeNumber) {
