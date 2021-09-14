@@ -43,7 +43,7 @@ void StabilizeSequence::threadLoop() {
   while (true) {
     //正常終了の確認
     if (_stabilize->state() == Stabilize::COMPLETE_STABILIZE) {
-      _state = COMPLETE;
+      setStatus(COMPLETE);
       break;
     }
     //強制終了の確認
