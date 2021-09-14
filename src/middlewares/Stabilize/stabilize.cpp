@@ -102,3 +102,7 @@ void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {
   }
   ThisThread::sleep_for(200ms);
 }
+
+Stabilize::STABILIZE_STATE Stabilize::state() {
+  return _state;
+}
