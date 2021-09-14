@@ -12,8 +12,11 @@ _magMax(0.0f)
 }
 
 void LSM9DS1::start() {
+  if (!_threadStart) {
     _thread = make_unique<Thread>(LSM9DS1_THREAD_PRIORITY, LSM9DS1_THREAD_STACK_SIZE, nullptr, LSM9DS1_THREAD_NAME);
     _thread->start(callback(this, &LSM9DS1::threadLoop));
+    _threadStart = true;
+  }
 }
 
 void LSM9DS1::stop() {
