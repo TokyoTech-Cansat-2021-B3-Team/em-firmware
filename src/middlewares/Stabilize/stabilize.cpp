@@ -3,10 +3,8 @@
 #include "lsm9ds1.h"
 #include <math.h>
 
-Stabilize::Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor,
-                     WheelControl *leftWheelControl, WheelControl *rightWheelControl)
-    : _imu(imu), _leftWheelMotor(leftWheelMotor), _rightWheelMotor(rightWheelMotor),
-      _leftWheelControl(leftWheelControl), _rightWheelControl(rightWheelControl), _thread() {}
+Stabilize::Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor)
+    : _imu(imu), _leftWheelMotor(leftWheelMotor), _rightWheelMotor(rightWheelMotor), _thread() {}
 
 void Stabilize::start() {
   _thread = make_unique<Thread>(STABILIZE_THREAD_PRIORITY, STABILIZE_THREAD_STACK_SIZE, nullptr, STABILIZE_THREAD_NAME);
@@ -95,19 +93,11 @@ void Stabilize::changeAllWheelOutput(double output) {
 
 void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {
   if (dir == CW) {
-    _leftWheelControl->setDirection(FOWARD);
-    _rightWheelControl->setDirection(FOWARD);
+    changeAllWheelOutput(1.0);
   } else if (dir == CCW) {
-    _leftWheelControl->setDirection(REVERSE);
-    _rightWheelControl->setDirection(REVERSE);
+    changeAllWheelOutput(-1.0);
   }
-  _leftWheelControl->start();
-  _rightWheelControl->start();
-  _leftWheelControl->setTargetSpeed(45); //無負荷では45rpmが最大
-  _leftWheelControl->setTargetSpeed(45);
   ThisThread::sleep_for(500ms); // 500msあれば最大速度まで達するであろう
-  _leftWheelControl->stop();//WheelControlによるPID制御をオフ
-  _rightWheelControl->stop();
   if (dir == CW) {
     changeAllWheelOutput(-1.0);
   } else {

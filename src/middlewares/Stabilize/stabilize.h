@@ -29,7 +29,7 @@ public:
     CW,
     CCW
   };
-  explicit Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor, WheelControl* leftWheelControl, WheelControl* rightWheelControl);
+  explicit Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor);
   void start();
   void stop();
   void terminate();
@@ -57,8 +57,6 @@ private:
   STABILIZE_STATE _state;
   WheelMotor *_leftWheelMotor;
   WheelMotor *_rightWheelMotor;
-  WheelControl *_leftWheelControl;
-  WheelControl *_rightWheelControl;
   LSM9DS1 *_imu;
   unique_ptr<Thread> _thread;
 };
