@@ -24,6 +24,7 @@
 #include "fusion-odometry.h"
 #include "localization.h"
 #include "navigation.h"
+#include "stabilize.h"
 
 #include "Console.h"
 #include "Logger.h"
@@ -34,6 +35,7 @@
 #include "LandingSequence.h"
 #include "ProbeSequence.h"
 #include "RunningSequence.h"
+#include "StabilizeSequence.h"
 
 // defines
 #define SPI_FREQUENCY 25000000
@@ -86,6 +88,7 @@ WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 FusionOdometry ekf;
 Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
 Navigation navi(&localization, &leftControl, &rightControl);
+Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
 
 Logger logger(&sdBlockDevice, &littleFileSystem2);
 Console console(&mu2, &logger);
@@ -98,6 +101,7 @@ FusingSequence fusingSequence(&fusing, &console);
 ProbeSequence probeSequence(&drillMotor, &verticalMotor, &loadingMotor, &verticalEncoder, &console);
 RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
                                 &rightControl, &console, &logger);
+StabilizeSequence stabilizeSequence(&stabilize, &imu, &console, &logger);
 
 // 着地検知シーケンス
 void syncLandingSequence() {
@@ -194,7 +198,32 @@ void runningSequenceSyncStart(RunningSqequneceType type) {
   }
 }
 
-// main() runs in its own thread in the OS
+// 正立シーケンス
+void stabilizeSequenceSyncStart() {
+  console.log("main", "Stabilize Sequence Sync Start");
+
+  stabilizeSequence.start();
+
+  while (true) {
+    // 正常終了
+    if (stabilizeSequence.state() == StabilizeSequence::COMPLETE) {
+      console.log("main", "Stabilize Sequence Complete");
+      break;
+    }
+
+    // タイムアウト
+    if (stabilizeSequence.state() == StabilizeSequence::TERMINATE) {
+      console.log("main", "Stabilize Sequence Timeout");
+      break;
+    }
+
+    ThisThread::sleep_for(1s);
+  }
+
+  stabilizeSequence.stop();
+}
+
+// StabilizeSequence main() runs in its own thread in the OS
 int main() {
   //   verticalMotor.forward(1.0);
 
@@ -223,6 +252,9 @@ int main() {
 
   // パラシュート分離シーケンス
   fusingSequenceSyncStart();
+
+  // 正立シーケンス
+  stabilizeSequenceSyncStart();
 
   // 刺し込みシーケンス1
   probeSequenceSyncStart(ProbeSequence::Probe1);
