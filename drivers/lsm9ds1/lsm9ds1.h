@@ -54,6 +54,7 @@ private:
     void get_mag();
     I2C* _i2c;
     unique_ptr<Thread> _thread;
+    bool _threadStart = false;
     float _accMax;
     float _gyrMax;
     float _magMax;
