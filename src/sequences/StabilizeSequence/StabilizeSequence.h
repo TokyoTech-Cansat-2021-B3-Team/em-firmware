@@ -28,7 +28,7 @@ public:
     TERMINATE
   };
 
-  explicit StabilizeSequence(Stabilize *stabilize, Console *console, Logger *logger);
+  explicit StabilizeSequence(Stabilize *stabilize, LSM9DS1 *imu, Console *console, Logger *logger);
   void start();
   void stop();
   StabilizeSequenceState state();
@@ -40,9 +40,11 @@ public:
 private:
   void setStatus(StabilizeSequenceState state);
   void threadLoop();
+  void updateStatus();
   chrono::microseconds _previousTime = 0s;
   StabilizeSequenceState _state;
   Stabilize *_stabilize;
+  LSM9DS1 *_imu;
   Console *_console;
   Logger *_logger;
   Timer _timer;

@@ -40,6 +40,9 @@ void Stabilize::threadLoop() {
       _leftWheelMotor->forward(-1 * _output);
       _rightWheelMotor->forward(-1 * _output);
     }
+    if (checkStabilizeComplete()) {
+      _state = COMPLETE_STABILIZE;
+    }
     ThisThread::sleep_for(STABILIZE_PERIOD);
   }
 }
@@ -76,6 +79,16 @@ bool Stabilize::checkStabilizerOpend() {
     return false;
   }
   return true;
+}
+
+bool Stabilize::checkStabilizeComplete() {
+  _theta = getTheta(_imu->accX(), _imu->accY(), _imu->accZ());
+  double diff = _theta - _targetTheta;
+  if (fabs(diff) < 0.07) {
+    // 4deg * pi /180 = 0.07
+    return true;
+  }
+  return false;
 }
 
 void Stabilize::changeAllWheelOutput(double output) {

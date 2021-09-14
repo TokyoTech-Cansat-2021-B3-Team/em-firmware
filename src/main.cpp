@@ -80,9 +80,9 @@ Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
 Logger logger(&sdBlockDevice, &littleFileSystem2);
 Console console(&mu2, &logger);
 
-StabilizeSequence stabilizeSequence(&stabilize, &console, &logger);
+StabilizeSequence stabilizeSequence(&stabilize, &imu, &console, &logger);
 
-Thread printTask(osPriorityRealtime, 512, nullptr, nullptr);
+Thread printTask(osPriorityRealtime, 2048, nullptr, nullptr);
 
 
 void printThreadLoop() {
@@ -100,6 +100,8 @@ void printThreadLoop() {
 
     // ステッピングモータへの電源供給OFF
     loadingMotor.idleCurrent(false);
+    logger.init();
+    console.init();
     snprintf(printBuffer, PRINT_BUFFER_SIZE, "Break Stabilizer!!!\r\n");
     bufferedSerial.write(printBuffer, strlen(printBuffer));
     stabilizeSequence.start();

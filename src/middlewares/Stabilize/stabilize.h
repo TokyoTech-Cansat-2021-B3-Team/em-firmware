@@ -46,11 +46,12 @@ private:
   void invokeAntiTolque();
   bool checkStabilizerOpend();
   bool checkCompleteStabilize();
+  bool checkStabilizeComplete();
   double getTheta(double accX, double accY, double accZ);
   const double _pGain = 1.0;
   const double _iGain = 0.01;
   const double _eps = 0.08;            // 5度程度
-  double _targetTheta = 0.01570796326; // 0.9度
+  double _targetTheta = 0.05235987755982988; // 3度
   double _integral = 0.0;
   double _output = 0.0;
   double _theta = 0.0;

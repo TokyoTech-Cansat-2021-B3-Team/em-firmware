@@ -1,15 +1,16 @@
 #include "StabilizeSequence.h"
 #include "stabilize.h"
 
-StabilizeSequence::StabilizeSequence(Stabilize *stabilize, Console *console, Logger *logger)
-    : _stabilize(stabilize), _console(console), _logger(logger),
-      _state(UNDEFINED), _timer(), _thread() {}
+StabilizeSequence::StabilizeSequence(Stabilize *stabilize, LSM9DS1 *imu, Console *console, Logger *logger)
+    : _stabilize(stabilize), _imu(imu), _console(console), _logger(logger), _state(UNDEFINED), _timer(), _thread() {}
 
 void StabilizeSequence::start() {
   _timer.start();
+  _imu->start();
   _console->log("stabilize", "init stabilize sequence\n");
   _logger->init();
   _console->init();
+  setStatus(WAITING);
   _thread = make_unique<Thread>(STABILIZESEQUENCE_THREAD_PRIORITY, STABILIZESEQUENCE_THREAD_STACK_SIZE, nullptr,
                                 STABILIZESEQUENCE_THREAD_NAME);
   _thread->start(callback(this, &StabilizeSequence::threadLoop));
@@ -39,11 +40,10 @@ void StabilizeSequence::threadLoop() {
       ThisThread::sleep_for(STABILIZESEQUENCE_PERIOD);
     }
   }
-  //stabilizeはエラーを検知できないので、成功判定orタイムアウトまで無限ループする
+  // stabilizeはエラーを検知できないので、成功判定orタイムアウトまで無限ループする
   while (true) {
     //正常終了の確認
-    if (_stabilize->state() == Stabilize::COMPLETE_STABILIZE) {
-      setStatus(COMPLETE);
+    if (_state == COMPLETE) {
       break;
     }
     //強制終了の確認
@@ -55,6 +55,7 @@ void StabilizeSequence::threadLoop() {
       _console->log("stabilize", "terminate\n");
       break;
     }
+    updateStatus();
     ThisThread::sleep_for(STABILIZESEQUENCE_PERIOD);
   }
   //エラー時もしくは完了時はループから抜ける
@@ -66,4 +67,24 @@ void StabilizeSequence::setStatus(StabilizeSequenceState state) {
 
 StabilizeSequence::StabilizeSequenceState StabilizeSequence::state() {
   return _state;
+}
+
+void StabilizeSequence::updateStatus() {
+  if (_stabilize->state() == Stabilize::WAITING) {
+    _state = WAITING;
+  } else if (_stabilize->state() == Stabilize::INVOKE_STABILIZER) {
+    _state = INVOKE_STABILIZER;
+  } else if (_stabilize->state() == Stabilize::WAITING_STABILIZER_OPENING) {
+    _state = WAITING_STABILIZER_OPENING;
+  } else if (_stabilize->state() == Stabilize::PREPARING_INVOKE_ANTI_TOLQUE) {
+    _state = PREPARING_INVOKE_ANTI_TOLQUE;
+  } else if (_stabilize->state() == Stabilize::INVOKE_STABILIZER) {
+    _state = INVOKE_STABILIZER;
+  } else if (_stabilize->state() == Stabilize::CALM_STABILIZE) {
+    _state = CALM_STABILIZE;
+  } else if (_stabilize->state() == Stabilize::COMPLETE_STABILIZE) {
+    _state = COMPLETE;
+  } else if (_stabilize->state() == Stabilize::TERMINATE) {
+    _state = TERMINATE;
+  }
 }
