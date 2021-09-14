@@ -32,12 +32,12 @@ public:
   explicit Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor);
   void start();
   void stop();
-  void terminate();
   double currentTheta();
   double currentOutput();
   STABILIZE_STATE state();
 
 private:
+  void terminate();
   void threadLoop();
   void changeAllWheelOutput(double output);
   void pulseTorque(TORQUE_DIRECTION dir);

@@ -17,6 +17,7 @@ void StabilizeSequence::start() {
 }
 
 void StabilizeSequence::stop() {
+  _stabilize->stop();
   _thread->terminate();
   _thread.reset();
 }
@@ -48,7 +49,6 @@ void StabilizeSequence::threadLoop() {
     }
     //強制終了の確認
     if ((_timer.elapsed_time() - _previousTime) > STABILIZESEQUENCE_TERMINATE_TIME) {
-      _stabilize->terminate();
       _stabilize->stop();
 
       setStatus(TERMINATE);
@@ -70,21 +70,28 @@ StabilizeSequence::StabilizeSequenceState StabilizeSequence::state() {
 }
 
 void StabilizeSequence::updateStatus() {
-  if (_stabilize->state() == Stabilize::WAITING) {
+  if (_state != WAITING && _stabilize->state() == Stabilize::WAITING) {
     _state = WAITING;
-  } else if (_stabilize->state() == Stabilize::INVOKE_STABILIZER) {
+  } else if (_state != INVOKE_STABILIZER && _stabilize->state() == Stabilize::INVOKE_STABILIZER) {
     _state = INVOKE_STABILIZER;
-  } else if (_stabilize->state() == Stabilize::WAITING_STABILIZER_OPENING) {
+    _console->log("stabilize", "invoke stabilizer");
+  } else if (_state != WAITING_STABILIZER_OPENING && _stabilize->state() == Stabilize::WAITING_STABILIZER_OPENING) {
     _state = WAITING_STABILIZER_OPENING;
-  } else if (_stabilize->state() == Stabilize::PREPARING_INVOKE_ANTI_TOLQUE) {
+    _console->log("stabilize", "waiting stabilizer opening");
+  } else if (_state != PREPARING_INVOKE_ANTI_TOLQUE && _stabilize->state() == Stabilize::PREPARING_INVOKE_ANTI_TOLQUE) {
     _state = PREPARING_INVOKE_ANTI_TOLQUE;
-  } else if (_stabilize->state() == Stabilize::INVOKE_STABILIZER) {
+    _console->log("stabilize", "preparing invoke anti tolque");
+  } else if (_state != INVOKE_STABILIZER && _stabilize->state() == Stabilize::INVOKE_STABILIZER) {
     _state = INVOKE_STABILIZER;
-  } else if (_stabilize->state() == Stabilize::CALM_STABILIZE) {
+    _console->log("stabilize", "invoke stabilizer");
+  } else if (_state != CALM_STABILIZE && _stabilize->state() == Stabilize::CALM_STABILIZE) {
     _state = CALM_STABILIZE;
-  } else if (_stabilize->state() == Stabilize::COMPLETE_STABILIZE) {
+    _console->log("stabilize", "calm stabilizing");
+  } else if (_state != COMPLETE && _stabilize->state() == Stabilize::COMPLETE_STABILIZE) {
     _state = COMPLETE;
-  } else if (_stabilize->state() == Stabilize::TERMINATE) {
+    _console->log("stabilize", "complete stabilize");
+  } else if (_state != TERMINATE && _stabilize->state() == Stabilize::TERMINATE) {
     _state = TERMINATE;
+    _console->log("stabilize", "terminate stabilize");
   }
 }

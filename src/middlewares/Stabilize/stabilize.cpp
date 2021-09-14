@@ -12,6 +12,7 @@ void Stabilize::start() {
 }
 
 void Stabilize::stop() {
+  terminate();
   _thread->terminate();
   _thread.reset();
 }

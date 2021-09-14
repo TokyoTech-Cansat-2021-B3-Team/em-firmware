@@ -107,6 +107,10 @@ void printThreadLoop() {
     stabilizeSequence.start();
     printTask.start(printThreadLoop);
     while (true) {
+      if (stabilizeSequence.state() == StabilizeSequence::COMPLETE) {
+        stabilizeSequence.stop();
+        break;
+      }
       ThisThread::sleep_for(100ms);
     }
   }
