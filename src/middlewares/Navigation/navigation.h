@@ -3,8 +3,8 @@
 #include "mbed.h"
 #include <cstdint>
 
-#include "localization.h"
 #include "WheelControl.h"
+#include "localization.h"
 
 #define NAVIGATION_THREAD_PRIORITY osPriorityAboveNormal
 #define NAVIGATION_THREAD_STACK_SIZE 1024
@@ -12,7 +12,7 @@
 
 #define NAVIGATION_PERIOD 200ms
 
-class Navigation{
+class Navigation {
 public:
     explicit Navigation(Localization* localization, WheelControl* leftWheelControl, WheelControl* rightWheelControl);
     void setTargetPosition(double targetX, double targetY, double eps);
@@ -23,14 +23,15 @@ public:
     double rightTargetSpeed();
     virtual bool checkArrivingTarget();
 protected:
-    double _y_diff = 0.0;
-    double _theta_diff = 0.0;
-    double norm(double x, double y);
-    virtual void updateDifference();
-    Localization* _localization;
-    double _targetX = 0.0;
-    double _targetY = 0.0;
-    double _eps = 0.0;
+  double _y_diff = 0.0;
+  double _theta_diff = 0.0;
+  double norm(double x, double y);
+  virtual void updateDifference();
+  Localization *_localization;
+  double _targetX = 0.0;
+  double _targetY = 0.0;
+  double _eps = 0.0;
+
 private:
     void threadLoop();
     const double _gainKL = 1.0;//1mのずれで2RPMの差
