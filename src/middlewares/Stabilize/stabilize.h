@@ -7,11 +7,11 @@
 #include "WheelControl.h"
 #include "lsm9ds1.h"
 
-#define STABILIZE_THREAD_PRIORITY osPriorityHigh
+#define STABILIZE_THREAD_PRIORITY osPriorityAboveNormal
 #define STABILIZE_THREAD_STACK_SIZE 1024
 #define STABILIZE_THREAD_NAME "STABILIZE"
 
-#define STABILIZE_PERIOD 1ms
+#define STABILIZE_PERIOD 10ms
 
 class Stabilize {
 public:

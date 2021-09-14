@@ -122,6 +122,16 @@ void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {
     changeAllWheelOutput(1.0);
   }
   ThisThread::sleep_for(200ms);
+  float _outTmp = 1.0;
+  while (_output > 0) {
+    if (dir == CW) {
+      changeAllWheelOutput(-1.0 * _outTmp);
+    } else {
+      changeAllWheelOutput(_outTmp);
+    }
+    _outTmp -= 0.1;
+    ThisThread::sleep_for(70ms);
+  }
 }
 
 Stabilize::STABILIZE_STATE Stabilize::state() {
