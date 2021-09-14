@@ -22,7 +22,8 @@ public:
     PREPARING_INVOKE_ANTI_TOLQUE,
     INVOKE_ANTI_TOLQUE,
     CALM_STABILIZE,
-    COMPLETE_STABILIZE
+    COMPLETE_STABILIZE,
+    TERMINATE
   };
   enum TORQUE_DIRECTION {
     CW,
@@ -31,6 +32,7 @@ public:
   explicit Stabilize(LSM9DS1 *imu, WheelMotor *leftWheelMotor, WheelMotor *rightWheelMotor, WheelControl* leftWheelControl, WheelControl* rightWheelControl);
   void start();
   void stop();
+  void terminate();
   double currentTheta();
   double currentOutput();
   STABILIZE_STATE state();

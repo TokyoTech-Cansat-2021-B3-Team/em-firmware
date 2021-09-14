@@ -18,6 +18,14 @@ void Stabilize::stop() {
   _thread.reset();
 }
 
+void Stabilize::terminate() {
+  _leftWheelControl->setTargetSpeed(0.0);
+  _rightWheelControl->setTargetSpeed(0.0);
+  ThisThread::sleep_for(100ms);
+  _leftWheelMotor->forward(0.0);
+  _rightWheelMotor->forward(0.0);
+}
+
 void Stabilize::threadLoop() {
   if (!checkStabilizerOpend()) {
     invokeStabilizer();
