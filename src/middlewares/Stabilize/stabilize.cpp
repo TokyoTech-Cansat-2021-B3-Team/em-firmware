@@ -28,6 +28,13 @@ void Stabilize::threadLoop() {
   }
   waitingStabilizerOpening();
   while (true) {
+    if (checkStabilizerOpend()) {
+      _state = CALM_STABILIZE;
+      break;
+    }
+    ThisThread::sleep_for(STABILIZE_PERIOD);
+  }
+  while (true) {
     _theta = getTheta(_imu->accX(), _imu->accY(), _imu->accZ());
     double diff = _theta - _targetTheta;
     _integral += diff * chrono::duration<float>(STABILIZE_PERIOD).count();

@@ -105,7 +105,7 @@ void printThreadLoop() {
     snprintf(printBuffer, PRINT_BUFFER_SIZE, "Break Stabilizer!!!\r\n");
     bufferedSerial.write(printBuffer, strlen(printBuffer));
     stabilizeSequence.start();
-    printTask.start(printThreadLoop);
+    //printTask.start(printThreadLoop);
     while (true) {
       if (stabilizeSequence.state() == StabilizeSequence::COMPLETE) {
         stabilizeSequence.stop();
