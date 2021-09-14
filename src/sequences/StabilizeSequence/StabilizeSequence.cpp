@@ -42,7 +42,7 @@ void StabilizeSequence::threadLoop() {
   //stabilizeはエラーを検知できないので、成功判定orタイムアウトまで無限ループする
   while (true) {
     //正常終了の確認
-    if (_stabilize->state() == COMPLETE_STABILIZE) {
+    if (_stabilize->state() == Stabilize::COMPLETE_STABILIZE) {
       _state = COMPLETE;
       break;
     }
