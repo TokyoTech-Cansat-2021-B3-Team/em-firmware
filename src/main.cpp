@@ -34,6 +34,7 @@
 #include "LandingSequence.h"
 #include "ProbeSequence.h"
 #include "RunningSequence.h"
+#include "StabilizeSequence.h"
 
 // defines
 #define SPI_FREQUENCY 25000000
@@ -55,16 +56,18 @@ PwmOut fuseGate(FUSE_GATE);
 I2C i2c(I2C_SDA, I2C_SCL);
 BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 
+SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, SPI_FREQUENCY);
+LittleFileSystem2 littleFileSystem2(nullptr);
+
 // drivers
 Stepper loadingMotor(&motor5Step, &motor5Enable);
 WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
 WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
-
 Fusing fusing(&fuseGate);
-
 LSM9DS1 imu(&i2c);
+MU2 mu2(&bufferedSerial);
 
 // middlewares
 MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
@@ -73,14 +76,18 @@ WheelPID leftPID;
 WheelPID rightPID;
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
+Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
+Logger logger(&sdBlockDevice, &littleFileSystem2);
+Console console(&mu2, &logger);
+
+StabilizeSequence stabilizeSequence(&stabilize, &console, &logger);
 
 Thread printTask(osPriorityRealtime, 512, nullptr, nullptr);
 
-Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
 
 void printThreadLoop() {
   while (true) {
-    snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f;\r\n", stabilize.currentTheta() * 180.0 / 3.14159265358, stabilize.currentOutput());
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f;\r\n", stabilizeSequence.state(), stabilize.currentTheta() * 180.0 / 3.14159265358, stabilize.currentOutput());
     bufferedSerial.write(printBuffer, strlen(printBuffer));
     ThisThread::sleep_for(20ms);
   }
@@ -93,39 +100,9 @@ void printThreadLoop() {
 
     // ステッピングモータへの電源供給OFF
     loadingMotor.idleCurrent(false);
-    imu.start();
-    ThisThread::sleep_for(100ms);
-    if (imu.getStatus() == LSM9DS1_STATUS_SUCCESS_TO_CONNECT) {
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
-      bufferedSerial.write(printBuffer, strlen(printBuffer));
-    } else {
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
-      bufferedSerial.write(printBuffer, strlen(printBuffer));
-    }
-    for (int i = 0; i < 10; i++) {
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting ... \r\n");
-      bufferedSerial.write(printBuffer, strlen(printBuffer));
-      ThisThread::sleep_for(1s);
-    }
     snprintf(printBuffer, PRINT_BUFFER_SIZE, "Break Stabilizer!!!\r\n");
     bufferedSerial.write(printBuffer, strlen(printBuffer));
-    /*
-    leftWheelMotor.forward(0.6);
-    rightWheelMotor.forward(0.6);
-    ThisThread::sleep_for(700ms);
-    leftWheelMotor.forward(0);
-    rightWheelMotor.forward(0);
-    ThisThread::sleep_for(500ms);
-    leftWheelMotor.forward(1);
-    rightWheelMotor.forward(1);
-    ThisThread::sleep_for(1s);
-    leftWheelMotor.reverse(0.6);
-    rightWheelMotor.reverse(0.6);
-    ThisThread::sleep_for(100ms);
-    leftWheelMotor.forward(0);
-    rightWheelMotor.forward(0);
-*/
-    stabilize.start();
+    stabilizeSequence.start();
     printTask.start(printThreadLoop);
     while (true) {
       ThisThread::sleep_for(100ms);

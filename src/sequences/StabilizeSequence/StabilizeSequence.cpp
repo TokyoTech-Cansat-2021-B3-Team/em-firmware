@@ -64,6 +64,6 @@ void StabilizeSequence::setStatus(StabilizeSequenceState state) {
   _state = state;
 }
 
-StabilizeSequenceState StabilizeSequence::state() {
+StabilizeSequence::StabilizeSequenceState StabilizeSequence::state() {
   return _state;
 }

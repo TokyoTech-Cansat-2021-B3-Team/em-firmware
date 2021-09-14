@@ -14,20 +14,20 @@
 
 #define STABILIZESEQUENCE_TERMINATE_TIME 60s
 
-enum StabilizeSequenceState {
-  UNDEFINED,
-  WAITING,
-  INVOKE_STABILIZER,
-  WAITING_STABILIZER_OPENING,
-  PREPARING_INVOKE_ANTI_TOLQUE,
-  INVOKE_ANTI_TOLQUE,
-  CALM_STABILIZE,
-  COMPLETE,
-  TERMINATE
-};
-
 class StabilizeSequence {
 public:
+  enum StabilizeSequenceState {
+    UNDEFINED,
+    WAITING,
+    INVOKE_STABILIZER,
+    WAITING_STABILIZER_OPENING,
+    PREPARING_INVOKE_ANTI_TOLQUE,
+    INVOKE_ANTI_TOLQUE,
+    CALM_STABILIZE,
+    COMPLETE,
+    TERMINATE
+  };
+
   explicit StabilizeSequence(Stabilize *stabilize, Console *console, Logger *logger);
   void start();
   void stop();
