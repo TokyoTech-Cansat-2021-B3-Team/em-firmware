@@ -79,8 +79,8 @@ MU2 mu2(&bufferedSerial);
 LSM9DS1 imu(&i2c);
 
 // middlewares
-MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 1000.0);
+MotorSpeed leftMotorSpeed(&leftEncoder, 986.41);
+MotorSpeed rightMotorSpeed(&rightEncoder, 986.41);
 WheelPID leftPID;
 WheelPID rightPID;
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
