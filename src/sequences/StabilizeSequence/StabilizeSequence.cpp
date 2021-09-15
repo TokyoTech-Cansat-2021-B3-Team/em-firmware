@@ -49,8 +49,6 @@ void StabilizeSequence::threadLoop() {
     }
     //強制終了の確認
     if ((_timer.elapsed_time() - _previousTime) > STABILIZESEQUENCE_TERMINATE_TIME) {
-      _stabilize->stop();
-
       setStatus(TERMINATE);
       _console->log("stabilize", "terminate\n");
       break;
