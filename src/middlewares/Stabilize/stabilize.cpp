@@ -70,7 +70,7 @@ double Stabilize::currentTheta() {
 
 void Stabilize::invokeStabilizer() {
   _state = INVOKE_STABILIZER;
-  pulseTorque(CCW);
+  pulseTorque(CCW, 0.5);
 }
 
 void Stabilize::waitingStabilizerOpening() {
@@ -110,18 +110,22 @@ void Stabilize::changeAllWheelOutput(double output) {
 }
 
 void Stabilize::pulseTorque(TORQUE_DIRECTION dir) {
+  pulseTorque(dir, 1.0);
+}
+
+void Stabilize::pulseTorque(TORQUE_DIRECTION dir, double duty) {
   if (dir == CW) {
-    changeAllWheelOutput(1.0);
+    changeAllWheelOutput(duty);
   } else if (dir == CCW) {
-    changeAllWheelOutput(-1.0);
+    changeAllWheelOutput(-duty);
   }
-  ThisThread::sleep_for(500ms); // 500msあれば最大速度まで達するであろう
+  ThisThread::sleep_for(2s); // 500msあれば最大速度まで達するであろう
   if (dir == CW) {
     changeAllWheelOutput(-1.0);
   } else {
     changeAllWheelOutput(1.0);
   }
-  ThisThread::sleep_for(200ms);
+  ThisThread::sleep_for(1000s);
   float _outTmp = 1.0;
   while (_output > 0) {
     if (dir == CW) {

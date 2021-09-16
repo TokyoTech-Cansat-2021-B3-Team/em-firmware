@@ -100,14 +100,14 @@ void printThreadLoop() {
 
     // ステッピングモータへの電源供給OFF
     loadingMotor.idleCurrent(false);
-    logger.init();
-    console.init();
+    //logger.init();
+    //console.init();
     snprintf(printBuffer, PRINT_BUFFER_SIZE, "Break Stabilizer!!!\r\n");
     bufferedSerial.write(printBuffer, strlen(printBuffer));
     stabilizeSequence.start();
     //printTask.start(printThreadLoop);
     while (true) {
-      if (stabilizeSequence.state() == StabilizeSequence::COMPLETE) {
+      if (stabilizeSequence.state() == StabilizeSequence::COMPLETE || stabilizeSequence.state() == StabilizeSequence::TERMINATE) {
         stabilizeSequence.stop();
         break;
       }

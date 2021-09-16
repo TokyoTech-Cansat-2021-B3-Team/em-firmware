@@ -41,6 +41,7 @@ private:
   void threadLoop();
   void changeAllWheelOutput(double output);
   void pulseTorque(TORQUE_DIRECTION dir);
+  void pulseTorque(TORQUE_DIRECTION dir, double duty);
   void invokeStabilizer();
   void waitingStabilizerOpening();
   void invokeAntiTolque();
