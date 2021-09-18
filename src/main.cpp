@@ -21,7 +21,8 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "WheelPID.h"
 #include "WheelControl.h"
 #include "MotorSpeed.h"
-#include "Localization.h"
+#include "localization.h"
+#include "ekflocalization.h"
 
 #define PRINT_BUFFER_SIZE 128
 
@@ -50,7 +51,7 @@ WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
 
 FusionOdometry ekf;
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);

@@ -16,7 +16,7 @@
 
 class Localization {
 public:
-  explicit Localization(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, LSM9DS1 *imu, FusionOdometry *ekf,
+  explicit Localization(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, LSM9DS1 *imu,
                         double wheelDistance, double wheelRadius);
   void start();
   void stop();
@@ -28,8 +28,8 @@ public:
   double getAngularVelocityFromWheelOdometry();
   double getVelocityFromWheelOdometry();
 
-private:
-  void threadLoop();
+protected:
+  virtual void threadLoop();
   double getVelocityLeft();
   double getVelocityRight();
   const double _wheelDistance;
@@ -43,7 +43,5 @@ private:
   MotorSpeed *_leftMotorSpeed;
   MotorSpeed *_rightMotorSpeed;
   LSM9DS1 *_imu;
-  FusionOdometry *_ekf;
   unique_ptr<Thread> _thread;
-  double _stateVector[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 };
