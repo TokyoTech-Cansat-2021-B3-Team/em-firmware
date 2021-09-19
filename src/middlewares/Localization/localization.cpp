@@ -1,6 +1,5 @@
 #include "localization.h"
 
-#include "fusion-odometry.h"
 #include "mbed.h"
 #include <memory>
 

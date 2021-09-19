@@ -4,7 +4,6 @@
 #include <cstdint>
 
 #include "MotorSpeed.h"
-#include "fusion-odometry.h"
 #include "lsm9ds1.h"
 
 #define LOCALIZATION_THREAD_PRIORITY osPriorityAboveNormal
