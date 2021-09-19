@@ -7,11 +7,11 @@
 #include "fusion-odometry.h"
 #include "lsm9ds1.h"
 
-#define LOCALIZATION_THREAD_PRIORITY osPriorityHigh
+#define LOCALIZATION_THREAD_PRIORITY osPriorityAboveNormal
 #define LOCALIZATION_THREAD_STACK_SIZE 1024
 #define LOCALIZATION_THREAD_NAME "LOCALIZATION"
 
-#define LOCALIZATION_PERIOD 200ms
+#define LOCALIZATION_PERIOD 50ms
 #define KALMANFILTER_PERIOD LOCALIZATION_PERIOD
 
 class Localization {

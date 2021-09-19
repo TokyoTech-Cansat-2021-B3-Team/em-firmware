@@ -1,7 +1,6 @@
 #pragma once
 
 #include "mbed.h"
-#include <cstdint>
 
 #include "QEI.h"
 
@@ -11,20 +10,21 @@
 
 #define MOTORSPEED_PERIOD 50ms
 
-class MotorSpeed{
+class MotorSpeed {
 public:
-    explicit MotorSpeed(QEI* encoder, double gyarRatio);
-    void start();
-    void stop();
-    double currentSpeedRPM();
-    double currentSpeedRPS();
+  explicit MotorSpeed(QEI *encoder, double gyarRatio);
+  void start();
+  void stop();
+  double currentSpeedRPM();
+  double currentSpeedRPS();
+
 private:
-    void threadLoop();
-    double pulsesToRpm(int pulses, chrono::microseconds period);
-    double rpmToRadPerSecond(double rpm);
-    const double PI = 3.141592653589793;
-    const double _gyarRatio;
-    QEI* _encoder;
-    double _motorSpeedRPM;
-    unique_ptr<Thread> _thread;
+  void threadLoop();
+  double pulsesToRpm(int pulses, chrono::microseconds period);
+  double rpmToRadPerSecond(double rpm);
+  const double PI = 3.141592653589793;
+  const double _gyarRatio;
+  QEI *_encoder;
+  double _motorSpeedRPM;
+  unique_ptr<Thread> _thread;
 };
