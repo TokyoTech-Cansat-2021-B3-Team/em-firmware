@@ -51,7 +51,6 @@ public:
     this->setQ(V, X, cos(this->x[0]) * sigma_2_v);
     this->setQ(V, Y, sin(this->x[0]) * sigma_2_v);
     this->setR(OMEGA_ZW, OMEGA_ZW, sigma_w_w); // w_w Dynamic
-    this->setR(OMEGA_ZG, OMEGA_ZG, sigma_w_gz); // w_g
     this->setR(V_W, V_W, sigma_v_w); // v_w Dynamic
   }
   void updateR(double *z) {
