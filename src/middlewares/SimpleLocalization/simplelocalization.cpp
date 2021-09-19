@@ -1,4 +1,4 @@
-#include "SimpleLocalization.h"
+#include "simpleLocalization.h"
 
 #include "fusion-odometry.h"
 #include "mbed.h"
