@@ -1,13 +1,13 @@
 #include "simpleLocalization.h"
 
+#include "localization.h"
 #include "fusion-odometry.h"
 #include "mbed.h"
 #include <memory>
 
 SimpleLocalization::SimpleLocalization(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, double wheelDistance,
                                        double wheelRadius)
-    : _leftMotorSpeed(leftMotorSpeed), _rightMotorSpeed(rightMotorSpeed), _wheelDistance(wheelDistance),
-      _wheelRadius(wheelRadius), _timer(Timer()), _thread() {}
+    : Localization(leftMotorSpeed,rightMotorSpeed, wheelDistance, wheelRadius) {}
 
 void SimpleLocalization::start() {
   _timer.start();
@@ -25,39 +25,11 @@ void SimpleLocalization::threadLoop() {
   while (true) {
     _dt = (_timer.elapsed_time().count() - _previousTime) * 1.0e-6;
     _previousTime = _timer.elapsed_time().count();
-    _omega = getAngularVelocityFromWheelOdometry();
-    _theta += _omega * _dt;
+    _omega_z = getAngularVelocityFromWheelOdometry();
+    _theta += _omega_z * _dt;
     _v = getVelocityFromWheelOdometry();
     _x += _v * _dt * cos(_theta);
     _y += _v * _dt * sin(_theta);
     ThisThread::sleep_for(SIMPLELOCALIZATION_PERIOD);
   }
-}
-
-double SimpleLocalization::getAngularVelocityFromWheelOdometry() {
-  return (-getVelocityLeft() + getVelocityRight()) / _wheelDistance;
-}
-
-double SimpleLocalization::getVelocityFromWheelOdometry() {
-  return (getVelocityLeft() + getVelocityRight()) / 2.0;
-}
-
-double SimpleLocalization::getVelocityLeft() {
-  return _leftMotorSpeed->currentSpeedRPS() * _wheelRadius;
-}
-
-double SimpleLocalization::getVelocityRight() {
-  return _rightMotorSpeed->currentSpeedRPS() * _wheelRadius;
-}
-
-double SimpleLocalization::x() {
-  return _x;
-}
-
-double SimpleLocalization::y() {
-  return _y;
-}
-
-double SimpleLocalization::theta() {
-  return _theta;
 }
