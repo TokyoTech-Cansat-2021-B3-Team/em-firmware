@@ -14,7 +14,7 @@
 #define SIMPLELOCALIZATION_PERIOD LOCALIZATION_PERIOD
 #define ODOMETRY_PERIOD SIMPLELOCALIZATION_PERIOD
 
-class SimpleLocalization : protected Localization {
+class SimpleLocalization : public Localization {
 public:
   explicit SimpleLocalization(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, double wheelDistance,
                               double wheelRadius);
