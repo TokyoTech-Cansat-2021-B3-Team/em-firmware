@@ -30,6 +30,6 @@ void EKFLocalization::threadLoop() {
     _y = _ekf->getX(4);
     _v = _ekf->getX(5);
     _omega_z = _ekf->getX(1);
-    ThisThread::sleep_for(LOCALIZATION_PERIOD);
+    ThisThread::sleep_for(KALMANFILTER_PERIOD);
   }
 }
