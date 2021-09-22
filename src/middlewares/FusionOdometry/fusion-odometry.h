@@ -3,7 +3,7 @@
 #include <chrono>
 #include <math.h>
 #define Nsta 6 // the size of states
-#define Mobs 6 // the size of measurements
+#define Mobs 3 // the size of measurements
 
 #include "TinyEKF.h"
 #include "mbed.h"
