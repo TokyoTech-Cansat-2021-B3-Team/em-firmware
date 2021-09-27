@@ -32,10 +32,27 @@ void ProbeSequence::threadLoop() {
   if (_probeNumber == Probe1) {
     // ホルダーの回転
     _console->log("Probe", "Rotate holder to next position\n");
-    holderToNext(30.0, PROBE_SEQUENCE_HOLDER_ANGLE_SECOND);
+    holderToNext(45.0 + PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION,
+                 PROBE_SEQUENCE_HOLDER_ANGLE_SECOND + PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION);
+  } else if (_probeNumber == Probe2) {
+    // ホルダーの回転
+    _console->log("Probe", "Rotate holder to next position\n");
+    holderToNext(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST + PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION,
+                 PROBE_SEQUENCE_HOLDER_ANGLE_SECOND + PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION);
+  } else if (_probeNumber == Probe3) {
+    // ホルダーの回転
+    _console->log("Probe", "Rotate holder to next position\n");
+    holderToNext(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST + PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION,
+                 PROBE_SEQUENCE_HOLDER_ANGLE_SECOND + 2 * PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION);
+  } else if (_probeNumber == Probe4) {
+    // ホルダーの回転
+    _console->log("Probe", "Rotate holder to next position\n");
+    holderToNext(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST + PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION,
+                 PROBE_SEQUENCE_HOLDER_ANGLE_SECOND + 2 * PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION);
   } else {
     _console->log("Probe", "Rotate holder to next position\n");
-    holderToNext(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST, PROBE_SEQUENCE_HOLDER_ANGLE_SECOND);
+    holderToNext(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST + PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION,
+                 PROBE_SEQUENCE_HOLDER_ANGLE_SECOND + PROBE_SEQUENCE_HOLDER_ANGLE_CORRECTION);
   }
 
   // 電極接続
@@ -149,6 +166,7 @@ double ProbeSequence::revToLength(int revolution) {
 void ProbeSequence::start(ProbeNumber probeNumber) {
   if (!_isStart) {
     _probeNumber = probeNumber;
+    _state = Running;
 
     _thread = make_unique<Thread>(PROBE_SEQUENCE_THREAD_PRIORITY,   //
                                   PROBE_SEQUENCE_THREAD_STACK_SIZE, //
@@ -175,7 +193,7 @@ ProbeSequence::ProbeSequenceState ProbeSequence::state() {
 
 void ProbeSequence::debugThreadLoop() {
   while (true) {
-      printf("%f\r\n", revToLength(_verticalEncoder->getRevolutions()));
+    printf("%f\r\n", revToLength(_verticalEncoder->getRevolutions()));
     ThisThread::sleep_for(10ms);
   }
 }
@@ -188,5 +206,36 @@ void ProbeSequence::test() {
   _thread->start(callback(this, &ProbeSequence::debugThreadLoop));
 
   //以降はデバッグ用の処理
-  verticalMove(1.0, 10);
+  // verticalMove(1.0, 10);
+  double first = 12;
+  double second = 60;
+  /*
+  while (1) {
+    _loadingMotor->rotate(12, PROBE_SEQUENCE_HOLDER_SPEED);
+    ThisThread::sleep_for(800ms);
+    _loadingMotor->rotate(60, PROBE_SEQUENCE_HOLDER_SPEED);
+    ThisThread::sleep_for(800ms);
+  }
+  */
+
+  double duty = 1.0;
+
+  //_verticalMotor->forward(duty);
+  //_verticalMotor->reverse(duty);
+
+  /*
+    double L = 53;
+    while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L)) {
+      ThisThread::sleep_for(PROBE_SEQUENCE_VERTICAL_POLLING);
+    }
+
+    _verticalMotor->stop();
+
+    printf("終了\n");
+    */
+  /*
+    while (1) {
+      _loadingMotor->rotate(30000, 0.05);
+    }
+    */
 }

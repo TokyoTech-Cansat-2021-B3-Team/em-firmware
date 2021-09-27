@@ -76,7 +76,7 @@ int main() {
   // I2C速度変更
   i2c.frequency(I2C_FREQUENCY);
 
-  //probeSequence.test();
+  // probeSequence.test();
 
   probeSequenceSyncStart(ProbeSequence::Probe1);
 
