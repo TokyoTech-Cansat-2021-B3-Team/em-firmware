@@ -23,7 +23,7 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "fusion-odometry.h"
 #include "localization.h"
 
-#define PRINT_BUFFER_SIZE 128
+#define PRINT_BUFFER_SIZE 256
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -55,12 +55,17 @@ EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
-void printThreadLoop(){
-    while(true){
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%f %f %f %f %f;\r\n",leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM() ,localization.theta(), localization.x(), localization.y());
-        serial.write(printBuffer,strlen(printBuffer));
-        ThisThread::sleep_for(500ms);
-    }
+void printThreadLoop() {
+  while (true) {
+    double tmp = imu.gyrZ() * 3.141592653589793 / 180.0;
+    snprintf(printBuffer, PRINT_BUFFER_SIZE,
+             "Lcsp:%f, Rcsp:%f, w_wh:%f, w_gy:%f, t_kf:%f, w_kf:%f, x_kf:%f, y_kf:%f, v_kf:%f, slip:%f, beta:%f\r\n",
+             leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(),
+             localization.getAngularVelocityFromWheelOdometry(), tmp, localization.theta(), localization.omega(),
+             localization.x(), localization.y(), localization.v(),localization.slip(), localization.beta());
+    serial.write(printBuffer, strlen(printBuffer));
+    ThisThread::sleep_for(500ms);
+  }
 }
 
 // main() runs in its own thread in the OS
