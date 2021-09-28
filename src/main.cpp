@@ -1,28 +1,27 @@
-#include "mbed.h"
 #include "PinAssignment.h"
+#include "mbed.h"
 
 #include "lsm9ds1.h"
 #include <cstring>
 
 #define PRINT_BUFFER_SIZE 128
 
-BufferedSerial serial(UART_TX, UART_RX);//
-I2C i2c(I2C_SDA, I2C_SCL);//
+BufferedSerial serial(UART_TX, UART_RX); //
+I2C i2c(I2C_SDA, I2C_SCL);               //
 
 char printBuffer[PRINT_BUFFER_SIZE];
-
 
 #include "PinAssignment.h"
 
 #include "QEI.h"
 
-#include "fusion-odometry.h"
+#include "MotorSpeed.h"
+#include "WheelControl.h"
 #include "WheelMotor.h"
 #include "WheelPID.h"
-#include "WheelControl.h"
-#include "MotorSpeed.h"
-#include "localization.h"
 #include "ekflocalization.h"
+#include "fusion-odometry.h"
+#include "localization.h"
 
 #define PRINT_BUFFER_SIZE 128
 
@@ -46,8 +45,8 @@ MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
 WheelPID leftPID;
 WheelPID rightPID;
 
-WheelControl leftControl(&leftWheelMotor,&leftPID,&leftMotorSpeed);
-WheelControl rightControl(&rightWheelMotor,&rightPID,&rightMotorSpeed);
+WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
+WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
 FusionOdometry ekf;
 
@@ -77,14 +76,14 @@ int main() {
   rightControl.setTargetSpeed(20);
   imu.start();
   localization.start();
-  if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
-      serial.write(printBuffer,strlen(printBuffer));
-  }else{
-      snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
-      serial.write(printBuffer,strlen(printBuffer));
+  if (imu.getStatus() == LSM9DS1_STATUS_SUCCESS_TO_CONNECT) {
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
+    serial.write(printBuffer, strlen(printBuffer));
+  } else {
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "Failed to connect LSM9DS1.\r\n");
+    serial.write(printBuffer, strlen(printBuffer));
   }
-  while(true){
-      ThisThread::sleep_for(100ms);
+  while (true) {
+    ThisThread::sleep_for(100ms);
   }
 }
