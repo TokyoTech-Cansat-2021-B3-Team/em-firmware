@@ -21,10 +21,14 @@ public:
                            double wheelDistance, double wheelRadius);
   void start();
   void stop();
+  double beta();
+  double slip();
 
 private:
   void threadLoop();
   FusionOdometry *_ekf;
   LSM9DS1 *_imu;
+  double _beta = 0.0;
+  double _slip = 0.0;
   double _stateVector[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 };

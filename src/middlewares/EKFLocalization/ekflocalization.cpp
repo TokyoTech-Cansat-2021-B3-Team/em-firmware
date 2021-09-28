@@ -29,7 +29,17 @@ void EKFLocalization::threadLoop() {
     _x = _ekf->getX(3);
     _y = _ekf->getX(4);
     _v = _ekf->getX(5);
-    _omega_z = _ekf->getX(1);
+    _omega_z = _ekf->getX(2);
+    _beta = _ekf->getX(1);
+    _slip = _ekf->getX(6);
     ThisThread::sleep_for(KALMANFILTER_PERIOD);
   }
+}
+
+double EKFLocalization::beta() {
+  return _beta;
+}
+
+double EKFLocalization::slip() {
+  return _slip;
 }
