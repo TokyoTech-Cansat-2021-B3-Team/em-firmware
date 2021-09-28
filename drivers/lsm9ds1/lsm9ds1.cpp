@@ -2,13 +2,12 @@
 #include <memory>
 #include "mbed.h"
 
-LSM9DS1::LSM9DS1(I2C* i2c):
-_i2c(i2c),
-_thread(),
-_accMax(0.0f),
-_gyrMax(0.0f),
-_magMax(0.0f)
-{
+LSM9DS1::LSM9DS1(I2C *i2c) : _i2c(i2c), _thread(), _accMax(0.0f), _gyrMax(0.0f), _magMax(0.0f) {
+  for (int i = 0; i < MOVING_AVERAGE_COUNT; i++) {
+    _gyrStackX[i] = 0.0f;
+    _gyrStackY[i] = 0.0f;
+    _gyrStackZ[i] = 0.0f;
+  }
 }
 
 void LSM9DS1::start() {
@@ -34,6 +33,7 @@ void LSM9DS1::threadLoop(){
         get_acc();
         get_gyr();
         get_mag();
+        updateGyrFiltered();
         ThisThread::sleep_for(LSM9DS1_POLLING_PERIOD);
     }
 }
@@ -159,7 +159,21 @@ void LSM9DS1::get_mag(){
     i2c_read_memories(LSM9DS1_MAG_I2C_8BIT_ADDR, 0x28, (char*)magRaw, 6);
     _mag[0] = _magMax * ((float)((int16_t)((magRaw[0*2+1] << 8) | magRaw[0*2+0])) / 32767.0);
     _mag[1] = _magMax * ((float)((int16_t)((magRaw[1*2+1] << 8) | magRaw[1*2+0])) / 32767.0);
-    _mag[2] = _magMax * ((float)((int16_t)((magRaw[2*2+1] << 8) | magRaw[2*2+0])) / 32767.0);     
+    _mag[2] = _magMax * ((float)((int16_t)((magRaw[2*2+1] << 8) | magRaw[2*2+0])) / 32767.0);
+}
+
+void LSM9DS1::updateGyrFiltered() {
+  _gyrFiltered[0] -= _gyrStackX[_movingAverageIndex] / static_cast<double>(MOVING_AVERAGE_COUNT);
+  _gyrFiltered[1] -= _gyrStackY[_movingAverageIndex] / static_cast<double>(MOVING_AVERAGE_COUNT);
+  _gyrFiltered[2] -= _gyrStackZ[_movingAverageIndex] / static_cast<double>(MOVING_AVERAGE_COUNT);
+  _gyrStackX[_movingAverageIndex] = _gyr[0];
+  _gyrStackY[_movingAverageIndex] = _gyr[1];
+  _gyrStackZ[_movingAverageIndex] = _gyr[2];
+  _gyrFiltered[0] += _gyrStackX[_movingAverageIndex] / static_cast<double>(MOVING_AVERAGE_COUNT);
+  _gyrFiltered[1] += _gyrStackY[_movingAverageIndex] / static_cast<double>(MOVING_AVERAGE_COUNT);
+  _gyrFiltered[2] += _gyrStackZ[_movingAverageIndex] / static_cast<double>(MOVING_AVERAGE_COUNT);
+  _movingAverageIndex++;
+  if(_movingAverageIndex>=MOVING_AVERAGE_COUNT)_movingAverageIndex=0;
 }
 
 float LSM9DS1::accX(){
@@ -175,15 +189,15 @@ float LSM9DS1::accZ(){
 }
 
 float LSM9DS1::gyrX(){
-    return _gyr[0];
+    return _gyrFiltered[0];
 }
 
 float LSM9DS1::gyrY(){
-    return _gyr[1];
+    return _gyrFiltered[1];
 }
 
 float LSM9DS1::gyrZ(){
-    return _gyr[2];
+    return _gyrFiltered[2];
 }
 
 float LSM9DS1::magX(){
