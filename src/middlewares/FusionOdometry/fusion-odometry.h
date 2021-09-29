@@ -63,7 +63,8 @@ protected:
     // process model
     // refer to p1295 column L
     fx[THETA] = this->x[THETA] + this->x[OMEGA_Z] * this->_dt;
-    fx[BETA_Z] = this->x[BETA_Z];
+    // fx[BETA_Z] = this->x[BETA_Z];
+    fx[BETA_Z] = 0.017;
     fx[OMEGA_Z] = this->x[OMEGA_Z];
     fx[X] = this->x[X] + cos(this->x[THETA]) * this->_dt * this->x[V];
     fx[Y] = this->x[Y] + sin(this->x[THETA]) * this->_dt * this->x[V];
@@ -73,7 +74,7 @@ protected:
     // Matrix F
     F[THETA][THETA] = 1;
     F[THETA][OMEGA_Z] = this->_dt;
-    F[BETA_Z][BETA_Z] = 1;
+    F[BETA_Z][BETA_Z] = 0;
     F[OMEGA_Z][OMEGA_Z] = 1;
     F[X][X] = 1;
     F[X][THETA] = -sin(this->x[0]) * this->_dt * this->x[5];
@@ -114,7 +115,7 @@ protected:
   const double sigma_1_w = 0.01f;  // 調整する変数
   const double sigma_1_v = 0.01f;  // 調整する変数
   const double sigma_beta = 0.01f; // 調整する変数
-  const double sigma_slip = 0.01f; // 調整する変数
+  const double sigma_slip = 0.0001f; // 調整する変数
   const double sigma_2_w = sigma_1_w * sigma_1_w / 2;
   const double sigma_3_w = sigma_1_w * sigma_1_w * sigma_1_w / 3;
   const double sigma_2_v = sigma_1_v * sigma_1_v / 2;
@@ -124,7 +125,7 @@ protected:
   double sigma_v_w;
   const double delta_w_w = 0.01f;  // 調整する変数
   const double delta_v_w = 0.01f;  // 調整する変数
-  const double sigma_w_gz = 0.01f; // 調整する変数
+  const double sigma_w_gz = 0.1f; // 調整する変数
   double _dt = 0;
   double _previousTime = 0;
   Timer _timer;
