@@ -119,8 +119,8 @@ void Stabilize::changeAllWheelOutput(double output) {
     _leftWheelMotor->forward(output);
     _rightWheelMotor->forward(output);
   } else {
-    _leftWheelMotor->reverse(output);
-    _rightWheelMotor->reverse(output);
+    _leftWheelMotor->reverse(-1.0 * output);
+    _rightWheelMotor->reverse(-1.0 * output);
   }
 }
 
