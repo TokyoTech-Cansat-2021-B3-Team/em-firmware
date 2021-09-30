@@ -23,21 +23,6 @@ void Stabilize::terminate() {
 }
 
 void Stabilize::threadLoop() {
-  changeAllWheelOutput(1.0);
-  ThisThread::sleep_for(500ms);
-  changeAllWheelOutput(0.0);
-  ThisThread::sleep_for(100ms);
-  changeAllWheelOutput(-1.0);
-  ThisThread::sleep_for(500ms);
-  changeAllWheelOutput(0.0);
-  ThisThread::sleep_for(100ms);
-  changeAllWheelOutput(1.0);
-  ThisThread::sleep_for(500ms);
-  changeAllWheelOutput(0.0);
-  ThisThread::sleep_for(100ms);
-  while (true) {
-    ThisThread::sleep_for(100ms);
-  }
   if (!checkStabilizerOpend()) {
     invokeStabilizer();
   }
