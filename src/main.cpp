@@ -54,7 +54,7 @@ FusionOdometry ekf;
 
 Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
-TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed);
+TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &leftPID, &rightPID);
 Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);

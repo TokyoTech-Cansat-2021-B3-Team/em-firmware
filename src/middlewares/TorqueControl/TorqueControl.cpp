@@ -6,8 +6,10 @@
 #include "mbed.h"
 #include <memory>
 
-TorqueControl::TorqueControl(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed)
-    : _leftMotorSpeed(leftMotorSpeed), _rightMotorSpeed(rightMotorSpeed), _thread() {}
+TorqueControl::TorqueControl(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, WheelControl *leftWheelControl,
+                             WheelControl *rightWheelControl, WheelPID *leftWheelPID, WheelPID *rightWheelPID)
+    : _leftMotorSpeed(leftMotorSpeed), _rightMotorSpeed(rightMotorSpeed), _leftWheelControl(leftWheelControl),
+      _rightWheelControl(rightWheelControl), _leftWheelPID(leftWheelPID), _rightWheelPID(rightWheelPID), _thread() {}
 
 void TorqueControl::start() {
   _thread = make_unique<Thread>(TORQUECONTROL_THREAD_PRIORITY, TORQUECONTROL_THREAD_STACK_SIZE, nullptr,
@@ -31,14 +33,17 @@ void TorqueControl::threadLoop() {
     updateSufficientSpeedUpCount();
     if (_state == GENERALSPEED) {
       if (checkDecreasingSpeed()) {
-        double slowingDetectSpeed = _slowingDetectSpeedRatio * _cruiseSpeed;
-        if (leftSpeed < slowingDetectSpeed || rightSpeed < slowingDetectSpeed) {
+        double leftslowingDetectSpeed = _slowingDetectSpeedRatio * _leftWheelControl->targetSpeed();
+        double rightslowingDetectSpeed = _slowingDetectSpeedRatio * _rightWheelControl->targetSpeed();
+        if (leftSpeed < leftslowingDetectSpeed || rightSpeed < rightslowingDetectSpeed) {
           setSlowState();
+          printf("SLOW STATE \r\n");
         }
       }
     } else if (_state == SLOWSPEED) {
       if (checkSufficientSpeedUp()) {
         setGeneralState();
+        printf("GENERAL STATE\r\n");
       }
     }
     ThisThread::sleep_for(TORQUECONTROL_PERIOD);
@@ -69,12 +74,11 @@ bool TorqueControl::checkSufficientSpeedUp() {
 
 void TorqueControl::updateSufficientSpeedUpCount() {
   if (_state == SLOWSPEED) {
-    double _speedThreshold = _slowCruiseSpeed * _sufficientSpeedUpCount;
-    if (_leftMotorSpeed->currentSpeedRPM() > _speedThreshold && _rightMotorSpeed->currentSpeedRPM() > _speedThreshold) {
+    double _leftspeedThreshold = _leftWheelControl->targetSpeed() * _sufficientSpeedRatio;
+    double _rightspeedThreshold = _rightWheelControl->targetSpeed() * _sufficientSpeedRatio;
+    if (_leftMotorSpeed->currentSpeedRPM() > _leftspeedThreshold &&
+        _rightMotorSpeed->currentSpeedRPM() > _rightspeedThreshold) {
       _sufficientSpeedUpCount++;
-      // SLOWSPEEDでは左右のモータに回転数差を設けないことを要求する仕様になっている
-      // SLOWSPEEDにおいて左右のモータに回転数差を設けてしまう場合にはこの実装は破綻する恐れが高い
-      // navigation側でSLOWSPEEDにおいては位置制御をおこなわない実装を追加する
     } else {
       resetSufficientSpeedUpCount();
     }
@@ -97,11 +101,19 @@ double TorqueControl::cruiseSpeed() {
 }
 
 void TorqueControl::setSlowState() {
+  if (_cruiseSpeed > _slowCruiseSpeed) {
+    _leftWheelPID->resetIntegral();
+    _rightWheelPID->resetIntegral();
+  }
   _state = SLOWSPEED;
   _cruiseSpeed = _slowCruiseSpeed;
 }
 
 void TorqueControl::setGeneralState() {
+  if (_cruiseSpeed > _generalCruiseSpeed) {
+    _leftWheelPID->resetIntegral();
+    _rightWheelPID->resetIntegral();
+  }
   _state = GENERALSPEED;
   _cruiseSpeed = _generalCruiseSpeed;
 }

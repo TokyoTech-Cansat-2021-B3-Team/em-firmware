@@ -6,17 +6,18 @@
 #include "MotorSpeed.h"
 #include "QEI.h"
 #include "WheelMotor.h"
+#include "WheelControl.h"
 #include "WheelPID.h"
 
 #define TORQUECONTROL_THREAD_PRIORITY osPriorityHigh
 #define TORQUECONTROL_THREAD_STACK_SIZE 1024
 #define TORQUECONTROL_THREAD_NAME "TORQUECONTROL"
 
-#define TORQUECONTROL_PERIOD 10ms
+#define TORQUECONTROL_PERIOD 100ms
 
 class TorqueControl {
 public:
-  explicit TorqueControl(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed);
+  explicit TorqueControl(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl, WheelPID* leftWheelPID, WheelPID* rightWheelPID);
   double cruiseSpeed();
   bool checkNavigatable();
   void setGeneralCruiseSpeed(double speed);
@@ -49,5 +50,9 @@ private:
   TORQUESTATE _state = GENERALSPEED;
   MotorSpeed *_leftMotorSpeed;
   MotorSpeed *_rightMotorSpeed;
+  WheelControl *_leftWheelControl;
+  WheelControl *_rightWheelControl;
+  WheelPID *_leftWheelPID;
+  WheelPID *_rightWheelPID;
   unique_ptr<Thread> _thread;
 };
