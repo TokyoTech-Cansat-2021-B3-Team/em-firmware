@@ -14,7 +14,7 @@
 
 // パラメータ
 #define PROBE_SEQUENCE_VERTICAL_LEAD 0.8     // 上下駆動のねじリード 0.8 mm
-#define PROBE_SEQUENCE_VERTICAL_RATIO 249    // 上下駆動のギア比 1:249
+#define PROBE_SEQUENCE_VERTICAL_RATIO 298    // 上下駆動のギア比 1:298
 #define PROBE_SEQUENCE_VERTICAL_POLLING 10ms // エンコーダの値の確認周期
 #define PROBE_SEQUENCE_VERTICAL_TIMEOUT 1min // 上下駆動のタイムアウト時間
 
