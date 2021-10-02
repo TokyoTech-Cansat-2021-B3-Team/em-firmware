@@ -82,7 +82,7 @@ int main() {
   rightControl.setTargetSpeed(20);
   imu.start();
   localization.start();
-  navi.setTargetPosition(1.0,1.0,0.1);
+  navi.setTargetPosition(10.0,0.0,0.1);
   navi.start();
   if(imu.getStatus()==LSM9DS1_STATUS_SUCCESS_TO_CONNECT){
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
