@@ -5,8 +5,8 @@
 
 #include "MotorSpeed.h"
 #include "QEI.h"
-#include "WheelMotor.h"
 #include "WheelControl.h"
+#include "WheelMotor.h"
 #include "WheelPID.h"
 
 #define TORQUECONTROL_THREAD_PRIORITY osPriorityHigh
@@ -17,17 +17,16 @@
 
 class TorqueControl {
 public:
-  explicit TorqueControl(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, WheelControl* leftWheelControl, WheelControl* rightWheelControl, WheelPID* leftWheelPID, WheelPID* rightWheelPID);
+  explicit TorqueControl(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, WheelControl *leftWheelControl,
+                         WheelControl *rightWheelControl, WheelPID *leftWheelPID, WheelPID *rightWheelPID);
   double cruiseSpeed();
   bool checkNavigatable();
   void setGeneralCruiseSpeed(double speed);
   void setSlowCruiseSpeed(double speed);
   void start();
   void stop();
-  enum TORQUESTATE {
-    SLOWSPEED,
-    GENERALSPEED
-  };
+  enum TORQUESTATE { SLOWSPEED, GENERALSPEED };
+
 private:
   void threadLoop();
   bool checkDecreasingSpeed();

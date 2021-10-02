@@ -37,13 +37,11 @@ void TorqueControl::threadLoop() {
         double rightslowingDetectSpeed = _slowingDetectSpeedRatio * _rightWheelControl->targetSpeed();
         if (leftSpeed < leftslowingDetectSpeed || rightSpeed < rightslowingDetectSpeed) {
           setSlowState();
-          printf("SLOW STATE \r\n");
         }
       }
     } else if (_state == SLOWSPEED) {
       if (checkSufficientSpeedUp()) {
         setGeneralState();
-        printf("GENERAL STATE\r\n");
       }
     }
     ThisThread::sleep_for(TORQUECONTROL_PERIOD);
