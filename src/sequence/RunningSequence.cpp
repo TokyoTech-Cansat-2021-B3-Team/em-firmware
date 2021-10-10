@@ -1,10 +1,10 @@
 #include "RunningSequence.h"
 
-RunningSequence::RunningSequence(Navigation *navigation, Localization *localization, LSM9DS1 *imu,
-                                 MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed,
+RunningSequence::RunningSequence(Navigation *navigation, Localization *localization, TorqueControl *torqueControl,
+                                 LSM9DS1 *imu, MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed,
                                  WheelControl *leftWheelControl, WheelControl *rightWheelControl, Console *console,
                                  Logger *logger)
-    : _navigation(navigation), _localization(localization), _imu(imu), _leftMotorSpeed(leftMotorSpeed),
+    : _navigation(navigation), _localization(localization), _torqueControl(torqueControl),  _imu(imu), _leftMotorSpeed(leftMotorSpeed),
       _rightMotorSpeed(rightMotorSpeed), _leftWheelControl(leftWheelControl), _rightWheelControl(rightWheelControl),
       _console(console), _logger(logger), _state(UNDEFINED), _timer(), _thread() {}
 
@@ -34,6 +34,7 @@ void RunningSequence::init() {
   _localization->start();
   _leftWheelControl->start();
   _rightWheelControl->start();
+  _torqueControl->start();
   _navigation->start();
   _logger->init();
   _console->init();

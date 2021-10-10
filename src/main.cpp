@@ -150,6 +150,7 @@ void speedThreadLoop() {
     simpleLocalization.start();
     leftControl.start();
     rightControl.start();
+    torqueControl.start();
     navi.start();
     navi.setTargetPosition(5.0, 0.0, 0.1);
   } else if (flag == RunningNoControle) {
@@ -197,6 +198,7 @@ int main() {
       leftWheelMotor.stop();
       rightWheelMotor.stop();
       speedThread.terminate();
+      torqueControl.stop();
       navi.stop();
       runningSequence.stop();
       printThread.terminate();
