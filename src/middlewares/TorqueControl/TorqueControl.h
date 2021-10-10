@@ -9,7 +9,7 @@
 #include "WheelMotor.h"
 #include "WheelPID.h"
 
-#define TORQUECONTROL_THREAD_PRIORITY osPriorityHigh
+#define TORQUECONTROL_THREAD_PRIORITY osPriorityAboveNormal
 #define TORQUECONTROL_THREAD_STACK_SIZE 1024
 #define TORQUECONTROL_THREAD_NAME "TORQUECONTROL"
 
