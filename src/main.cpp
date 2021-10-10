@@ -42,8 +42,15 @@ PwmOut motor1In2(M1_IN2);
 PwmOut motor2In1(M2_IN1);
 PwmOut motor2In2(M2_IN2);
 
+DigitalOut motor5Enable(M5_ENABLE);
+
+DigitalIn saftyPin(FUSE_GATE);
+
+SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
+LittleFileSystem2 littleFileSystem2(nullptr);
+
 WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
-WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
+WheelMotor rightWheelMotor(&motor2In2, &motor2In1);
 
 QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
