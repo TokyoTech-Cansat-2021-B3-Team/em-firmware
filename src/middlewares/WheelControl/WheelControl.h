@@ -22,7 +22,8 @@ public:
   void setDirection(DIRECTION direction);
   void start();
   void stop();
-
+  double targetSpeed();
+  
 private:
   void updateSensorSpeed();
   void threadLoop();
