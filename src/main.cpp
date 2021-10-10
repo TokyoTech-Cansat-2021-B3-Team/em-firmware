@@ -19,6 +19,7 @@
 #include "ekflocalization.h"
 #include "fusion-odometry.h"
 #include "localization.h"
+#include "TorqueControl.h"
 #include "navigation.h"
 #include "simplelocalization.h"
 
@@ -79,7 +80,7 @@ EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.
 TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &leftPID, &rightPID);
 Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
 
-RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
+RunningSequence runningSequence(&navi, &localization, &torqueControl,&imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
                                 &rightControl, &console, &logger);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
