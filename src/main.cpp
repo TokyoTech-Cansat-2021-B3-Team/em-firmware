@@ -13,10 +13,10 @@
 #include "QEI.h"
 
 #include "MotorSpeed.h"
-#include "SimpleLocalization.h"
 #include "WheelControl.h"
 #include "WheelMotor.h"
 #include "WheelPID.h"
+#include "ekflocalization.h"
 #include "fusion-odometry.h"
 #include "localization.h"
 #include "navigation.h"
@@ -34,6 +34,7 @@ enum ExperimentMode { RunningAllSequence, RunningPoleToPole, RunningNoControle }
 
 ExperimentMode flag = RunningAllSequence;
 const double cruiseSpeed = 20.0;
+#define PRINT_BUFFER_SIZE 256
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -41,43 +42,32 @@ PwmOut motor1In2(M1_IN2);
 PwmOut motor2In1(M2_IN1);
 PwmOut motor2In2(M2_IN2);
 
-DigitalOut motor5Enable(M5_ENABLE);
-
-DigitalIn saftyPin(FUSE_GATE);
-
-SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, 25000000);
-LittleFileSystem2 littleFileSystem2(nullptr);
-
 WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
-WheelMotor rightWheelMotor(&motor2In2, &motor2In1);
+WheelMotor rightWheelMotor(&motor2In1, &motor2In2);
 
 QEI leftEncoder(ENC1_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
 LSM9DS1 imu(&i2c);
-MU2 mu2(&bufferedSerial);
 
-MotorSpeed leftMotorSpeed(&leftEncoder, 986.41);
-MotorSpeed rightMotorSpeed(&rightEncoder, 986.41);
+MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
+MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
 
 WheelPID leftPID;
 WheelPID rightPID;
-
-Logger logger(&sdBlockDevice, &littleFileSystem2);
-Console console(&mu2, &logger);
 
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
 FusionOdometry ekf;
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
 SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 68.0e-3);
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
 RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
                                 &rightControl, &console, &logger);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
