@@ -17,6 +17,7 @@
 #include "WheelMotor.h"
 #include "WheelPID.h"
 #include "ekflocalization.h"
+#include "simplelocalization.h"
 #include "fusion-odometry.h"
 #include "localization.h"
 #include "navigation.h"
@@ -73,12 +74,12 @@ WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 FusionOdometry ekf;
 
 SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 68.0e-3);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
 Navigation navi(&localization, &leftControl, &rightControl);
 
 RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
                                 &rightControl, &console, &logger);
-EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
