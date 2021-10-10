@@ -63,6 +63,9 @@ MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
 WheelPID leftPID;
 WheelPID rightPID;
 
+Logger logger(&sdBlockDevice, &littleFileSystem2);
+Console console(&mu2, &logger);
+
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
