@@ -22,14 +22,14 @@ void Localization::stop() {
 
 void Localization::threadLoop() {
   while (true) {
-    double gyrZ_rps = _imu->gyrY() * PI / 180.0;
+    double gyrZ_rps = - _imu->gyrY() * PI / 180.0;
     double z[] = {getAngularVelocityFromWheelOdometry(), gyrZ_rps, getVelocityFromWheelOdometry()};
     _ekf->step_with_updateQR(z);
     _theta = _ekf->getX(0);
     _xpk = _ekf->getX(3);
     _ypk = _ekf->getX(4);
     _vpk = _ekf->getX(5);
-    _omega_zk = _ekf->getX(1);
+    _omega_zk = _ekf->getX(2);
     ThisThread::sleep_for(LOCALIZATION_PERIOD);
   }
 }

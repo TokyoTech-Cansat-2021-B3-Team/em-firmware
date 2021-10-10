@@ -6,7 +6,7 @@ void Console::init() {
   if (!_isInit) {
     _mu2->init();
 
-    _logger->init();
+    // _logger->init();
 
     _isInit = true;
   }

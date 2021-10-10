@@ -47,8 +47,8 @@ QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 LSM9DS1 imu(&i2c);
 MU2 mu2(&bufferedSerial);
 
-MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 1000.0);
+MotorSpeed leftMotorSpeed(&leftEncoder, 986.41);
+MotorSpeed rightMotorSpeed(&rightEncoder, 986.41);
 
 WheelPID leftPID;
 WheelPID rightPID;
@@ -59,7 +59,7 @@ Console console(&mu2, &logger);
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
-FusionOdometry ekf(KALMANFILTER_PERIOD);
+FusionOdometry ekf;
 
 Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
 

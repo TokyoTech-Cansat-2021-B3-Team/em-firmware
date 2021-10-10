@@ -94,7 +94,7 @@ protected:
 
     // measurements function
     hx[0] = this->x[2];
-    hx[1] = this->x[1] + this->x[2];
+    hx[1] = this->x[2] + this->x[1];
     hx[2] = this->x[5];
     /*
     //when using VOD
