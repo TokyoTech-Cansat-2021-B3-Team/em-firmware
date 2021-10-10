@@ -108,6 +108,7 @@ void printThreadLoop() {
 
     bufferedSerial.write(printBuffer, strlen(printBuffer));
     ThisThread::sleep_for(20ms);
+    ThisThread::sleep_for(500ms);
   }
 }
 
