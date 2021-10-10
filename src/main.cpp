@@ -189,7 +189,6 @@ int main() {
     if (i < 51) {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");
       bufferedSerial.write(printBuffer, strlen(printBuffer));
-      ThisThread::sleep_for(100ms);
     } else if (i == 51) {
       navi.setCruiseSpeed(cruiseSpeed);
       printThread.start(printThreadLoop);
