@@ -17,10 +17,10 @@
 #include "WheelMotor.h"
 #include "WheelPID.h"
 #include "ekflocalization.h"
-#include "simplelocalization.h"
 #include "fusion-odometry.h"
 #include "localization.h"
 #include "navigation.h"
+#include "simplelocalization.h"
 
 #include "RunningSequence.h"
 
@@ -86,25 +86,26 @@ Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
-  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stts Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
-  //snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
+  snprintf(printBuffer, PRINT_BUFFER_SIZE,
+           "stts Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
+  // snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
   bufferedSerial.write(printBuffer, strlen(printBuffer));
   while (true) {
-       
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",
-                 runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),
-       leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(),
-       localization.getAngularVelocityFromWheelOdometry(), -imu.gyrY(), localization.theta(), localization.omega(),
-       localization.x(), localization.y(), localization.v(), simpleLocalization.theta(), simpleLocalization.x(),
-       simpleLocalization.y());
-       
-    //snprintf(printBuffer, PRINT_BUFFER_SIZE, "%f %f %f \r\n", localization.x(), localization.y(),sqrt(localization.x()*localization.x()+localization.y()*localization.y()));
+
+    snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",
+             runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(), leftMotorSpeed.currentSpeedRPM(),
+             rightMotorSpeed.currentSpeedRPM(), localization.getAngularVelocityFromWheelOdometry(), -imu.gyrY(),
+             localization.theta(), localization.omega(), localization.x(), localization.y(), localization.v(),
+             simpleLocalization.theta(), simpleLocalization.x(), simpleLocalization.y());
+
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "%f %f %f \r\n", localization.x(),
+    // localization.y(),sqrt(localization.x()*localization.x()+localization.y()*localization.y()));
     // snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n", runningSequence.state(),
     //         navi.leftTargetSpeed(), navi.rightTargetSpeed(), leftMotorSpeed.currentSpeedRPM(),
     //         rightMotorSpeed.currentSpeedRPM(), localization.theta(), localization.x(), localization.y());
 
-             bufferedSerial.write(printBuffer, strlen(printBuffer));
-             ThisThread::sleep_for(20ms);
+    bufferedSerial.write(printBuffer, strlen(printBuffer));
+    ThisThread::sleep_for(20ms);
   }
 }
 
