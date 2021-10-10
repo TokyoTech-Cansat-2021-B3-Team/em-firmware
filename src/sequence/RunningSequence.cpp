@@ -35,7 +35,6 @@ void RunningSequence::init() {
   _leftWheelControl->start();
   _rightWheelControl->start();
   _torqueControl->start();
-  _navigation->start();
   _logger->init();
   _console->init();
 }
@@ -57,6 +56,7 @@ void RunningSequence::threadLoop() {
   */
   if (isWaiting()) {
     shiftStatusToMovingAndSetTargetPosition();
+    _navigation->start();
     _previousTime = _timer.elapsed_time();
   } else {
     // WAITING状態でない状態でstartされた場合は待機
@@ -70,10 +70,14 @@ void RunningSequence::threadLoop() {
     //正常終了の確認
     if (_navigation->checkArrivingTarget()) {
       shiftStatusToArrived();
+      ThisThread::sleep_for(1s);
+      //navigation側の処理が終わるのを待つ必要がある
+      _navigation->stop();
       break;
     }
     //強制終了の確認
     if ((_timer.elapsed_time() - _previousTime) > RUNNINGSEQUENCE_TERMINATE_TIME) {
+      _navigation->stop();
       _leftWheelControl->setTargetSpeed(0);
       _rightWheelControl->setTargetSpeed(0);
 

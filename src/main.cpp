@@ -114,8 +114,6 @@ void printThreadLoop() {
 
 void speedThreadLoop() {
   if (flag == RunningAllSequence) {
-    runningSequence.start(FIRST);
-    simpleLocalization.start();
     if (imu.getStatus() == LSM9DS1_STATUS_SUCCESS_TO_CONNECT) {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
       bufferedSerial.write(printBuffer, strlen(printBuffer));
@@ -124,25 +122,31 @@ void speedThreadLoop() {
       bufferedSerial.write(printBuffer, strlen(printBuffer));
     }
     int i = 0;
+    simpleLocalization.start();
+    runningSequence.start(FIRST);
+    while (runningSequence.state() != ARRIVED_SECOND_POLE && runningSequence.state() != TERMINATE) {
+      ThisThread::sleep_for(100ms);
+    }
+    runningSequence.stop();
+    ThisThread::sleep_for(1s);
+
+    runningSequence.start(SECOND);
+    while (runningSequence.state() != ARRIVED_THIRD_POLE && runningSequence.state() != TERMINATE) {
+      ThisThread::sleep_for(100ms);
+    }
+    runningSequence.stop();
+    ThisThread::sleep_for(1s);
+
+    runningSequence.start(THIRD);
+    while (runningSequence.state() != ARRIVED_FOURTH_POLE && runningSequence.state() != TERMINATE) {
+      ThisThread::sleep_for(100ms);
+    }
+    runningSequence.stop();
+    if (runningSequence.state() == ARRIVED_FOURTH_POLE) {
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
+      bufferedSerial.write(printBuffer, strlen(printBuffer));
+    }
     while (true) {
-      if (runningSequence.state() == ARRIVED_SECOND_POLE) {
-        runningSequence.stop();
-        ThisThread::sleep_for(30s);
-        runningSequence.start(SECOND);
-      }
-      if (runningSequence.state() == ARRIVED_THIRD_POLE) {
-        runningSequence.stop();
-        ThisThread::sleep_for(30s);
-        runningSequence.start(THIRD);
-      }
-      if (runningSequence.state() == ARRIVED_FOURTH_POLE) {
-        runningSequence.stop();
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
-        bufferedSerial.write(printBuffer, strlen(printBuffer));
-        while (true) {
-          ThisThread::sleep_for(100ms);
-        }
-      }
       ThisThread::sleep_for(100ms);
     }
   } else if (flag == RunningPoleToPole) {
