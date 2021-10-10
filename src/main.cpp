@@ -18,12 +18,15 @@ char printBuffer[PRINT_BUFFER_SIZE];
 #include "Console.h"
 #include "Logger.h"
 #include "MotorSpeed.h"
+#include "TorqueControl.h"
 #include "WheelControl.h"
 #include "WheelMotor.h"
 #include "WheelPID.h"
+#include "ekflocalization.h"
 #include "fusion-odometry.h"
 #include "localization.h"
 #include "navigation.h"
+#include "simplelocalization.h"
 
 #include "RunningSequence.h"
 
@@ -61,12 +64,14 @@ WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
 FusionOdometry ekf;
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
+SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 68.0e-3);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
-Navigation navi(&localization, &leftControl, &rightControl);
+TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &leftPID, &rightPID);
+Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
 
-RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
-                                &rightControl, &console, &logger);
+RunningSequence runningSequence(&navi, &localization, &torqueControl, &imu, &leftMotorSpeed, &rightMotorSpeed,
+                                &leftControl, &rightControl, &console, &logger);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);

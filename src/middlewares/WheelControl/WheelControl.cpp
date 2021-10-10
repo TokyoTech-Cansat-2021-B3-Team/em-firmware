@@ -53,3 +53,7 @@ void WheelControl::updateSensorSpeed() {
 void WheelControl::setDirection(DIRECTION direction) {
   _direction = direction;
 }
+
+double WheelControl::targetSpeed() {
+  return _targetSpeed;
+}

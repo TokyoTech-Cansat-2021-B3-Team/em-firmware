@@ -1,13 +1,12 @@
 #include "localization.h"
 
-#include "fusion-odometry.h"
 #include "mbed.h"
 #include <memory>
 
-Localization::Localization(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, LSM9DS1 *imu, FusionOdometry *ekf,
-                           double wheelDistance, double wheelRadius)
+Localization::Localization(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed,  double wheelDistance,
+                           double wheelRadius)
     : _leftMotorSpeed(leftMotorSpeed), _rightMotorSpeed(rightMotorSpeed), _wheelDistance(wheelDistance),
-      _wheelRadius(wheelRadius), _imu(imu), _ekf(ekf), _thread() {}
+      _wheelRadius(wheelRadius), _thread() {}
 
 void Localization::start() {
   _thread = make_unique<Thread>(LOCALIZATION_THREAD_PRIORITY, LOCALIZATION_THREAD_STACK_SIZE, nullptr,
@@ -21,17 +20,7 @@ void Localization::stop() {
 }
 
 void Localization::threadLoop() {
-  while (true) {
-    double gyrZ_rps = - _imu->gyrY() * PI / 180.0;
-    double z[] = {getAngularVelocityFromWheelOdometry(), gyrZ_rps, getVelocityFromWheelOdometry()};
-    _ekf->step_with_updateQR(z);
-    _theta = _ekf->getX(0);
-    _xpk = _ekf->getX(3);
-    _ypk = _ekf->getX(4);
-    _vpk = _ekf->getX(5);
-    _omega_zk = _ekf->getX(2);
-    ThisThread::sleep_for(LOCALIZATION_PERIOD);
-  }
+  
 }
 
 double Localization::getAngularVelocityFromWheelOdometry() {
@@ -51,15 +40,15 @@ double Localization::getVelocityRight() {
 }
 
 double Localization::x() {
-  return _xpk;
+  return _x;
 }
 
 double Localization::y() {
-  return _ypk;
+  return _y;
 }
 
 double Localization::v() {
-  return _vpk;
+  return _v;
 }
 
 double Localization::theta() {
@@ -67,5 +56,5 @@ double Localization::theta() {
 }
 
 double Localization::omega() {
-  return _omega_zk;
+  return _omega_z;
 }

@@ -9,6 +9,7 @@
 #include "localization.h"
 #include "lsm9ds1.h"
 #include "navigation.h"
+#include "torqueControl.h"
 
 #define RUNNINGSEQUENCE_THREAD_PRIORITY osPriorityBelowNormal
 #define RUNNINGSEQUENCE_THREAD_STACK_SIZE 2048
@@ -16,7 +17,7 @@
 
 #define RUNNINGSEQUENCE_PERIOD 100ms
 
-#define RUNNINGSEQUENCE_TERMINATE_TIME 300s
+#define RUNNINGSEQUENCE_TERMINATE_TIME 150s
 
 enum RunningSequenceState {
   UNDEFINED,
@@ -36,9 +37,10 @@ enum RunningSqequneceType { FIRST, SECOND, THIRD };
 
 class RunningSequence {
 public:
-  explicit RunningSequence(Navigation *navigation, Localization *Localization, LSM9DS1 *imu, MotorSpeed *leftMotorSpeed,
-                           MotorSpeed *rightMotorSpeed, WheelControl *leftWheelControl, WheelControl *rightWheelControl,
-                           Console *console, Logger *logger);
+  explicit RunningSequence(Navigation *navigation, Localization *Localization, TorqueControl *torqueControl,
+                           LSM9DS1 *imu, MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed,
+                           WheelControl *leftWheelControl, WheelControl *rightWheelControl, Console *console,
+                           Logger *logger);
   void start(RunningSqequneceType sequenceType);
   void stop();
   RunningSequenceState state();
@@ -66,6 +68,7 @@ private:
   RunningSequenceState _state;
   Navigation *_navigation;
   Localization *_localization;
+  TorqueControl* _torqueControl;
   LSM9DS1 *_imu;
   MotorSpeed *_leftMotorSpeed;
   MotorSpeed *_rightMotorSpeed;
