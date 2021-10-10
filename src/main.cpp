@@ -58,8 +58,8 @@ QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 LSM9DS1 imu(&i2c);
 MU2 mu2(&bufferedSerial);
 
-MotorSpeed leftMotorSpeed(&leftEncoder, 1000.0);
-MotorSpeed rightMotorSpeed(&rightEncoder, 249.8);
+MotorSpeed leftMotorSpeed(&leftEncoder, 986.41);
+MotorSpeed rightMotorSpeed(&rightEncoder, 986.41);
 
 WheelPID leftPID;
 WheelPID rightPID;
