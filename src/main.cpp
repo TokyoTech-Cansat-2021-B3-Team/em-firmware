@@ -57,7 +57,7 @@ Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
   while (true) {
-    double tmp = imu.gyrZ() * 3.141592653589793 / 180.0;
+    double tmp = imu.gyrX() * 3.141592653589793 / 180.0;
     snprintf(printBuffer, PRINT_BUFFER_SIZE,
              "Lcsp:%f, Rcsp:%f, w_wh:%f, w_gy:%f, t_kf:%f, w_kf:%f, x_kf:%f, y_kf:%f, v_kf:%f, slip:%f, beta:%f\r\n",
              leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(),
