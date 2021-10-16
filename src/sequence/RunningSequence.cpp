@@ -1,10 +1,10 @@
 #include "RunningSequence.h"
 
-RunningSequence::RunningSequence(Navigation *navigation, Localization *localization, LSM9DS1 *imu,
-                                 MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed,
+RunningSequence::RunningSequence(Navigation *navigation, Localization *localization, TorqueControl *torqueControl,
+                                 LSM9DS1 *imu, MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed,
                                  WheelControl *leftWheelControl, WheelControl *rightWheelControl, Console *console,
                                  Logger *logger)
-    : _navigation(navigation), _localization(localization), _imu(imu), _leftMotorSpeed(leftMotorSpeed),
+    : _navigation(navigation), _localization(localization), _torqueControl(torqueControl),  _imu(imu), _leftMotorSpeed(leftMotorSpeed),
       _rightMotorSpeed(rightMotorSpeed), _leftWheelControl(leftWheelControl), _rightWheelControl(rightWheelControl),
       _console(console), _logger(logger), _state(UNDEFINED), _timer(), _thread() {}
 
@@ -34,7 +34,7 @@ void RunningSequence::init() {
   _localization->start();
   _leftWheelControl->start();
   _rightWheelControl->start();
-  _navigation->start();
+  _torqueControl->start();
   _logger->init();
   _console->init();
 }
@@ -56,6 +56,7 @@ void RunningSequence::threadLoop() {
   */
   if (isWaiting()) {
     shiftStatusToMovingAndSetTargetPosition();
+    _navigation->start();
     _previousTime = _timer.elapsed_time();
   } else {
     // WAITING状態でない状態でstartされた場合は待機
@@ -69,10 +70,14 @@ void RunningSequence::threadLoop() {
     //正常終了の確認
     if (_navigation->checkArrivingTarget()) {
       shiftStatusToArrived();
+      ThisThread::sleep_for(1s);
+      //navigation側の処理が終わるのを待つ必要がある
+      _navigation->stop();
       break;
     }
     //強制終了の確認
     if ((_timer.elapsed_time() - _previousTime) > RUNNINGSEQUENCE_TERMINATE_TIME) {
+      _navigation->stop();
       _leftWheelControl->setTargetSpeed(0);
       _rightWheelControl->setTargetSpeed(0);
 
