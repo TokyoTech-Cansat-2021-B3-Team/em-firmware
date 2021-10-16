@@ -57,7 +57,7 @@ void Stabilize::threadLoop() {
 
 double Stabilize::getTheta(double accX, double accY, double accZ) {
   // return  -1 * atan2(-accX, accZ); // 走行EMの座標系で調整
-  return atan2(accZ, -accY); // FMの座標系で調整
+  return atan2(accZ, accX); // 現FMの座標系で調整
 }
 
 double Stabilize::currentOutput() {
