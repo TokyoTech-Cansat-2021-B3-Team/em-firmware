@@ -9,7 +9,7 @@
 #include "localization.h"
 #include "lsm9ds1.h"
 #include "navigation.h"
-#include "torqueControl.h"
+#include "TorqueControl.h"
 
 #define RUNNINGSEQUENCE_THREAD_PRIORITY osPriorityBelowNormal
 #define RUNNINGSEQUENCE_THREAD_STACK_SIZE 2048

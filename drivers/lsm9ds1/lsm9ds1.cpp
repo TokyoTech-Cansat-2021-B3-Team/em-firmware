@@ -11,11 +11,8 @@ LSM9DS1::LSM9DS1(I2C *i2c) : _i2c(i2c), _thread(), _accMax(0.0f), _gyrMax(0.0f),
 }
 
 void LSM9DS1::start() {
-  if (!_threadStart) {
-    _thread = make_unique<Thread>(LSM9DS1_THREAD_PRIORITY, LSM9DS1_THREAD_STACK_SIZE, nullptr, LSM9DS1_THREAD_NAME);
-    _thread->start(callback(this, &LSM9DS1::threadLoop));
-    _threadStart = true;
-  }
+  _thread = make_unique<Thread>(LSM9DS1_THREAD_PRIORITY, LSM9DS1_THREAD_STACK_SIZE, nullptr, LSM9DS1_THREAD_NAME);
+  _thread->start(callback(this, &LSM9DS1::threadLoop));
 }
 
 void LSM9DS1::stop() {

@@ -17,12 +17,12 @@
 #include "lsm9ds1.h"
 
 // middlewares
+#include "EKFLocalization.h"
 #include "MotorSpeed.h"
 #include "WheelControl.h"
 #include "WheelMotor.h"
 #include "WheelPID.h"
 #include "fusion-odometry.h"
-#include "localization.h"
 #include "navigation.h"
 #include "stabilize.h"
 
@@ -86,8 +86,9 @@ WheelPID rightPID;
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 FusionOdometry ekf;
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
-Navigation navi(&localization, &leftControl, &rightControl);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
+TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &leftPID, &rightPID);
+Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
 Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
 
 Logger logger(&sdBlockDevice, &littleFileSystem2);
@@ -99,8 +100,8 @@ GPSDownlink gpsDownlink(&pa1010d, &console, &logger);
 LandingSequence landingSequence(&variometer, &console);
 FusingSequence fusingSequence(&fusing, &console);
 ProbeSequence probeSequence(&drillMotor, &verticalMotor, &loadingMotor, &verticalEncoder, &console);
-RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
-                                &rightControl, &console, &logger);
+RunningSequence runningSequence(&navi, &localization, &torqueControl, &imu, &leftMotorSpeed, &rightMotorSpeed,
+                                &leftControl, &rightControl, &console, &logger);
 StabilizeSequence stabilizeSequence(&stabilize, &imu, &console, &logger);
 
 // 着地検知シーケンス
