@@ -24,6 +24,8 @@
 #define LSM9DS1_STATUS_FAILED_TO_CONNECT 3
 #define LSM9DS1_STATUS_SUCCESS_TO_CONNECT 1
 
+#define MOVING_AVERAGE_COUNT 40
+
 class LSM9DS1{
 public:
     explicit LSM9DS1(I2C* i2c);
@@ -52,14 +54,19 @@ private:
     void get_acc();
     void get_gyr();
     void get_mag();
+    void updateGyrFiltered();
     I2C* _i2c;
     unique_ptr<Thread> _thread;
-    bool _threadStart = false;
+    uint16_t _movingAverageIndex = 0;
     float _accMax;
     float _gyrMax;
     float _magMax;
     double _acc[3] = {0.0f, 0.0f, 0.0f};
     double _gyr[3] = {0.0f,0.0f,0.0f};
+    double _gyrStackX[MOVING_AVERAGE_COUNT];
+    double _gyrStackY[MOVING_AVERAGE_COUNT];
+    double _gyrStackZ[MOVING_AVERAGE_COUNT];
+    double _gyrFiltered[3] = {0.0f, 0.0f, 0.0f};
     double _mag[3] = {0.0f,0.0f,0.0f};
     uint8_t _status = LSM9DS1_STATUS_UNCONNECTED;
 };
