@@ -8,8 +8,8 @@ void StabilizeSequence::start() {
   _timer.start();
   _imu->start();
   _console->log("stabilize", "init stabilize sequence\n");
-  _logger->init();
-  _console->init();
+  //_logger->init();
+  //_console->init();
   setStatus(WAITING);
   _thread = make_unique<Thread>(STABILIZESEQUENCE_THREAD_PRIORITY, STABILIZESEQUENCE_THREAD_STACK_SIZE, nullptr,
                                 STABILIZESEQUENCE_THREAD_NAME);
