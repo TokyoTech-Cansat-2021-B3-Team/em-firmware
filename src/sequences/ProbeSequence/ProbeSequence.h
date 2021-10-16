@@ -39,7 +39,7 @@
 
 // 刺し込み
 #define PROBE_SEQUENCE_DRILLING_DRILL_DUTY 1.0    // ドリルDuty
-#define PROBE_SEQUENCE_DRILLING_VERTICAL_DUTY 0.3 // 上下Duty
+#define PROBE_SEQUENCE_DRILLING_VERTICAL_DUTY 0.2 // 上下Duty
 #define PROBE_SEQUENCE_DRILLING_LENGTH 40         // 上下駆動下降量 (mm)
 
 // 初期位置に戻る
