@@ -17,11 +17,11 @@
 #include "lsm9ds1.h"
 
 // middlewares
-#include "EKFLocalization.h"
 #include "MotorSpeed.h"
 #include "WheelControl.h"
 #include "WheelMotor.h"
 #include "WheelPID.h"
+#include "ekflocalization.h"
 #include "fusion-odometry.h"
 #include "navigation.h"
 #include "stabilize.h"
