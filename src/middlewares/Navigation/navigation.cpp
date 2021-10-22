@@ -20,6 +20,7 @@ void Navigation::stop() {
 }
 
 void Navigation::threadLoop() {
+  _torqueControl->setGeneralCruiseSpeed(_cruiseSpeed);
   while (true) {
     if (checkArrivingTarget()) {
       _leftTargetSpeed = 0.0;

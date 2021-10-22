@@ -38,7 +38,7 @@ private:
   const int _sufficientSpeedUpCountThreshold = 10;
   double _sufficientSpeedRatio = 0.9;
   double _slowingDetectSpeedRatio = 0.4;
-  double _generalCruiseSpeed = 18.0;
+  double _generalCruiseSpeed = 0.0;
   double _slowCruiseSpeed = 5.0;
   double _leftPreviousSpeed = 0.0;
   double _rightPreviousSpeed = 0.0;

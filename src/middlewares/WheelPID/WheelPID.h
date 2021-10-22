@@ -19,7 +19,7 @@ private:
   double _output = 0.0;
   double _integral = 0.0;
   double _diff = 0.0;
-  double _pGain = 0.009;
-  double _iGain = 0.008;
-  double _dGain = 0.00008;
+  double _pGain = 0.01;
+  double _iGain = 0.02;
+  double _dGain = 0.00001;
 };
