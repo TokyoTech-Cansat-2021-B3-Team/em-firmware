@@ -4,7 +4,7 @@
 
 #include "DCMotor.h"
 
-#define WHEEL_MOTOR_PWM_PERIOD 100us // TODO: PWM周波数調整？
+#define WHEEL_MOTOR_PWM_PERIOD 10ms // TODO: PWM周波数調整？
 
 // 車輪用モータ
 // チャンネル共有のため、毎度初期化が必要
