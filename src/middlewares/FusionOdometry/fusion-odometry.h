@@ -64,7 +64,7 @@ protected:
     // refer to p1295 column L
     fx[THETA] = this->x[THETA] + this->x[OMEGA_Z] * this->_dt;
     // fx[BETA_Z] = this->x[BETA_Z];
-    fx[BETA_Z] = 0.017;
+    fx[BETA_Z] = 0.013558209;
     fx[OMEGA_Z] = this->x[OMEGA_Z];
     fx[X] = this->x[X] + cos(this->x[THETA]) * this->_dt * this->x[V];
     fx[Y] = this->x[Y] + sin(this->x[THETA]) * this->_dt * this->x[V];
