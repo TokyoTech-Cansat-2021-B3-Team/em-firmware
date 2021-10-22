@@ -23,7 +23,7 @@
 #define PROBE_SEQUENCE_SETUP_LENGTH -20        // 上下駆動下降量 (mm)
 
 // ホルダー回転
-#define PROBE_SEQUENCE_HOLDER_ANGLE_FIRST_1 27.0 // 1本目1段階目の回転角
+#define PROBE_SEQUENCE_HOLDER_ANGLE_FIRST_1 32.0 // 1本目1段階目の回転角
 #define PROBE_SEQUENCE_HOLDER_ANGLE_FIRST 15.0   // 1段階目の回転角
 #define PROBE_SEQUENCE_HOLDER_ANGLE_SECOND 58.0  // 2段階目の回転角
 #define PROBE_SEQUENCE_HOLDER_DELAY 2s           // 1段階目と2段階目の間の時間
@@ -39,7 +39,7 @@
 
 // 刺し込み
 #define PROBE_SEQUENCE_DRILLING_DRILL_DUTY 1.0    // ドリルDuty
-#define PROBE_SEQUENCE_DRILLING_VERTICAL_DUTY 0.2 // 上下Duty
+#define PROBE_SEQUENCE_DRILLING_VERTICAL_DUTY 0.3 // 上下Duty
 #define PROBE_SEQUENCE_DRILLING_LENGTH 40         // 上下駆動下降量 (mm)
 
 // 初期位置に戻る
