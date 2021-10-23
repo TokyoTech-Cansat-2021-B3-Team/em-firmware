@@ -21,6 +21,9 @@ void EKFLocalization::stop() {
 }
 
 void EKFLocalization::threadLoop() {
+  while (!_calibratedFlag) {
+    ThisThread::sleep_for(EKFLOCALIZATION_PERIOD);
+  }
   while (true) {
     double gyrX_rps = _imu->gyrX() * PI / 180.0;
     double z[] = {getAngularVelocityFromWheelOdometry(), gyrX_rps, getVelocityFromWheelOdometry()};
@@ -42,4 +45,14 @@ double EKFLocalization::beta() {
 
 double EKFLocalization::slip() {
   return _slip;
+}
+
+void EKFLocalization::calibration() {
+  double gyrSum = 0;
+  for (int i = 0; i < CALIBRATION_COUNT; i++) {
+    gyrSum += _imu->gyrX() * PI / 180.0;
+    ThisThread::sleep_for(CALIBRATION_PERIOD);
+  }
+  _ekf->setGyrBias(gyrSum / (double)CALIBRATION_COUNT);
+  _calibratedFlag = true;
 }

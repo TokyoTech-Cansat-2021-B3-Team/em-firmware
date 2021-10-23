@@ -55,6 +55,11 @@ void RunningSequence::threadLoop() {
   の部分のみ処理を行う.
   */
   if (isWaiting()) {
+    if (_state == WAITING_FIRST_TO_SECOND_POLE) {
+      _console->log("running", "start calibration");
+      _localization->calibration();
+      _console->log("running", "finish calibration");
+    }
     shiftStatusToMovingAndSetTargetPosition();
     _navigation->start();
     _previousTime = _timer.elapsed_time();

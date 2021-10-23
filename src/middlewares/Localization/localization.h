@@ -25,6 +25,9 @@ public:
   double omega();
   double getAngularVelocityFromWheelOdometry();
   double getVelocityFromWheelOdometry();
+  virtual void calibration(){
+
+  };
 
 protected:
   virtual void threadLoop();

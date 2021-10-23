@@ -58,13 +58,17 @@ public:
     return this->step(z);
   }
 
+  void setGyrBias(double gyrBias) {
+    _gyrBias = gyrBias;
+  }
+
 protected:
   void model(double fx[Nsta], double F[Nsta][Nsta], double hx[Mobs], double H[Mobs][Nsta]) {
     // process model
     // refer to p1295 column L
     fx[THETA] = this->x[THETA] + this->x[OMEGA_Z] * this->_dt;
     // fx[BETA_Z] = this->x[BETA_Z];
-    fx[BETA_Z] = 0.013558209;
+    fx[BETA_Z] = _gyrBias;
     fx[OMEGA_Z] = this->x[OMEGA_Z];
     fx[X] = this->x[X] + cos(this->x[THETA]) * this->_dt * this->x[V];
     fx[Y] = this->x[Y] + sin(this->x[THETA]) * this->_dt * this->x[V];
@@ -97,6 +101,7 @@ protected:
     H[OMEGA_ZG][BETA_Z] = 1;
     H[V_W][V] = 1;
   }
+
   const uint8_t THETA = 0;
   const uint8_t BETA_Z = 1;
   const uint8_t OMEGA_Z = 2;
@@ -121,6 +126,7 @@ protected:
   const double sigma_2_v = sigma_1_v * sigma_1_v / 2;
   const double sigma_3_v = sigma_1_v * sigma_1_v * sigma_1_v / 3;
 
+  double _gyrBias = 0.0;
   double sigma_w_w;
   double sigma_v_w;
   const double delta_w_w = 0.01f;  // 調整する変数

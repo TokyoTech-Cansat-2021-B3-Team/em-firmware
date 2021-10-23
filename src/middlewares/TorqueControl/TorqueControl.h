@@ -33,11 +33,22 @@ private:
   bool checkSufficientSpeedUp();
   void updateSufficientSpeedUpCount();
   void resetSufficientSpeedUpCount();
+  void updateDecreasingSpeedCount();
+  void resetDecreasingSpeedCount();
+  void updateDeviation();
+  void updateDeviationFiltered();
   void setSlowState();
   void setGeneralState();
-  const int _sufficientSpeedUpCountThreshold = 10;
-  double _sufficientSpeedRatio = 0.9;
-  double _slowingDetectSpeedRatio = 0.4;
+  const int _sufficientSpeedUpCountThreshold = 7;
+  const int _decreasingSpeedCountThreshold = 3;
+  const double _slowingDisableDevivationThreshold = 5; // rpm / s
+  const double _deviationLowpassFilteredRatio = 0.2;
+  double _deviationFilteredLeft = 0.0;
+  double _deviationFilteredRight = 0.0;
+  double _deviationLeft = 0.0;
+  double _deviationRight = 0.0;
+  double _sufficientSpeedRatio = 0.7;
+  double _slowingDetectSpeedRatio = 0.7;
   double _generalCruiseSpeed = 0.0;
   double _slowCruiseSpeed = 5.0;
   double _leftPreviousSpeed = 0.0;
@@ -46,6 +57,7 @@ private:
   double _rightSpeedDifference = 0.0;
   double _cruiseSpeed = 0.0;
   int _sufficientSpeedUpCount = 0;
+  int _decreasingSpeedCount = 0;
   TORQUESTATE _state = GENERALSPEED;
   MotorSpeed *_leftMotorSpeed;
   MotorSpeed *_rightMotorSpeed;
