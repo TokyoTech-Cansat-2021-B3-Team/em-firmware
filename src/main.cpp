@@ -4,7 +4,7 @@
 
 #include "PinAssignment.h"
 
-#define PRINT_BUFFER_SIZE 128
+#define PRINT_BUFFER_SIZE 512
 
 BufferedSerial bufferedSerial(UART_TX, UART_RX); //
 I2C i2c(I2C_SDA, I2C_SCL);                       //
@@ -63,7 +63,7 @@ WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 FusionOdometry ekf;
 
 SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 68.0e-3);
-EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
 
 TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &leftPID, &rightPID);
 Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
@@ -76,11 +76,16 @@ Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
   while (true) {
-    snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n", runningSequence.state(),
+    double tmp = imu.gyrX() * 3.141592653589793 / 180.0;
+    snprintf(printBuffer, PRINT_BUFFER_SIZE,
+             "Ltsp:%f, Rtsp:%f, Lcsp:%f, Rcsp:%f, w_wh:%f, w_gy:%f, t_kf:%f, w_kf:%f, x_kf:%f, y_kf:%f, v_kf:%f, "
+             "beta:%f, slip:%f\r\n",
              navi.leftTargetSpeed(), navi.rightTargetSpeed(), leftMotorSpeed.currentSpeedRPM(),
-             rightMotorSpeed.currentSpeedRPM(), localization.theta(), localization.x(), localization.y());
-    // bufferedSerial.write(printBuffer,strlen(printBuffer));
-    ThisThread::sleep_for(20ms);
+             rightMotorSpeed.currentSpeedRPM(), localization.getAngularVelocityFromWheelOdometry(), tmp,
+             localization.theta(), localization.omega(), localization.x(), localization.y(), localization.v(),
+             localization.beta(), localization.slip());
+    bufferedSerial.write(printBuffer, strlen(printBuffer));
+    ThisThread::sleep_for(500ms);
   }
 }
 
