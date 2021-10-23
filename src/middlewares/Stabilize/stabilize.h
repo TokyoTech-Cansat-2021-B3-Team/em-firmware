@@ -11,7 +11,7 @@
 #define STABILIZE_THREAD_STACK_SIZE 1024
 #define STABILIZE_THREAD_NAME "STABILIZE"
 
-#define STABILIZE_PERIOD 10ms
+#define STABILIZE_PERIOD 50ms
 
 class Stabilize {
 public:
