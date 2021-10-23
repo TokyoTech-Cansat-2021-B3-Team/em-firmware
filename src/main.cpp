@@ -30,8 +30,6 @@ char printBuffer[PRINT_BUFFER_SIZE];
 
 #include "RunningSequence.h"
 
-#define PRINT_BUFFER_SIZE 128
-
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
 
