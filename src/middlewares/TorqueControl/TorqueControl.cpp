@@ -4,6 +4,7 @@
 #include "WheelMotor.h"
 #include "WheelPID.h"
 #include "mbed.h"
+#include <chrono>
 #include <memory>
 
 TorqueControl::TorqueControl(MotorSpeed *leftMotorSpeed, MotorSpeed *rightMotorSpeed, WheelControl *leftWheelControl,
@@ -31,6 +32,9 @@ void TorqueControl::threadLoop() {
     _leftPreviousSpeed = leftSpeed;
     _rightPreviousSpeed = rightSpeed;
     updateSufficientSpeedUpCount();
+    updateDecreasingSpeedCount();
+    updateDeviation();
+    updateDeviationFiltered();
     if (_state == GENERALSPEED) {
       if (checkDecreasingSpeed()) {
         double leftslowingDetectSpeed = _slowingDetectSpeedRatio * _leftWheelControl->targetSpeed();
@@ -49,7 +53,10 @@ void TorqueControl::threadLoop() {
 }
 
 bool TorqueControl::checkDecreasingSpeed() {
-  if (_leftSpeedDifference < 0 || _rightSpeedDifference < 0) {
+  if (_deviationFilteredLeft > _slowingDisableDevivationThreshold && _deviationFilteredRight > _slowingDisableDevivationThreshold) {
+    return false;
+  }
+  if (_decreasingSpeedCount > _decreasingSpeedCountThreshold) {
     return true;
   }
   return false;
@@ -114,4 +121,35 @@ void TorqueControl::setGeneralState() {
   }
   _state = GENERALSPEED;
   _cruiseSpeed = _generalCruiseSpeed;
+}
+
+void TorqueControl::updateDecreasingSpeedCount() {
+  if (_state == GENERALSPEED) {
+    double _leftspeedThreshold = _leftWheelControl->targetSpeed() * _slowingDetectSpeedRatio;
+    double _rightspeedThreshold = _rightWheelControl->targetSpeed() * _slowingDetectSpeedRatio;
+    if (_leftMotorSpeed->currentSpeedRPM() < _leftspeedThreshold ||
+        _rightMotorSpeed->currentSpeedRPM() < _rightspeedThreshold) {
+      _decreasingSpeedCount++;
+    } else {
+      resetDecreasingSpeedCount();
+    }
+  }
+}
+
+void TorqueControl::resetDecreasingSpeedCount() {
+  _decreasingSpeedCount = 0;
+}
+
+void TorqueControl::updateDeviation() {
+  _deviationLeft = _leftSpeedDifference /
+                           ((double)chrono::duration_cast<chrono::milliseconds>(TORQUECONTROL_PERIOD).count() / 1000.0);
+  _deviationRight = _rightSpeedDifference /
+                           ((double)chrono::duration_cast<chrono::milliseconds>(TORQUECONTROL_PERIOD).count() / 1000.0);
+}
+
+void TorqueControl::updateDeviationFiltered() {
+  _deviationFilteredLeft =
+      (1.0 - _deviationLowpassFilteredRatio) * _deviationFilteredLeft + _deviationLowpassFilteredRatio * _deviationLeft;
+  _deviationFilteredRight =
+      (1.0 - _deviationLowpassFilteredRatio) * _deviationFilteredRight + _deviationLowpassFilteredRatio * _deviationRight;
 }
