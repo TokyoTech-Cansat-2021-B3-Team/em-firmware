@@ -7,6 +7,7 @@
 #include "DrillMotor.h"
 #include "QEI.h"
 #include "Stepper.h"
+#include "lsm9ds1.h"
 
 #define PROBE_SEQUENCE_THREAD_PRIORITY osPriorityBelowNormal
 #define PROBE_SEQUENCE_THREAD_STACK_SIZE 2048
@@ -70,6 +71,7 @@ private:
   DCMotor *_verticalMotor;
   Stepper *_loadingMotor;
   QEI *_verticalEncoder;
+  LSM9DS1 *_lsm9ds1;
 
   Console *_console;
 
@@ -110,7 +112,7 @@ private:
 
 public:
   explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder,
-                         Console *console);
+                         Console *console, LSM9DS1 *lsm9ds1);
 
   void start(ProbeNumber probeNumber);
 

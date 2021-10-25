@@ -47,12 +47,14 @@ DrillMotor drillMotor(&motor4In1);
 Stepper loadingMotor(&motor5Step, &motor5Enable);
 QEI verticalEncoder(ENC3_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 
+LSM9DS1 lsm9ds1(&i2c);
+
 // middlewares
 Logger logger(&sdBlockDevice, &littleFileSystem2);
 Console console(&mu2, &logger);
 
 // sequences
-ProbeSequence probeSequence(&drillMotor, &verticalMotor, &loadingMotor, &verticalEncoder, &console);
+ProbeSequence probeSequence(&drillMotor, &verticalMotor, &loadingMotor, &verticalEncoder, &console, &lsm9ds1);
 
 // 刺し込みシーケンス
 void probeSequenceSyncStart(ProbeSequence::ProbeNumber number) {
@@ -75,6 +77,8 @@ void probeSequenceSyncStart(ProbeSequence::ProbeNumber number) {
 int main() {
   // I2C速度変更
   i2c.frequency(I2C_FREQUENCY);
+
+  loadingMotor.idleCurrent(false);
 
   probeSequenceSyncStart(ProbeSequence::Probe1);
 

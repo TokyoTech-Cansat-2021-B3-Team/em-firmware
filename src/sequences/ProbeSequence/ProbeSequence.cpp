@@ -1,7 +1,7 @@
 #include "ProbeSequence.h"
 
 ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor,
-                             QEI *verticalEncoder, Console *console)
+                             QEI *verticalEncoder, Console *console, LSM9DS1 *lsm9ds1)
     : _thread(),                         //
       _drillMotor(drillMotor),           //
       _verticalMotor(verticalMotor),     //
@@ -10,7 +10,8 @@ ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Ste
       _verticalEncoder(verticalEncoder), //
       _isStart(false),                   //
       _state(Stop),                      //
-      _console(console)                  //
+      _console(console),                 //
+      _lsm9ds1(lsm9ds1)                  //
 {}
 
 void ProbeSequence::threadLoop() {
@@ -133,7 +134,9 @@ void ProbeSequence::verticalMove(double duty, double L) {
 
   while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
          timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
-    ThisThread::sleep_for(PROBE_SEQUENCE_VERTICAL_POLLING);
+    printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(), _lsm9ds1->accZ(),
+           revToLength(_verticalEncoder->getRevolutions()));
+    ThisThread::sleep_for(100ms);
   }
 
   timer.stop();
@@ -149,6 +152,8 @@ void ProbeSequence::start(ProbeNumber probeNumber) {
   if (!_isStart) {
     _probeNumber = probeNumber;
     _state = Stop;
+
+    _lsm9ds1->start();
 
     _thread = make_unique<Thread>(PROBE_SEQUENCE_THREAD_PRIORITY,   //
                                   PROBE_SEQUENCE_THREAD_STACK_SIZE, //
