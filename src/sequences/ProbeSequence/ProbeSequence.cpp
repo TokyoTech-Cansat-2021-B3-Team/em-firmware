@@ -32,7 +32,7 @@ void ProbeSequence::threadLoop() {
   if (_probeNumber == Probe1) {
     // ホルダーの回転
     _console->log("Probe", "Rotate holder to next position\n");
-    holderToNext(30.0, PROBE_SEQUENCE_HOLDER_ANGLE_SECOND);
+    holderToNext(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST_1, PROBE_SEQUENCE_HOLDER_ANGLE_SECOND);
   } else {
     _console->log("Probe", "Rotate holder to next position\n");
     holderToNext(PROBE_SEQUENCE_HOLDER_ANGLE_FIRST, PROBE_SEQUENCE_HOLDER_ANGLE_SECOND);
