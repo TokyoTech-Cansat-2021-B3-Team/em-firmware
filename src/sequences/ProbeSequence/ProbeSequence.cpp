@@ -105,8 +105,10 @@ void ProbeSequence::drilling() {
   _drillMotor->forward(PROBE_SEQUENCE_DRILLING_DRILL_DUTY);
 
   // 上下駆動指定量下降
-  verticalMove(PROBE_SEQUENCE_DRILLING_VERTICAL_DUTY, //
-               PROBE_SEQUENCE_DRILLING_LENGTH);
+  verticalMove_rSaG(PROBE_SEQUENCE_DRILLING_VERTICAL_rSaG_DUTY, //
+                    PROBE_SEQUENCE_DRILLING_rSaG_LENGTH);
+  verticalMove_sSaG(PROBE_SEQUENCE_DRILLING_VERTICAL_sSaG_DUTY, //
+                    PROBE_SEQUENCE_DRILLING_LENGTH - PROBE_SEQUENCE_DRILLING_rSaG_LENGTH);
 
   // ドリル停止
   _drillMotor->stop();
@@ -117,6 +119,31 @@ void ProbeSequence::back() {
   // 電極接続 + 刺し込み の下降分だけ上昇
   verticalMove(PROBE_SEQUENCE_BACK_VERTIVAL_DUTY, //
                -(PROBE_SEQUENCE_CONNECT_LENGTH + PROBE_SEQUENCE_DRILLING_LENGTH));
+}
+
+void ProbeSequence::verticalMove(double duty, double L) {
+
+  _verticalEncoder->reset();
+
+  Timer timer;
+  timer.start();
+
+  if (L >= 0.0) {
+    _verticalMotor->forward(duty);
+  } else {
+    _verticalMotor->reverse(duty);
+  }
+
+  while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
+         timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
+    printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(), _lsm9ds1->accZ(),
+           revToLength(_verticalEncoder->getRevolutions()));
+    ThisThread::sleep_for(100ms);
+  }
+
+  timer.stop();
+
+  _verticalMotor->stop();
 }
 
 void ProbeSequence::verticalMove_sSaG(double duty, double L) {

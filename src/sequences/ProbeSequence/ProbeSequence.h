@@ -39,9 +39,11 @@
 #define PROBE_SEQUENCE_CONNECT_LENGTH 10         // 上下駆動下降量 (mm)
 
 // 刺し込み
-#define PROBE_SEQUENCE_DRILLING_DRILL_DUTY 1.0    // ドリルDuty
-#define PROBE_SEQUENCE_DRILLING_VERTICAL_DUTY 0.3 // 上下Duty
-#define PROBE_SEQUENCE_DRILLING_LENGTH 40         // 上下駆動下降量 (mm)
+#define PROBE_SEQUENCE_DRILLING_DRILL_DUTY 1.0         // ドリルDuty
+#define PROBE_SEQUENCE_DRILLING_VERTICAL_rSaG_DUTY 0.2 // 上下Duty、rSaG時
+#define PROBE_SEQUENCE_DRILLING_VERTICAL_sSaG_DUTY 0.3 // 上下Duty、sSaG時
+#define PROBE_SEQUENCE_DRILLING_rSaG_LENGTH 15         // 上下駆動下降量 (mm)、rSaG分
+#define PROBE_SEQUENCE_DRILLING_LENGTH 40              // 上下駆動下降量 (mm)、刺しこみ全体
 
 // 初期位置に戻る
 #define PROBE_SEQUENCE_BACK_VERTIVAL_DUTY 1.0 // 上下Duty
@@ -105,9 +107,11 @@ private:
 
   // 指定した距離だけ、上下駆動する
   // strokeは下降する向きを正、上昇する向きを負
-  void verticalMove_sSaG(double duty, double L);
+  void verticalMove(double duty, double L); //刺しこみ時以外の上下駆動
 
-  void verticalMove_rSaG(double duty, double L);
+  void verticalMove_sSaG(double duty, double L); // s-SaG
+
+  void verticalMove_rSaG(double duty, double L); // r-SaG
 
   // 上下駆動の回転数から距離への変換
   double revToLength(int revolution);
