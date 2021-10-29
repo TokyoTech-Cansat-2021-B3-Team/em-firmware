@@ -105,7 +105,9 @@ private:
 
   // 指定した距離だけ、上下駆動する
   // strokeは下降する向きを正、上昇する向きを負
-  void verticalMove(double duty, double L);
+  void verticalMove_sSaG(double duty, double L);
+
+  void verticalMove_rSaG(double duty, double L);
 
   // 上下駆動の回転数から距離への変換
   double revToLength(int revolution);

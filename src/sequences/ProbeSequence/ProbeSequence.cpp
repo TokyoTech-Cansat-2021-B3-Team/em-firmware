@@ -119,7 +119,7 @@ void ProbeSequence::back() {
                -(PROBE_SEQUENCE_CONNECT_LENGTH + PROBE_SEQUENCE_DRILLING_LENGTH));
 }
 
-void ProbeSequence::verticalMove(double duty, double L) {
+void ProbeSequence::verticalMove_sSaG(double duty, double L) {
 
   _verticalEncoder->reset();
 
@@ -137,6 +137,56 @@ void ProbeSequence::verticalMove(double duty, double L) {
     printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(), _lsm9ds1->accZ(),
            revToLength(_verticalEncoder->getRevolutions()));
     ThisThread::sleep_for(100ms);
+  }
+
+  timer.stop();
+
+  _verticalMotor->stop();
+}
+
+void ProbeSequence::verticalMove_rSaG(double duty, double L) {
+
+  _verticalEncoder->reset();
+
+  Timer timer;
+  timer.start();
+
+  if (L >= 0.0) {
+    _verticalMotor->forward(duty);
+  } else {
+    _verticalMotor->reverse(duty);
+  }
+
+  double GoTime = 5000;   // ms
+  double StopTime = 3000; // ms
+  int G = 0;
+  int S = 0;
+  int phase = 0;                                                      // Go:0、Stop:1
+  while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
+         timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
+    printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(), _lsm9ds1->accZ(),
+           revToLength(_verticalEncoder->getRevolutions()));
+    ThisThread::sleep_for(100ms);
+
+    if (phase == 0) {
+      if (G > GoTime / 100) {
+        phase = 1;
+        G = 0;
+        _verticalMotor->stop();
+      }
+      G += 1;
+    } else {
+      if (S > StopTime / 100) {
+        phase = 0;
+        S = 0;
+        if (L >= 0.0) {
+          _verticalMotor->forward(duty);
+        } else {
+          _verticalMotor->reverse(duty);
+        }
+      }
+      S += 1;
+    }
   }
 
   timer.stop();
