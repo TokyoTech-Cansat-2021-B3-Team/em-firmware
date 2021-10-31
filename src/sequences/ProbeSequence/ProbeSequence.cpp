@@ -105,10 +105,10 @@ void ProbeSequence::drilling() {
   _drillMotor->forward(PROBE_SEQUENCE_DRILLING_DRILL_DUTY);
 
   // 上下駆動指定量下降
-  verticalMove_rSaG(PROBE_SEQUENCE_DRILLING_VERTICAL_rSaG_DUTY, //
-                    PROBE_SEQUENCE_DRILLING_rSaG_LENGTH);
-  verticalMove_sSaG(PROBE_SEQUENCE_DRILLING_VERTICAL_sSaG_DUTY, //
-                    PROBE_SEQUENCE_DRILLING_LENGTH - PROBE_SEQUENCE_DRILLING_rSaG_LENGTH);
+  verticalMove_rSaG(PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_DUTY, //
+                    PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_LENGTH);
+  verticalMove_sSaG(PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_DUTY, //
+                    PROBE_SEQUENCE_DRILLING_LENGTH - PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_LENGTH);
 
   // ドリル停止
   _drillMotor->stop();
@@ -136,8 +136,6 @@ void ProbeSequence::verticalMove(double duty, double L) {
 
   while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
          timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
-    printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(), _lsm9ds1->accZ(),
-           revToLength(_verticalEncoder->getRevolutions()));
     ThisThread::sleep_for(100ms);
   }
 
@@ -159,10 +157,44 @@ void ProbeSequence::verticalMove_sSaG(double duty, double L) {
     _verticalMotor->reverse(duty);
   }
 
+  double Time = 0;          //前回の測定からの経過時間、100ms
+  double revToLength_0 = 0; // 前の刺しこみ進度、mm
+  double revToLength_1 = 0; // 今の刺しこみ進度、mm
+  int phase = 0;            // Go:0、Stop:1                                             // ms
+  int S = 0;                //
   while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
          timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
-    printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(), _lsm9ds1->accZ(),
-           revToLength(_verticalEncoder->getRevolutions()));
+
+    if (phase == 0) {
+      if (Time >= PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_SENSINGINTARVAL) {
+        Time = 0;
+        revToLength_1 = revToLength(_verticalEncoder->getRevolutions());
+
+        if ((revToLength_1 - revToLength_0) / (PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_SENSINGINTARVAL) <
+            PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_THRESHOLD) {
+          _verticalMotor->stop();
+          phase = 1;
+          printf("ストップ\n");
+        }
+        printf("下降速度：%f\n",
+               (revToLength_1 - revToLength_0) / (PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_SENSINGINTARVAL));
+        revToLength_0 = revToLength_1;
+      }
+      Time++;
+    } else {
+      if (S * PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_SAMPLINGTIME >= PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_STOPTIME) {
+        phase = 0;
+        if (L >= 0.0) {
+          _verticalMotor->forward(duty);
+        } else {
+          _verticalMotor->reverse(duty);
+        }
+        S = 0;
+        printf("ゴー\n");
+      }
+      S += 1;
+    }
+
     ThisThread::sleep_for(100ms);
   }
 
@@ -184,26 +216,22 @@ void ProbeSequence::verticalMove_rSaG(double duty, double L) {
     _verticalMotor->reverse(duty);
   }
 
-  double GoTime = 5000;   // ms
-  double StopTime = 3000; // ms
   int G = 0;
   int S = 0;
   int phase = 0;                                                      // Go:0、Stop:1
   while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
          timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
-    printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(), _lsm9ds1->accZ(),
-           revToLength(_verticalEncoder->getRevolutions()));
-    ThisThread::sleep_for(100ms);
-
+    // printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(),
+    // _lsm9ds1->accZ(),revToLength(_verticalEncoder->getRevolutions()));
     if (phase == 0) {
-      if (G > GoTime / 100) {
+      if (G >= PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_GOTIME) {
         phase = 1;
         G = 0;
         _verticalMotor->stop();
       }
-      G += 1;
+      G++;
     } else {
-      if (S > StopTime / 100) {
+      if (S >= PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_STOPTIME) {
         phase = 0;
         S = 0;
         if (L >= 0.0) {
@@ -212,8 +240,9 @@ void ProbeSequence::verticalMove_rSaG(double duty, double L) {
           _verticalMotor->reverse(duty);
         }
       }
-      S += 1;
+      S++;
     }
+    ThisThread::sleep_for(100ms);
   }
 
   timer.stop();
