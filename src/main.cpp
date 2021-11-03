@@ -13,13 +13,15 @@
 #include "QEI.h"
 
 #include "MotorSpeed.h"
-#include "SimpleLocalization.h"
+#include "TorqueControl.h"
 #include "WheelControl.h"
 #include "WheelMotor.h"
 #include "WheelPID.h"
+#include "ekflocalization.h"
 #include "fusion-odometry.h"
 #include "localization.h"
 #include "navigation.h"
+#include "simplelocalization.h"
 
 #include "RunningSequence.h"
 
@@ -34,6 +36,7 @@ enum ExperimentMode { RunningAllSequence, RunningPoleToPole, RunningNoControle }
 
 ExperimentMode flag = RunningAllSequence;
 const double cruiseSpeed = 20.0;
+#define PRINT_BUFFER_SIZE 256
 
 PwmOut motor1In1(M1_IN1);
 PwmOut motor1In2(M1_IN2);
@@ -71,44 +74,46 @@ WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
 FusionOdometry ekf;
 
-Localization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
 SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 68.0e-3);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
 
-Navigation navi(&localization, &leftControl, &rightControl);
+TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &leftPID, &rightPID);
+Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
 
-RunningSequence runningSequence(&navi, &localization, &imu, &leftMotorSpeed, &rightMotorSpeed, &leftControl,
-                                &rightControl, &console, &logger);
+RunningSequence runningSequence(&navi, &localization, &torqueControl, &imu, &leftMotorSpeed, &rightMotorSpeed,
+                                &leftControl, &rightControl, &console, &logger);
 
 Thread speedThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
-  snprintf(printBuffer, PRINT_BUFFER_SIZE, "stts Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
-  //snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
-  bufferedSerial.write(printBuffer, strlen(printBuffer));
+  snprintf(printBuffer, PRINT_BUFFER_SIZE,
+           "stts Ltsp Rtsp Lcsp Rcsp w_wh w_gy t_kf w_kf x_kf y_kf v_kf t_sm x_sm y_sm'\r\n");
+  // snprintf(printBuffer, PRINT_BUFFER_SIZE, "stat Ltsp Rtsp Lcsp Rcsp t_kf x_kf y_kf\r\n");
+  //bufferedSerial.write(printBuffer, strlen(printBuffer));
   while (true) {
-       
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f %f %f %f %f %f %f %f;\r\n",
-                 runningSequence.state(), navi.leftTargetSpeed(), navi.rightTargetSpeed(),
-       leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(),
-       localization.getAngularVelocityFromWheelOdometry(), -imu.gyrY(), localization.theta(), localization.omega(),
-       localization.x(), localization.y(), localization.v(), simpleLocalization.theta(), simpleLocalization.x(),
-       simpleLocalization.y());
-       
-    //snprintf(printBuffer, PRINT_BUFFER_SIZE, "%f %f %f \r\n", localization.x(), localization.y(),sqrt(localization.x()*localization.x()+localization.y()*localization.y()));
+
+    double tmp = imu.gyrZ() * 3.141592653589793 / 180.0;
+    snprintf(printBuffer, PRINT_BUFFER_SIZE,
+             "Lcsp:%f, Rcsp:%f, w_wh:%f, w_gy:%f, t_kf:%f, w_kf:%f, x_kf:%f, y_kf:%f, v_kf:%f, slip:%f, beta:%f\r\n",
+             leftMotorSpeed.currentSpeedRPM(), rightMotorSpeed.currentSpeedRPM(),
+             localization.getAngularVelocityFromWheelOdometry(), tmp, localization.theta(), localization.omega(),
+             localization.x(), localization.y(), localization.v(), localization.slip(), localization.beta());
+
+    // snprintf(printBuffer, PRINT_BUFFER_SIZE, "%f %f %f \r\n", localization.x(),
+    // localization.y(),sqrt(localization.x()*localization.x()+localization.y()*localization.y()));
     // snprintf(printBuffer, PRINT_BUFFER_SIZE, "$%d %f %f %f %f %f %f %f;\r\n", runningSequence.state(),
     //         navi.leftTargetSpeed(), navi.rightTargetSpeed(), leftMotorSpeed.currentSpeedRPM(),
     //         rightMotorSpeed.currentSpeedRPM(), localization.theta(), localization.x(), localization.y());
 
-             bufferedSerial.write(printBuffer, strlen(printBuffer));
-             ThisThread::sleep_for(20ms);
+    bufferedSerial.write(printBuffer, strlen(printBuffer));
+    ThisThread::sleep_for(20ms);
+    ThisThread::sleep_for(500ms);
   }
 }
 
 void speedThreadLoop() {
   if (flag == RunningAllSequence) {
-    runningSequence.start(FIRST);
-    simpleLocalization.start();
     if (imu.getStatus() == LSM9DS1_STATUS_SUCCESS_TO_CONNECT) {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Succeeded connecting LSM9DS1.\r\n");
       bufferedSerial.write(printBuffer, strlen(printBuffer));
@@ -117,25 +122,31 @@ void speedThreadLoop() {
       bufferedSerial.write(printBuffer, strlen(printBuffer));
     }
     int i = 0;
+    simpleLocalization.start();
+    runningSequence.start(FIRST);
+    while (runningSequence.state() != ARRIVED_SECOND_POLE && runningSequence.state() != TERMINATE) {
+      ThisThread::sleep_for(100ms);
+    }
+    runningSequence.stop();
+    ThisThread::sleep_for(1s);
+
+    runningSequence.start(SECOND);
+    while (runningSequence.state() != ARRIVED_THIRD_POLE && runningSequence.state() != TERMINATE) {
+      ThisThread::sleep_for(100ms);
+    }
+    runningSequence.stop();
+    ThisThread::sleep_for(1s);
+
+    runningSequence.start(THIRD);
+    while (runningSequence.state() != ARRIVED_FOURTH_POLE && runningSequence.state() != TERMINATE) {
+      ThisThread::sleep_for(100ms);
+    }
+    runningSequence.stop();
+    if (runningSequence.state() == ARRIVED_FOURTH_POLE) {
+      snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
+      bufferedSerial.write(printBuffer, strlen(printBuffer));
+    }
     while (true) {
-      if (runningSequence.state() == ARRIVED_SECOND_POLE) {
-        runningSequence.stop();
-        ThisThread::sleep_for(30s);
-        runningSequence.start(SECOND);
-      }
-      if (runningSequence.state() == ARRIVED_THIRD_POLE) {
-        runningSequence.stop();
-        ThisThread::sleep_for(30s);
-        runningSequence.start(THIRD);
-      }
-      if (runningSequence.state() == ARRIVED_FOURTH_POLE) {
-        runningSequence.stop();
-        snprintf(printBuffer, PRINT_BUFFER_SIZE, "SUCCESS\r\n");
-        bufferedSerial.write(printBuffer, strlen(printBuffer));
-        while (true) {
-          ThisThread::sleep_for(100ms);
-        }
-      }
       ThisThread::sleep_for(100ms);
     }
   } else if (flag == RunningPoleToPole) {
@@ -146,6 +157,7 @@ void speedThreadLoop() {
     simpleLocalization.start();
     leftControl.start();
     rightControl.start();
+    torqueControl.start();
     navi.start();
     navi.setTargetPosition(5.0, 0.0, 0.1);
   } else if (flag == RunningNoControle) {
@@ -181,7 +193,6 @@ int main() {
     if (i < 51) {
       snprintf(printBuffer, PRINT_BUFFER_SIZE, "Waiting . . .\r\n");
       bufferedSerial.write(printBuffer, strlen(printBuffer));
-      ThisThread::sleep_for(100ms);
     } else if (i == 51) {
       navi.setCruiseSpeed(cruiseSpeed);
       printThread.start(printThreadLoop);
@@ -193,6 +204,7 @@ int main() {
       leftWheelMotor.stop();
       rightWheelMotor.stop();
       speedThread.terminate();
+      torqueControl.stop();
       navi.stop();
       runningSequence.stop();
       printThread.terminate();
