@@ -3,6 +3,7 @@
 #include "mbed.h"
 
 #include "PinAssignment.h"
+#include "MissionParameters.h"
 
 #define PRINT_BUFFER_SIZE 512
 
@@ -48,8 +49,8 @@ QEI rightEncoder(ENC2_A, NC, NC, 6, QEI::CHANNEL_A_ENCODING);
 LSM9DS1 imu(&i2c);
 MU2 mu2(&bufferedSerial);
 
-MotorSpeed leftMotorSpeed(&leftEncoder, 986.41);
-MotorSpeed rightMotorSpeed(&rightEncoder, 986.41);
+MotorSpeed leftMotorSpeed(&leftEncoder, LEFTWHEEL_GEAR_RATIO);
+MotorSpeed rightMotorSpeed(&rightEncoder, RIGHTWHEEL_GEAR_RATIO);
 
 WheelPID leftPID;
 WheelPID rightPID;
@@ -62,8 +63,8 @@ WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 
 FusionOdometry ekf;
 
-SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, 180.0e-3, 68.0e-3);
-EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 68.0e-3);
+SimpleLocalization simpleLocalization(&leftMotorSpeed, &rightMotorSpeed, BODY_LENGTH, WHEEL_RADIUS);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, BODY_LENGTH, WHEEL_RADIUS);
 
 TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &leftPID, &rightPID);
 Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
@@ -76,7 +77,7 @@ Thread printThread(osPriorityAboveNormal, 1024, nullptr, nullptr);
 
 void printThreadLoop() {
   while (true) {
-    double tmp = imu.gyrX() * 3.141592653589793 / 180.0;
+    double tmp = imu.gyrX() * PI / 180.0;
     snprintf(printBuffer, PRINT_BUFFER_SIZE,
              "Ltsp:%f, Rtsp:%f, Lcsp:%f, Rcsp:%f, w_wh:%f, w_gy:%f, t_kf:%f, w_kf:%f, x_kf:%f, y_kf:%f, v_kf:%f, "
              "beta:%f, slip:%f\r\n",

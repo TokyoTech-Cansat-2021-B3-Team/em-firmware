@@ -1,0 +1,10 @@
+#pragma once
+
+#define WHEEL_RADIUS 68.0e-3
+
+#define BODY_LENGTH 180.0e-3
+
+#define RIGHTWHEEL_GEAR_RATIO 986.41
+#define LEFTWHEEL_GEAR_RATIO 986.41
+
+#define PI 3.141592653589793
