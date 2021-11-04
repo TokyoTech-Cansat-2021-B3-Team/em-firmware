@@ -84,7 +84,6 @@ private:
   DCMotor *_verticalMotor;
   Stepper *_loadingMotor;
   QEI *_verticalEncoder;
-  LSM9DS1 *_lsm9ds1;
 
   Console *_console;
 
@@ -135,7 +134,7 @@ private:
 
 public:
   explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder,
-                         Console *console, LSM9DS1 *lsm9ds1);
+                         Console *console);
 
   void start(ProbeNumber probeNumber);
 

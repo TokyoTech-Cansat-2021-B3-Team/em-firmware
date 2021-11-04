@@ -1,7 +1,7 @@
 #include "ProbeSequence.h"
 
 ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor,
-                             QEI *verticalEncoder, Console *console, LSM9DS1 *lsm9ds1)
+                             QEI *verticalEncoder, Console *console)
     : _thread(),                         //
       _drillMotor(drillMotor),           //
       _verticalMotor(verticalMotor),     //
@@ -10,8 +10,7 @@ ProbeSequence::ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Ste
       _verticalEncoder(verticalEncoder), //
       _isStart(false),                   //
       _state(Stop),                      //
-      _console(console),                 //
-      _lsm9ds1(lsm9ds1)                  //
+      _console(console)                  //
 {}
 
 void ProbeSequence::threadLoop() {
@@ -255,8 +254,6 @@ void ProbeSequence::verticalMove_rSaG(double duty, double L) {
   int phase = 0;                                                      // Go:0、Stop:1
   while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
          timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
-    // printf("actX:%f,actY:%f,actZ:%f,length:%f\n", _lsm9ds1->accX(), _lsm9ds1->accY(),
-    // _lsm9ds1->accZ(),revToLength(_verticalEncoder->getRevolutions()));
     if (phase == 0) {
       if (G >= PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_GOTIME) {
         phase = 1;
