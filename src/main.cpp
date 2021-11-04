@@ -80,6 +80,8 @@ int main() {
 
   loadingMotor.idleCurrent(false);
 
+  ThisThread::sleep_for(3s);
+
   probeSequenceSyncStart(ProbeSequence::Probe1);
 
   probeSequenceSyncStart(ProbeSequence::Probe2);

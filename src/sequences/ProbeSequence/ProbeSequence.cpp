@@ -28,6 +28,10 @@ void ProbeSequence::threadLoop() {
   //     verticalMove(PROBE_SEQUENCE_SETUP_VERTICAL_DUTY, PROBE_SEQUENCE_SETUP_LENGTH);
   //   }
 
+  // 刺しこみ進度計測値
+  double DrillingVelocity = 0;
+  // https://qiita.com/yokoto/items/5672ff20b63815728d90
+
   // 1本目は回転角が大きい
   if (_probeNumber == Probe1) {
     // ホルダーの回転
@@ -40,11 +44,15 @@ void ProbeSequence::threadLoop() {
 
   // 電極接続
   _console->log("Probe", "Start Connect to Probe\n");
-  connect();
+  connect(&DrillingVelocity);
+
+  printf("降下速度：%fmm/100ms\n", DrillingVelocity);
 
   // 刺し込み
   _console->log("Probe", "Start Drilling\n");
-  drilling();
+  double Threshold = ThresholdDecision(DrillingVelocity);
+  printf("閾値：%f mm/100ms\n", Threshold);
+  drilling(Threshold);
 
   // 初期位置へ戻る
   _console->log("Probe", "Back to Init Position\n");
@@ -88,19 +96,19 @@ void ProbeSequence::probepush() {
                -(PROBE_SEQUENCE_CONNECT_LENGTH + PROBE_SEQUENCE_DRILLING_LENGTH));
 }
 
-void ProbeSequence::connect() {
+void ProbeSequence::connect(double *ptr) {
   // ドリル回転開始
   _drillMotor->forward(PROBE_SEQUENCE_CONNECT_DRILL_DUTY);
 
   // 上下駆動指定量下降
-  verticalMove(PROBE_SEQUENCE_CONNECT_VERTICAL_DUTY, //
-               PROBE_SEQUENCE_CONNECT_LENGTH);
+  verticalMove_connect(PROBE_SEQUENCE_CONNECT_VERTICAL_DUTY, //
+                       PROBE_SEQUENCE_CONNECT_LENGTH, ptr);
 
   // ドリル停止
   _drillMotor->stop();
 }
 
-void ProbeSequence::drilling() {
+void ProbeSequence::drilling(double Threshold) {
   // ドリル回転開始
   _drillMotor->forward(PROBE_SEQUENCE_DRILLING_DRILL_DUTY);
 
@@ -108,7 +116,7 @@ void ProbeSequence::drilling() {
   verticalMove_rSaG(PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_DUTY, //
                     PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_LENGTH);
   verticalMove_sSaG(PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_DUTY, //
-                    PROBE_SEQUENCE_DRILLING_LENGTH - PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_LENGTH);
+                    PROBE_SEQUENCE_DRILLING_LENGTH - PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_LENGTH, Threshold);
 
   // ドリル停止
   _drillMotor->stop();
@@ -144,7 +152,34 @@ void ProbeSequence::verticalMove(double duty, double L) {
   _verticalMotor->stop();
 }
 
-void ProbeSequence::verticalMove_sSaG(double duty, double L) {
+void ProbeSequence::verticalMove_connect(double duty, double L, double *ptr) {
+
+  _verticalEncoder->reset();
+
+  Timer timer;
+  timer.start();
+
+  if (L >= 0.0) {
+    _verticalMotor->forward(duty);
+  } else {
+    _verticalMotor->reverse(duty);
+  }
+
+  int time = 0;
+  while (revToLength(_verticalEncoder->getRevolutions()) < fabs(L) && //
+         timer.elapsed_time() < PROBE_SEQUENCE_VERTICAL_TIMEOUT) {
+    time++;
+    ThisThread::sleep_for(100ms);
+  }
+
+  *ptr = L / time; //降下速度を記録、mm/100ms
+
+  timer.stop();
+
+  _verticalMotor->stop();
+}
+
+void ProbeSequence::verticalMove_sSaG(double duty, double L, double Threshold) {
 
   _verticalEncoder->reset();
 
@@ -170,8 +205,7 @@ void ProbeSequence::verticalMove_sSaG(double duty, double L) {
         Time = 0;
         revToLength_1 = revToLength(_verticalEncoder->getRevolutions());
 
-        if ((revToLength_1 - revToLength_0) / (PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_SENSINGINTARVAL) <
-            PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_THRESHOLD) {
+        if ((revToLength_1 - revToLength_0) / (PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_SENSINGINTARVAL) < Threshold) {
           _verticalMotor->stop();
           phase = 1;
           printf("ストップ\n");
@@ -252,6 +286,10 @@ void ProbeSequence::verticalMove_rSaG(double duty, double L) {
 
 double ProbeSequence::revToLength(int revolution) {
   return ((double)revolution / PROBE_SEQUENCE_VERTICAL_RATIO) * PROBE_SEQUENCE_VERTICAL_LEAD;
+}
+
+double ProbeSequence::ThresholdDecision(double DrillingVelocity) {
+  return DrillingVelocity * PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_THRESHOLD_RATIO;
 }
 
 void ProbeSequence::start(ProbeNumber probeNumber) {

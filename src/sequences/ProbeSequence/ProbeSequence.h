@@ -49,8 +49,9 @@
 #define PROBE_SEQUENCE_DRILLING_VERTICAL_RSAG_STOPTIME 3 // GoTime (ms)
 
 //刺しこみ、s-SaG
-#define PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_DUTY 0.2           // 上下Duty、sSaG時
-#define PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_THRESHOLD 0.12     // 刺しこみ速度閾値 (mm/100ms)
+#define PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_DUTY 0.2 // 上下Duty、sSaG時
+#define PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_THRESHOLD_RATIO 0.8
+//#define PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_THRESHOLD 0.12     // 刺しこみ速度閾値 (mm/100ms)
 #define PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_SAMPLINGTIME 1     // サンプリングタイム (100ms)
 #define PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_SENSINGINTARVAL 10 // 刺しこみ速度判定頻度 (100ms)
 #define PROBE_SEQUENCE_DRILLING_VERTICAL_SSAG_STOPTIME 30        // 上下駆動停止時間 (100ms)
@@ -107,24 +108,30 @@ private:
   void probepush();
 
   // 電極の接続
-  void connect();
+  void connect(double *ptr);
 
   // 刺し込み
-  void drilling();
+  void drilling(double DrillingVelocity);
 
   // 初期位置に戻る
   void back();
 
   // 指定した距離だけ、上下駆動する
   // strokeは下降する向きを正、上昇する向きを負
-  void verticalMove(double duty, double L); //刺しこみ時以外の上下駆動
+  void verticalMove(double duty, double L); //刺しこみ時・電極接続時以外の上下駆動
 
-  void verticalMove_sSaG(double duty, double L); // s-SaG
+  void verticalMove_connect(double duty, double L,
+                            double *ptr); //電極接続時の上下駆動、刺しこみ速度を計測する
+
+  void verticalMove_sSaG(double duty, double L, double DrillingVelocity); // s-SaG
 
   void verticalMove_rSaG(double duty, double L); // r-SaG
 
   // 上下駆動の回転数から距離への変換
   double revToLength(int revolution);
+
+  // s-SaG閾値の決定
+  double ThresholdDecision(double DrillingVelocity);
 
 public:
   explicit ProbeSequence(DrillMotor *drillMotor, DCMotor *verticalMotor, Stepper *loadingMotor, QEI *verticalEncoder,
