@@ -57,12 +57,6 @@ void ProbeSequence::threadLoop() {
   _console->log("Probe", "Back to Init Position\n");
   back();
 
-  // 4本目のみ20mm戻す
-  if (_probeNumber == Probe4) {
-    _console->log("Probe", "return Park Position\n");
-    verticalMove(PROBE_SEQUENCE_SETUP_VERTICAL_DUTY, -(PROBE_SEQUENCE_SETUP_LENGTH));
-  }
-
   // シーケンス終了s
   _console->log("Probe", "Probe%d Sequence Complete\n", _probeNumber);
   _state = Complete;
