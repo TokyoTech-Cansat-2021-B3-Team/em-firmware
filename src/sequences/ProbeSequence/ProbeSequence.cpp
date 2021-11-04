@@ -288,8 +288,6 @@ void ProbeSequence::start(ProbeNumber probeNumber) {
     _probeNumber = probeNumber;
     _state = Stop;
 
-    _lsm9ds1->start();
-
     _thread = make_unique<Thread>(PROBE_SEQUENCE_THREAD_PRIORITY,   //
                                   PROBE_SEQUENCE_THREAD_STACK_SIZE, //
                                   nullptr,                          //
