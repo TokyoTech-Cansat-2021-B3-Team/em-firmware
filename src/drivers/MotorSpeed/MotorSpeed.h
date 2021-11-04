@@ -2,6 +2,7 @@
 
 #include "mbed.h"
 
+#include "MissionParameters.h"
 #include "QEI.h"
 
 #define MOTORSPEED_THREAD_PRIORITY osPriorityHigh
