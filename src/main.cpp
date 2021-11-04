@@ -264,17 +264,26 @@ int main() {
   // 走行シーケンス1
   runningSequenceSyncStart(FIRST);
 
+  // 正立シーケンス
+  stabilizeSequenceSyncStart();
+
   // 刺し込みシーケンス2
   probeSequenceSyncStart(ProbeSequence::Probe2);
 
   // 走行シーケンス2
   runningSequenceSyncStart(SECOND);
 
+  // 正立シーケンス
+  stabilizeSequenceSyncStart();
+
   // 刺し込みシーケンス3
   probeSequenceSyncStart(ProbeSequence::Probe3);
 
   // 走行シーケンス3
   runningSequenceSyncStart(THIRD);
+
+  // 正立シーケンス
+  stabilizeSequenceSyncStart();
 
   // 刺し込みシーケンス4
   probeSequenceSyncStart(ProbeSequence::Probe4);
