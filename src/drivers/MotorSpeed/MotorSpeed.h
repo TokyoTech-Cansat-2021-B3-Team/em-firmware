@@ -22,7 +22,6 @@ private:
   void threadLoop();
   double pulsesToRpm(int pulses, chrono::microseconds period);
   double rpmToRadPerSecond(double rpm);
-  const double PI = 3.141592653589793;
   const double _gyarRatio;
   QEI *_encoder;
   double _motorSpeedRPM;
