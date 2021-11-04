@@ -1,6 +1,7 @@
 #include "mbed.h"
 
 // includes
+#include "MissionParameters.h"
 #include "PinAssignment.h"
 
 // embedded
@@ -79,14 +80,14 @@ MU2 mu2(&bufferedSerial);
 LSM9DS1 imu(&i2c);
 
 // middlewares
-MotorSpeed leftMotorSpeed(&leftEncoder, 986.41);
-MotorSpeed rightMotorSpeed(&rightEncoder, 986.41);
+MotorSpeed leftMotorSpeed(&leftEncoder, LEFTWHEEL_GEAR_RATIO);
+MotorSpeed rightMotorSpeed(&rightEncoder, RIGHTWHEEL_GEAR_RATIO);
 WheelPID leftPID;
 WheelPID rightPID;
 WheelControl leftControl(&leftWheelMotor, &leftPID, &leftMotorSpeed);
 WheelControl rightControl(&rightWheelMotor, &rightPID, &rightMotorSpeed);
 FusionOdometry ekf;
-EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, 180.0e-3, 52.0e-3);
+EKFLocalization localization(&leftMotorSpeed, &rightMotorSpeed, &imu, &ekf, BODY_LENGTH, WHEEL_RADIUS);
 TorqueControl torqueControl(&leftMotorSpeed, &rightMotorSpeed, &leftControl, &rightControl, &leftPID, &rightPID);
 Navigation navi(&localization, &leftControl, &rightControl, &torqueControl);
 Stabilize stabilize(&imu, &leftWheelMotor, &rightWheelMotor);
