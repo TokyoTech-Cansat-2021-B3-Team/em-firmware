@@ -35,7 +35,6 @@ protected:
   double getVelocityRight();
   const double _wheelDistance;
   const double _wheelRadius;
-  const double PI = 3.141592653589793;
   double _theta = 0.0;
   double _omega_z = 0.0;
   double _x = 0.0;
