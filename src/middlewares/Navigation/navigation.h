@@ -35,8 +35,8 @@ protected:
 
 private:
     void threadLoop();
-    const double _gainKL = 1.0;//1mのずれで2RPMの差
-    const double _gainKT = 0.3;
+    const double _gainKL = 17.0;//1mのずれで2RPMの差
+    const double _gainKT = 8.0;
     double _cruiseSpeed = 18.0; // rpm
     double _deltaV = 0.0;
     double _leftTargetSpeed = 0.0;
