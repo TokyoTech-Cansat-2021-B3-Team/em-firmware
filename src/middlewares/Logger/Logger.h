@@ -6,10 +6,13 @@
 #include <memory>
 
 #define LOGGER_FORCE_REFORMAT false
-#define LOGGER_MESSAGE_FILE_PATH "/MessageLog.txt"
-#define LOGGER_GPS_FILE_PATH "/GPSLog.bin"
-#define LOGGER_RUNNING_FILE_PATH "/RunningLog.bin"
+#define LOGGER_MOUNT_POINT "fs"
+#define LOGGER_DIRECTORY "/"
+#define LOGGER_MESSAGE_FILE_NAME_FORMAT "MessageLog%03u.txt"
+#define LOGGER_GPS_FILE_NAME_FORMAT "GPSLog%03u.bin"
+#define LOGGER_RUNNING_FILE_NAME_FORMAT "RunningLog%03u.bin"
 
+#define LOGGER_FILE_PATH_BUFFER_SIZE 256
 #define LOGGER_PRINTF_BUFFER_SIZE 256
 
 class Logger {
@@ -50,6 +53,9 @@ private:
 
   bool _isInit;
 
+  // ファイルのID
+  size_t id;
+
 public:
 private:
   void mount();
@@ -62,11 +68,13 @@ private:
 
   int read(shared_ptr<File> file, void *buffer, size_t size);
 
-  void dumpMessageLog();
+  int getLastID();
 
-  void dumpGPSLog();
+  void dumpMessageLog(size_t id);
 
-  void dumpRunningLog();
+  void dumpGPSLog(size_t id);
+
+  void dumpRunningLog(size_t id);
 
 public:
   explicit Logger(BlockDevice *blockDevice, FileSystem *fileSystem);
@@ -82,7 +90,7 @@ public:
 
   // GPSログの書き込み
   void gpsLog(GPSLogData *data);
-  
+
   // 位置制御情報の書き込み
   void runningLog(RunningData *data);
 };

@@ -87,8 +87,50 @@ int Logger::read(shared_ptr<File> file, void *buffer, size_t size) {
   return ret;
 }
 
-void Logger::dumpMessageLog() {
-  printf("Dumping \"%s\":\n", LOGGER_MESSAGE_FILE_PATH);
+int Logger::getLastID() {
+  size_t retId = 0;
+
+  // Display the root directory
+  printf("Opening the root directory... ");
+  fflush(stdout);
+
+  DIR *d = opendir("/fs/");
+
+  printf("%s\n", (!d ? "Fail :(" : "OK"));
+  if (!d) {
+    error("error: %s (%d)\n", strerror(errno), -errno);
+  }
+
+  printf("root directory:\n");
+  while (true) {
+    struct dirent *e = readdir(d);
+    if (!e) {
+      break;
+    }
+
+    size_t fId = 0;
+    int err = sscanf(e->d_name, LOGGER_MESSAGE_FILE_NAME_FORMAT, &fId);
+    printf("    %s, err: %d, fId: %u\n", e->d_name, err, fId);
+    if (err == 1 && //
+        fId > retId) {
+      retId = fId;
+    }
+  }
+
+  printf("Closing the root directory... ");
+  fflush(stdout);
+
+  int err = closedir(d);
+  printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
+  if (err < 0) {
+    error("error: %s (%d)\n", strerror(errno), -errno);
+  }
+
+  return retId;
+}
+
+void Logger::dumpMessageLog(size_t id) {
+  printf("Dumping \"" LOGGER_MESSAGE_FILE_NAME_FORMAT "\":\n", id);
 
   char c;
   while (read(_messageFile, &c, 1) != 0) {
@@ -96,8 +138,8 @@ void Logger::dumpMessageLog() {
   }
 }
 
-void Logger::dumpGPSLog() {
-  printf("Dumping \"%s\":\n", LOGGER_GPS_FILE_PATH);
+void Logger::dumpGPSLog(size_t id) {
+  printf("Dumping \"" LOGGER_GPS_FILE_NAME_FORMAT "\":\n", id);
 
   GPSLogData data;
   while (read(_gpsFile, &data, sizeof(data)) != 0) {
@@ -112,8 +154,8 @@ void Logger::dumpGPSLog() {
   }
 }
 
-void Logger::dumpRunningLog() {
-  printf("Dumping \"%s\":\n", LOGGER_RUNNING_FILE_PATH);
+void Logger::dumpRunningLog(size_t id) {
+  printf("Dumping \"" LOGGER_RUNNING_FILE_NAME_FORMAT "\":\n", id);
 
   RunningData data;
   while (read(_runningFile, &data, sizeof(data)) != 0) {
@@ -127,18 +169,26 @@ void Logger::init() {
     // ファイルシステムのマウント
     mount();
 
+    // 既存のファイル番号を判断
+    id = getLastID() + 1;
+
+    char filePath[LOGGER_FILE_PATH_BUFFER_SIZE];
+
     // メッセージログ用のファイル
-    _messageFile = open(LOGGER_MESSAGE_FILE_PATH);
+    snprintf(filePath, LOGGER_FILE_PATH_BUFFER_SIZE, LOGGER_DIRECTORY LOGGER_MESSAGE_FILE_NAME_FORMAT, id);
+    _messageFile = open(filePath);
 
     //   dumpMessageLog();
 
     // GPSログ用のファイル
-    _gpsFile = open(LOGGER_GPS_FILE_PATH);
+    snprintf(filePath, LOGGER_FILE_PATH_BUFFER_SIZE, LOGGER_DIRECTORY LOGGER_GPS_FILE_NAME_FORMAT, id);
+    _gpsFile = open(filePath);
 
     //   dumpGPSLog();
 
     //走行シーケンスログ用のファイル
-    _runningFile = open(LOGGER_RUNNING_FILE_PATH);
+    snprintf(filePath, LOGGER_FILE_PATH_BUFFER_SIZE, LOGGER_DIRECTORY LOGGER_RUNNING_FILE_NAME_FORMAT, id);
+    _runningFile = open(filePath);
 
     // dumpRunningLog();
 
@@ -148,14 +198,19 @@ void Logger::init() {
 
 void Logger::deinit() {
   if (_isInit) {
+    char filePath[LOGGER_FILE_PATH_BUFFER_SIZE];
+
     // メッセージログ用のファイル
-    close(_messageFile, LOGGER_MESSAGE_FILE_PATH);
+    snprintf(filePath, LOGGER_FILE_PATH_BUFFER_SIZE, LOGGER_DIRECTORY LOGGER_MESSAGE_FILE_NAME_FORMAT, id);
+    close(_messageFile, filePath);
 
     // GPSログ用のファイル
-    close(_gpsFile, LOGGER_GPS_FILE_PATH);
+    snprintf(filePath, LOGGER_FILE_PATH_BUFFER_SIZE, LOGGER_DIRECTORY LOGGER_GPS_FILE_NAME_FORMAT, id);
+    close(_gpsFile, filePath);
 
     // 走行シーケンス用のファイル
-    close(_runningFile, LOGGER_RUNNING_FILE_PATH);
+    snprintf(filePath, LOGGER_FILE_PATH_BUFFER_SIZE, LOGGER_DIRECTORY LOGGER_RUNNING_FILE_NAME_FORMAT, id);
+    close(_runningFile, filePath);
 
     _isInit = false;
   }

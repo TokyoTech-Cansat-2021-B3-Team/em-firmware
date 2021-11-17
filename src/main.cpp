@@ -60,7 +60,7 @@ I2C i2c(I2C_SDA, I2C_SCL);
 BufferedSerial bufferedSerial(UART_TX, UART_RX, MU2_SERIAL_BAUDRATE);
 
 SDBlockDevice sdBlockDevice(SPI_MOSI, SPI_MISO, SPI_SCLK, SPI_SSEL, SPI_FREQUENCY);
-LittleFileSystem2 littleFileSystem2(nullptr);
+LittleFileSystem2 littleFileSystem2(LOGGER_MOUNT_POINT);
 
 // drivers
 WheelMotor leftWheelMotor(&motor1In1, &motor1In2);
