@@ -34,7 +34,7 @@ void RunningSequence::init() {
   _localization->start();
   _leftWheelControl->start();
   _rightWheelControl->start();
-  _torqueControl->start();
+  //   _torqueControl->start();
   _logger->init();
   _console->init();
 }
