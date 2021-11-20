@@ -250,8 +250,8 @@ int main() {
   // 着地検知シーケンス
   syncLandingSequence();
 
-  // 人が接近するために1分待つ
-  ThisThread::sleep_for(1min);
+  // 人が接近するために2分待つ
+  ThisThread::sleep_for(2min);
 
   // ログ書き込み有効化
   logger.init();
